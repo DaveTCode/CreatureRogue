@@ -1,30 +1,28 @@
-import sqlite3
-
 class StaticGameData():
-    def __init__(self):
-        self.species = None
-        self.types = None
-        self.type_chart = None
-        self.moves = None
+    def __init__(self, species, types, type_chart, moves, stats, colors):
+        self.species = species
+        self.types = types
+        self.type_chart = type_chart
+        self.moves = moves
+        self.stats = stats
+        self.colors = colors
 
-    def load(self, database_file):
-        '''
-            Given a database file we want to load the entire of the static 
-            data into the application so that it can be quickly accessed as 
-            required.
-        '''
-        try:
-            conn = sqlite3.connect(database_file)
-            self.types = self._load_types(conn)
-            self.type_chart = self._load_type_chart(conn)
-            self.moves = self._load_moves(conn)
-        except sqlite3.Error as e:
-            print "An error occurred: ", e.args[0]
-        finally:
-            conn.close()
+class Stat():
+    
+    def __init__(self, name):
+        self.name = name
         
-    def _load_types(self, db_connection):
-
+class Color():
+    
+    def __init__(self, name, r, g, b):
+        self.name = name
+        self.r = r
+        self.g = g
+        self.b = b
+        
+    def __str__(self):
+        return self.name + "(" + str(self.r) + "," + str(self.g) + "," + str(self.b) + ")"
+        
 class Species():
     
     def __init__(self, name, types, base_hp, base_xp_yield, display_character, display_color):
@@ -35,17 +33,41 @@ class Species():
         self.display_character = display_character
         self.display_color = display_color
         
+    def __str__(self):
+        return self.name
+        
 class Type():
     
     def __init__(self, name):
         self.name = name
         
+    def __str__(self):
+        return self.name
+        
 class TypeChart():
     def __init__(self, chart):
         self.chart = chart
         
-    def damage_modifier(type_1, type_2):
-        return self.chart[type_1][type_2]
+    def damage_modifier(attacking_type, defending_type):
+        '''
+            The type chart hold information on how attacks of all types affect
+            creatures of all types. This function allows us to query that 
+            information.
+        '''
+        if attacking_type in self.chart and defending_type in self.chart[attacking_type]:
+            return self.chart[attacking_type][defending_type]
+        else:
+            return 1
+            
+    def __str__(self):
+        s = ""
+    
+        for attacking_type in self.chart:
+            s = str(attacking_type) + " - "
+            for defending_type in self.chart[attacking_type]:
+                s = s + "(" + str(defending_type) + ":" + str(self.chart[attacking_type][defending_type]) + ")\n"
+                
+        return s
         
 class Move():
     
@@ -53,11 +75,14 @@ class Move():
         self.name = name
         self.max_pp = max_pp
         self.type = type
-
+        
+    def __str__(self):
+        return self.name
+        
 class AttackingMove(Move):
     
     def __init__(self, name, max_pp, type, base_attack, attack_stat, defence_stat):
-        super(AttackingMove, self).__init__(name, max_pp, type)
+        Move.__init__(self, name, max_pp, type)
         self.base_attack = base_attack
         self.attack_stat = attack_stat
         self.defence_stat = defence_stat
