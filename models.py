@@ -13,12 +13,17 @@ class Creature():
         
         self.current_hp = self.max_hp()
         
-    def max_hp(self):
+    def max_stat(self, stat):
         '''
-            The maximum hit points of a creature is a function of it's level,
-            species, IVs and EVs
+            The stat value of a creature is a function of it's level, species,
+            IVs and EVs and differs slightly for hitpoints and normal stats.
         '''
-        return math.floor((self.species.base_hp + self.individual_values["hp"] + math.sqrt(self.effort_values["hp"]) / 8 + 50) * self.level / 50 + 10)
+        if stat.name = "hp":
+            value = (self.individual_values[stat] + self.species.base_stats[stat] + math.sqrt(self.effort_values[stat]) / 8 + 50) * self.level / 50 + 10
+        else:
+            value = (self.individual_values[stat] + self.species.base_stats[stat] + math.sqrt(self.effort_values[stat]) / 8) * self.level / 50 + 5
+            
+        return int(math.floor(value))
         
     def xp_given(self, number_winners, winner_traded, winner_modifier = 1):
         '''
@@ -38,3 +43,17 @@ class Player():
     def __init__(self, name, creatures):
         self.name = name
         self.creatures = creatures
+        
+class GameData():
+        
+    def __init__(self, player):
+        self.player = player
+        self.is_in_battle = False
+        
+class BattleData():
+
+    def __init__(self, game_data, player_pokemon, trainer_pokemon=None, wild_pokemon=None):
+        self.game_data = game_data
+        self.player_pokemon = player_pokemon
+        self.wild_pokemon = wild_pokemon
+        self.trainer_pokemon = trainer_pokemon

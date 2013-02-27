@@ -25,10 +25,10 @@ class Color():
         
 class Species():
     
-    def __init__(self, name, types, base_hp, base_xp_yield, display_character, display_color):
+    def __init__(self, name, types, base_stats, base_xp_yield, display_character, display_color):
         self.name = name
         self.types = types
-        self.base_hp = base_hp
+        self.base_stats = base_stats
         self.base_xp_yield = base_xp_yield
         self.display_character = display_character
         self.display_color = display_color
