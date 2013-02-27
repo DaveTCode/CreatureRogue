@@ -32,3 +32,9 @@ class Creature():
             xp = xp * 1.5
         
         return math.floor(xp)
+        
+class Player():
+
+    def __init__(self, name, creatures):
+        self.name = name
+        self.creatures = creatures
