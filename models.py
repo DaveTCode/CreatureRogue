@@ -32,15 +32,17 @@ class Creature():
         
         return math.floor(xp)
         
-    def level(self, xp_loader):
-        '''
-            The level of a creature is determined solely by its current xp so
-            we don't store the data directly.
-        '''
-        return xp_lookup.level_at_xp(self.species, self.current_xp)
-        
 class Player():
 
     def __init__(self, name, creatures):
         self.name = name
         self.creatures = creatures
+        
+class GameData():
+    def __init__(self):
+        self.is_in_battle = True
+        self.battle_data = BattleData()
+        
+class BattleData():
+    def __init__(self):
+        pass

@@ -2,6 +2,7 @@ import sys
 import libtcodpy as libtcod
 import db_layer
 import settings
+from models import GameData
 
 class Game():
     
@@ -28,7 +29,7 @@ class Game():
             The game loop runs until the user closes the window manually. All 
             game logic and rendering is done here.
         '''
-        game_data = None
+        game_data = GameData()
         
         while not libtcod.console_is_window_closed():
             self.render(game_data)
@@ -48,7 +49,18 @@ class Game():
         libtcod.console_flush()
         
     def render_battle(self, battle):
-        pass
+        # Render the name of the defending pokemon
+        libtcod.console_print(0, 5, 7, 'Bulbasaur')
+        
+        # Render the level of the defending pokemon
+        
+        
+        # Render the HP bar for the defending pokemon
+        libtcod.console_put_char(0, 5, 8, 'H')
+        libtcod.console_put_char(0, 6, 8, 'P')
+        
+        for x in range(8, 18):
+            libtcod.console_put_char(0, x, 8, '=')
         
     def render_world(self, game_data):
         pass

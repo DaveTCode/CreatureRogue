@@ -59,6 +59,13 @@ class Species():
         self.display_character = display_character
         self.display_color = display_color
         
+    def level(self, xp_loader, current_xp):
+        '''
+            The level of a species is determined solely by its current xp so
+            we don't store the data directly.
+        '''
+        return xp_lookup.level_at_xp(self, current_xp)
+    
     def __str__(self):
         return self.name
         
