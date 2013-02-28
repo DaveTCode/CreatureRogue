@@ -1,6 +1,6 @@
 class Creature():
     
-    def __init__(self, species, level, nickname, trainer, individual_values, effort_values, was_traded, moves, stats):
+    def __init__(self, species, level, nickname, trainer, individual_values, effort_values, was_traded, moves, stats, current_xp):
         self.species = species
         self.level = level
         self.nickname = nickname
@@ -10,8 +10,7 @@ class Creature():
         self.was_traded = was_traded
         self.moves = [{'move': move, 'pp': move.max_pp} for move in moves]
         self.stats = stats
-        
-        self.current_hp = self.max_hp()
+        self.current_xp = current_xp
         
     def max_hp(self):
         '''
@@ -32,6 +31,13 @@ class Creature():
             xp = xp * 1.5
         
         return math.floor(xp)
+        
+    def level(self, xp_loader):
+        '''
+            The level of a creature is determined solely by its current xp so
+            we don't store the data directly.
+        '''
+        return xp_lookup.level_at_xp(self.species, self.current_xp)
         
 class Player():
 
