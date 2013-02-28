@@ -1,6 +1,6 @@
 import sys
 import sqlite3
-from data import Type, Species, TypeChart, StaticGameData, Move, Stat, Color, AttackingMove
+from data import Type, Species, TypeChart, StaticGameData, Move, Stat, Color, AttackingMove, GrowthRate
 
 class Loader():
     def __init__(self, db_file):
@@ -18,10 +18,12 @@ class Loader():
             
             stats = self._load_stats(conn)
             colors = self._load_colors(conn)
+            growth_rates = self._load_growth_rates(conn)
+            xp_lookup = self._load_xp_lookup(conn, growth_rates)
             types = self._load_types(conn)
             type_chart = self._load_type_chart(conn, types)
             moves = self._load_moves(conn, types)
-            species = self._load_species(conn, types, colors, stats)
+            species = self._load_species(conn, types, colors, stats, growth_rates)
         except sqlite3.Error as e:
             print "An error occurred: ", e.args[0]
             sys.exit(1)
@@ -29,7 +31,7 @@ class Loader():
             if conn:
                 conn.close()
             
-        return StaticGameData(species, types, type_chart, moves, stats, colors)
+        return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates)
 
     def _load_stats(self, conn):
         stats = {}
@@ -51,6 +53,26 @@ class Loader():
             
         return colors
         
+    def _load_growth_rates(self, conn):
+        growth_rates = {}
+        cur = conn.cursor()
+        cur.execute('SELECT id, identifier FROM growth_rates')
+        
+        for id, name in cur.fetchall():
+            growth_rates[id] = GrowthRate(name)
+            
+        return growth_rates
+        
+    def _load_xp_lookup(self, conn, growth_rates):
+        xp_lookup = {}
+        cur = conn.cursor()
+        cur.execute('SELECT growth_rate_id, level, experience FROM experience ORDER BY growth_rate_id, level')
+        
+        for growth_rate_id, level, xp in cur.fetchall():
+            xp_lookup[growth_rates[growth_rate_id]] = (level, xp)
+            
+        return xp_lookup
+    
     def _load_types(self, conn):
         types = {}
         cur = conn.cursor()
@@ -88,20 +110,20 @@ class Loader():
             
         return moves
 
-    def _load_species(self, conn, types, colors, stats):
+    def _load_species(self, conn, types, colors, stats, growth_rates):
         species = {}
         cur = conn.cursor()
-        cur.execute('SELECT species_id, pokemon_id, name, base_experience, color_id FROM pokemon_species_data WHERE pokedex_id = 1')
+        cur.execute('SELECT species_id, pokemon_id, name, base_experience, color_id, growth_rate_id FROM pokemon_species_data WHERE pokedex_id = 1')
         
-        for species_id, pokemon_id, name, base_exp, color_id in cur.fetchall():
+        for species_id, pokemon_id, name, base_exp, color_id, growth_rate_id in cur.fetchall():
             types_cur = conn.cursor()
             types_cur.execute('SELECT type_id FROM pokemon_types WHERE pokemon_id = ' + str(pokemon_id))
             species_types = [types[row[0]] for row in types_cur]
             
             stats_cur = conn.cursor()
-            stats_cur.execute('SELECT stat_id FROM pokemon_stats INNER JOIN stats ON stats.id = pokemon_stats.stat_id WHERE pokemon_id = ' + str(pokemon_id))
-            species_stats = [stats[row[0]] for row in stats_cur]
+            stats_cur.execute('SELECT stat_id, base_stat FROM pokemon_stats INNER JOIN stats ON stats.id = pokemon_stats.stat_id WHERE pokemon_id = ' + str(pokemon_id))
+            species_stats = {stats[row[0]]: row[1] for row in stats_cur}
                 
-            species[species_id] = Species(name, species_types, species_stats, base_exp, name[0:1], colors[color_id])
+            species[species_id] = Species(name, species_types, species_stats, base_exp, growth_rates[growth_rate_id], name[0:1], colors[color_id])
             
         return species

@@ -1,29 +1,35 @@
+from __future__ import division
+import math
+import sys
+
 class Creature():
     
-    def __init__(self, species, level, nickname, trainer, individual_values, effort_values, was_traded, moves, stats):
+    def __init__(self, species, level, nickname, trainer, individual_values, effort_values, was_traded, moves, current_xp):
         self.species = species
         self.level = level
-        self.nickname = nickname
+        self.nickname = nickname if nickname != None else species.name
         self.trainer = trainer
         self.individual_values = individual_values
         self.effort_values = effort_values
         self.was_traded = was_traded
         self.moves = [{'move': move, 'pp': move.max_pp} for move in moves]
-        self.stats = stats
+        self.stats = {stat: self.max_stat(stat) for stat in species.base_stats}
+        self.current_xp = current_xp
         
-        self.current_hp = self.max_hp()
+    def current_stat(self, stat):
+        return self.stats[stat]
         
     def max_stat(self, stat):
         '''
             The stat value of a creature is a function of it's level, species,
             IVs and EVs and differs slightly for hitpoints and normal stats.
         '''
-        if stat.name = "hp":
+        if stat.name.upper() == "HP":
             value = (self.individual_values[stat] + self.species.base_stats[stat] + math.sqrt(self.effort_values[stat]) / 8 + 50) * self.level / 50 + 10
         else:
             value = (self.individual_values[stat] + self.species.base_stats[stat] + math.sqrt(self.effort_values[stat]) / 8) * self.level / 50 + 5
             
-        return int(math.floor(value))
+        return int(value)
         
     def xp_given(self, number_winners, winner_traded, winner_modifier = 1):
         '''
@@ -36,7 +42,7 @@ class Creature():
         if winner_traded:
             xp = xp * 1.5
         
-        return math.floor(xp)
+        return int(xp)
         
 class Player():
 
@@ -46,14 +52,17 @@ class Player():
         
 class GameData():
         
-    def __init__(self, player):
-        self.player = player
-        self.is_in_battle = False
+    def __init__(self):
+        self.is_in_battle = True
+        self.battle_data = BattleData(self, None, None, None)
         
 class BattleData():
 
-    def __init__(self, game_data, player_pokemon, trainer_pokemon=None, wild_pokemon=None):
+    def __init__(self, game_data, player_creature, trainer_creature=None, wild_creature=None):
         self.game_data = game_data
-        self.player_pokemon = player_pokemon
-        self.wild_pokemon = wild_pokemon
-        self.trainer_pokemon = trainer_pokemon
+        self.player_creature = player_creature
+        self.wild_creature = wild_creature
+        self.trainer_creature = trainer_creature
+
+    def defending_creature(self):
+        return self.trainer_creature if self.trainer_creature != None else self.wild_creature

@@ -1,16 +1,23 @@
 class StaticGameData():
-    def __init__(self, species, types, type_chart, moves, stats, colors):
+    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates):
         self.species = species
         self.types = types
         self.type_chart = type_chart
         self.moves = moves
         self.stats = stats
         self.colors = colors
-
+        self.growth_rates = growth_rates
+        
+    def hp_stat(self):
+        return self.stats[1]
+        
 class Stat():
     
     def __init__(self, name):
         self.name = name
+        
+    def __str__(self):
+        return self.name
         
 class Color():
     
@@ -23,16 +30,45 @@ class Color():
     def __str__(self):
         return self.name + "(" + str(self.r) + "," + str(self.g) + "," + str(self.b) + ")"
         
+class GrowthRate():
+    def __init__(self, name):
+        self.name = name
+        
+    def __str__(self):
+        return self.name
+        
+class XpLookup():
+    def __init__(self, map):
+        self.map = map
+        
+    def level_at_xp(species, xp):
+        level_xps = self.map[species.growth_rate]
+        
+        prev_xp = 0
+        for level_xp in level_xps:
+            if xp > prev_xp and xp < level_xp[1]:
+                return level_xp[0]
+            
+            prev_xp = level_xp[1]
+        
 class Species():
     
-    def __init__(self, name, types, base_stats, base_xp_yield, display_character, display_color):
+    def __init__(self, name, types, base_stats, base_xp_yield, growth_rate, display_character, display_color):
         self.name = name
         self.types = types
         self.base_stats = base_stats
         self.base_xp_yield = base_xp_yield
+        self.growth_rate = growth_rate
         self.display_character = display_character
         self.display_color = display_color
         
+    def level(self, xp_loader, current_xp):
+        '''
+            The level of a species is determined solely by its current xp so
+            we don't store the data directly.
+        '''
+        return xp_lookup.level_at_xp(self, current_xp)
+    
     def __str__(self):
         return self.name
         
