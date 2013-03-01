@@ -68,6 +68,7 @@ class Game():
             libtcod.console_print(0, 60, 23, "LV." + str(creature.level))
             
             render_health_bar(creature, 28, 49, 25)
+            render_health_values(creature, 70, 27)
                 
         def render_health_bar(creature, max_length, x, y):
             hp_stat = self.static_game_data.hp_stat()
@@ -87,6 +88,14 @@ class Game():
             libtcod.console_set_default_foreground(0, settings.BLANK_HEALTH_COLOR)
             for i in range(x + health_bars, x + max_length):
                 libtcod.console_put_char(0, i, y, '=')
+                
+        def render_health_values(creature, x, y):
+            hp_stat = self.static_game_data.hp_stat()
+            current = creature.current_stat(hp_stat)
+            max = creature.current_stat(hp_stat)
+            
+            libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
+            libtcod.console_print(0, x, y, str(current) + "/" + str(max))
         
         render_lines()
         
