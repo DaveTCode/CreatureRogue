@@ -1,3 +1,7 @@
+from __future__ import division
+import random
+import math
+
 class StaticGameData():
     def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates):
         self.species = species
@@ -84,7 +88,7 @@ class TypeChart():
     def __init__(self, chart):
         self.chart = chart
         
-    def damage_modifier(attacking_type, defending_type):
+    def damage_modifier(self, attacking_type, defending_type):
         '''
             The type chart hold information on how attacks of all types affect
             creatures of all types. This function allows us to query that 
@@ -135,11 +139,12 @@ class AttackingMove(Move):
         
         # Modifiers
         critical_modifier = 2 if random.uniform(0, 100) < 6.25 else 1 # TODO: Incomplete - should use items and check whether this is a high critical move etc
-        same_type_attack_bonus = 1.5 if self.type in attacking_creature.types else 1
+        same_type_attack_bonus = 1.5 if self.type in attacking_creature.species.types else 1
         type_modifier = 1
-        for type in defending_creature.types:
-            type_modifier = type_modifier * type_chart.damage_modifier(self.type, type)
+        for type in defending_creature.species.types:
+            type_modifier = type_modifier * type_chart.damage_modifier(self.type, type) / 100
             
         modifier = same_type_attack_bonus * type_modifier * critical_modifier # TODO: Incomplete - Ignoring weather effects and other bits
+        print modifier
         
-        return math.floor((((2 * attacking_creature.level + 10) / 250) * (attack_stat_value / defence_stat_value) * self.base_attack + 2) * modifier)
+        return int((((2 * attacking_creature.level + 10) / 250) * (attack_stat_value / defence_stat_value) * self.base_attack + 2) * modifier)

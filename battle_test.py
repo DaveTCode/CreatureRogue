@@ -25,11 +25,15 @@ if __name__ == "__main__":
     defending_species = game.static_game_data.species[defending_id]
     print("You've select a: " + str(defending_species))
     
-    game_data.battle_data.player_creature = Creature(attacking_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, [], 1)
+    attacking_moves = [game.static_game_data.moves[1], game.static_game_data.moves[2], game.static_game_data.moves[3], game.static_game_data.moves[4]]
+    
+    game_data.battle_data.player_creature = Creature(attacking_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1)
     game_data.battle_data.wild_creature = Creature(defending_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, [], 1)
     
     game_data.battle_data.wild_creature.stats[game.static_game_data.hp_stat()] = 5
     
     while not libtcod.console_is_window_closed():
         game.render(game_data)
+
         key = libtcod.console_wait_for_keypress(True)
+        game.handle_input(game_data, key)

@@ -36,7 +36,7 @@ class Game():
             self.render(game_data)
             
             key = libtcod.console_wait_for_keypress(True)
-            self.handle_input(key)
+            self.handle_input(game_data, key)
             
     def render(self, game_data):
         libtcod.console_set_default_foreground(0, libtcod.white)
@@ -97,17 +97,58 @@ class Game():
             libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
             libtcod.console_print(0, x, y, str(current) + "/" + str(max))
         
+        def render_moves(creature, x, y):
+            chars = ['A. ', 'B. ', 'C. ', 'D. ']
+            
+            for row in range(4):
+                move = creature.moves[row]
+                    
+                libtcod.console_print(0, x, y + row, chars[row])
+                libtcod.console_print(0, x + 3, y + row, move["move"].name)
+                libtcod.console_print(0, x + 15, y + row, move["move"].type.name)
+                libtcod.console_print(0, x + 27, y + row, "(" + str(move["pp"]) + "/" + str(move["move"].max_pp) + ")")
+        
         render_lines()
         
         render_defending_creature_details(battle.defending_creature())
         render_attacking_creature_details(battle.player_creature)
         
+        render_moves(battle.player_creature, 2, 36)
+        
     def render_world(self, game_data):
         pass
         
-    def handle_input(self, key):
+    def handle_input(self, game_data, key):
         '''
             Handles a single key stroke.
         '''
         if key.vk == libtcod.KEY_ESCAPE:
             sys.exit(0)
+        
+        if game_data.is_in_battle:
+            self.handle_battle_input(game_data.battle_data, key)
+        else:
+            pass
+            
+    def handle_battle_input(self, battle_data, key):
+        move = None
+        if key.c == ord('a'):
+            move = battle_data.player_creature.moves[0]
+        elif key.c == ord('b'):
+            move = battle_data.player_creature.moves[1]
+        elif key.c == ord('c'):
+            move = battle_data.player_creature.moves[2]
+        elif key.c == ord('d'):
+            move = battle_data.player_creature.moves[3]
+            
+        if move != None:
+            self.perform_move(move, battle_data.player_creature, battle_data.defending_creature())
+            
+    def perform_move(self, move, attacking_creature, defending_creature):
+        if move["pp"] > 0:
+            move["pp"] = move["pp"] - 1
+            hp_stat = self.static_game_data.hp_stat()
+            defending_creature.adjust_stat(hp_stat, move["move"].damage_calculation(
+                attacking_creature, defending_creature, self.static_game_data.type_chart))
+
+        print move["move"].damage_calculation(attacking_creature, defending_creature, self.static_game_data.type_chart)

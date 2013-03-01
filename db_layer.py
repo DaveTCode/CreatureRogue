@@ -22,7 +22,7 @@ class Loader():
             xp_lookup = self._load_xp_lookup(conn, growth_rates)
             types = self._load_types(conn)
             type_chart = self._load_type_chart(conn, types)
-            moves = self._load_moves(conn, types)
+            moves = self._load_moves(conn, types, stats)
             species = self._load_species(conn, types, colors, stats, growth_rates)
         except sqlite3.Error as e:
             print "An error occurred: ", e.args[0]
@@ -97,16 +97,23 @@ class Loader():
                 
             chart[damage_type][target_type] = int(damage_factor)
             
-        return chart
+        return TypeChart(chart)
     
     # TODO: Only loads attack type moves at the moment.
-    def _load_moves(self, conn, types):
+    def _load_moves(self, conn, types, stats):
         moves = {}
         cur = conn.cursor()
-        cur.execute('SELECT moves.id, name, pp, type_id, power FROM moves INNER JOIN move_names ON moves.id = move_names.move_id AND local_language_id = 9 WHERE damage_class_id=2')
+        cur.execute('SELECT moves.id, name, pp, type_id, power, damage_class_id FROM moves INNER JOIN move_names ON moves.id = move_names.move_id AND local_language_id = 9 WHERE damage_class_id IN (2,3)')
         
-        for id, name, pp, type_id, power in cur.fetchall():
-            moves[id] = AttackingMove(name, pp, types[type_id], power, 'attack', 'defence')
+        for id, name, pp, type_id, power, damage_class_id in cur.fetchall():
+            if damage_class_id == 2: # Physical
+                attack_stat = stats[2]
+                defense_stat = stats[3]
+            elif damage_class_id == 3: # Special
+                attack_stat = stats[4]
+                defense_stat = stats[5]
+                
+            moves[id] = AttackingMove(name, pp, types[type_id], power, attack_stat, defense_stat)
             
         return moves
 

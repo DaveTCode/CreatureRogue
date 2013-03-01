@@ -16,6 +16,14 @@ class Creature():
         self.stats = {stat: self.max_stat(stat) for stat in species.base_stats}
         self.current_xp = current_xp
         
+    def adjust_stat(self, stat, delta):
+        self.stats[stat] = self.stats[stat] - delta
+        
+        if self.stats[stat] < 0:
+            self.stats[stat] = 0
+        elif self.stats[stat] > self.max_stat(stat):
+            self.stats[stat] = self.max_stat(stat)
+        
     def current_stat(self, stat):
         return self.stats[stat]
         
