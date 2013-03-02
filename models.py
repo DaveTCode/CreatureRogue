@@ -71,6 +71,7 @@ class BattleData():
         self.player_creature = player_creature
         self.wild_creature = wild_creature
         self.trainer_creature = trainer_creature
+        self.messages_to_display = []
 
     def defending_creature(self):
         return self.trainer_creature if self.trainer_creature != None else self.wild_creature

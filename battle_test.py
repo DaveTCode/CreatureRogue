@@ -35,5 +35,6 @@ if __name__ == "__main__":
     while not libtcod.console_is_window_closed():
         game.render(game_data)
 
+        libtcod.console_flush()
         key = libtcod.console_wait_for_keypress(True)
         game.handle_input(game_data, key)

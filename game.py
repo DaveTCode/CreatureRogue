@@ -4,6 +4,7 @@ import libtcodpy as libtcod
 import db_layer
 import settings
 from models import GameData, Player
+import battle_renderer
 
 class Game():
     
@@ -13,6 +14,7 @@ class Game():
         self.title = title
         self.font = font
         self.static_game_data = None
+        self.battle_renderer = BattleRenderer()
     
     def init(self):
         '''
@@ -42,78 +44,11 @@ class Game():
         libtcod.console_set_default_foreground(0, libtcod.white)
         
         if game_data.is_in_battle:
-            self.render_battle(game_data.battle_data)
+            self.battle_renderer.render(game_data.battle_data)
         else:
             self.render_world(game_data)
         
         libtcod.console_flush()
-        
-    def render_battle(self, battle):
-        def render_lines():
-            libtcod.console_set_default_foreground(0, settings.LINE_COLOR)
-            libtcod.console_print_frame(0, 2, 4, 30, 6)
-            libtcod.console_print_frame(0, 48, 22, 30, 8)
-            libtcod.console_hline(0, 0, 34, 80)
-    
-        def render_defending_creature_details(creature):
-            libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
-            libtcod.console_print(0, 3, 5, creature.nickname[:10])
-            libtcod.console_print(0, 24, 5, "LV." + str(creature.level))
-            
-            render_health_bar(creature, 28, 3, 7)
-    
-        def render_attacking_creature_details(creature):
-            libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
-            libtcod.console_print(0, 49, 23, creature.nickname[:10])
-            libtcod.console_print(0, 60, 23, "LV." + str(creature.level))
-            
-            render_health_bar(creature, 28, 49, 25)
-            render_health_values(creature, 70, 27)
-                
-        def render_health_bar(creature, max_length, x, y):
-            hp_stat = self.static_game_data.hp_stat()
-            health_bars = int((creature.current_stat(hp_stat) / creature.max_stat(hp_stat)) * max_length)
-            
-            if (health_bars > max_length / 2):
-                color = settings.GOOD_HEALTH_COLOR
-            elif (health_bars > max_length / 4):
-                color = settings.HALF_HEALTH_COLOR
-            else:
-                color = settings.LOW_HEALTH_COLOR
-                
-            libtcod.console_set_default_foreground(0, color)
-            for i in range(x, x + health_bars):
-                libtcod.console_put_char(0, i, y, '=')
-                
-            libtcod.console_set_default_foreground(0, settings.BLANK_HEALTH_COLOR)
-            for i in range(x + health_bars, x + max_length):
-                libtcod.console_put_char(0, i, y, '=')
-                
-        def render_health_values(creature, x, y):
-            hp_stat = self.static_game_data.hp_stat()
-            current = creature.current_stat(hp_stat)
-            max = creature.current_stat(hp_stat)
-            
-            libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
-            libtcod.console_print(0, x, y, str(current) + "/" + str(max))
-        
-        def render_moves(creature, x, y):
-            chars = ['A. ', 'B. ', 'C. ', 'D. ']
-            
-            for row in range(4):
-                move = creature.moves[row]
-                    
-                libtcod.console_print(0, x, y + row, chars[row])
-                libtcod.console_print(0, x + 3, y + row, move["move"].name)
-                libtcod.console_print(0, x + 15, y + row, move["move"].type.name)
-                libtcod.console_print(0, x + 27, y + row, "(" + str(move["pp"]) + "/" + str(move["move"].max_pp) + ")")
-        
-        render_lines()
-        
-        render_defending_creature_details(battle.defending_creature())
-        render_attacking_creature_details(battle.player_creature)
-        
-        render_moves(battle.player_creature, 2, 36)
         
     def render_world(self, game_data):
         pass
@@ -132,14 +67,15 @@ class Game():
             
     def handle_battle_input(self, battle_data, key):
         move = None
-        if key.c == ord('a'):
-            move = battle_data.player_creature.moves[0]
-        elif key.c == ord('b'):
-            move = battle_data.player_creature.moves[1]
-        elif key.c == ord('c'):
-            move = battle_data.player_creature.moves[2]
-        elif key.c == ord('d'):
-            move = battle_data.player_creature.moves[3]
+        if libtcod.console_is_key_pressed(libtcod.KEY_CHAR):
+            if key.c == ord('a'):
+                move = battle_data.player_creature.moves[0]
+            elif key.c == ord('b'):
+                move = battle_data.player_creature.moves[1]
+            elif key.c == ord('c'):
+                move = battle_data.player_creature.moves[2]
+            elif key.c == ord('d'):
+                move = battle_data.player_creature.moves[3]
             
         if move != None:
             self.perform_move(move, battle_data.player_creature, battle_data.defending_creature())
@@ -150,5 +86,3 @@ class Game():
             hp_stat = self.static_game_data.hp_stat()
             defending_creature.adjust_stat(hp_stat, move["move"].damage_calculation(
                 attacking_creature, defending_creature, self.static_game_data.type_chart))
-
-        print move["move"].damage_calculation(attacking_creature, defending_creature, self.static_game_data.type_chart)
