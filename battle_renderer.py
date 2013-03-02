@@ -24,10 +24,9 @@ class BattleRenderer():
         
         self._render_moves(battle_data.player_creature.creature, 2, 36)
         
+        self._render_blank_message_box(40, 34, 40, 16)
         if (len(battle_data.messages_to_display)):
             self._render_message(battle_data.messages_to_display[0], 40, 38, 40, 12)
-        else:
-            self._render_blank_message_box(40, 34, 40, 16)
         
     def _render_lines(self):
         '''
@@ -99,15 +98,14 @@ class BattleRenderer():
             Render the available moves for the player creature starting at
             the given x,y coordinates.
         '''
-        chars = ['A. ', 'B. ', 'C. ', 'D. ']
-        
         for row in range(4):
-            move = creature.moves[row]
+            if row < len(creature.moves):
+                move = creature.moves[row]
                 
-            libtcod.console_print(0, x, y + row, chars[row])
-            libtcod.console_print(0, x + 3, y + row, move.move_data.name)
-            libtcod.console_print(0, x + 15, y + row, move.move_data.type.name)
-            libtcod.console_print(0, x + 27, y + row, "(" + str(move.pp) + "/" + str(move.move_data.max_pp) + ")")
+                libtcod.console_print(0, x, y + row, str(row + 1) + ". ")
+                libtcod.console_print(0, x + 3, y + row, move.move_data.name)
+                libtcod.console_print(0, x + 15, y + row, move.move_data.type.name)
+                libtcod.console_print(0, x + 27, y + row, "(" + str(move.pp) + "/" + str(move.move_data.max_pp) + ")")
            
     def _render_blank_message_box(self, x, y, width, height):
         libtcod.console_print_frame(0, x, y, width, height)

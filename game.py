@@ -71,15 +71,10 @@ class Game():
                 battle_data.pop_message()
         else:
             move = None
-            if libtcod.console_is_key_pressed(libtcod.KEY_CHAR):
-                if key.c == ord('a'):
-                    move = battle_data.player_creature.creature.moves[0]
-                elif key.c == ord('b'):
-                    move = battle_data.player_creature.creature.moves[1]
-                elif key.c == ord('c'):
-                    move = battle_data.player_creature.creature.moves[2]
-                elif key.c == ord('d'):
-                    move = battle_data.player_creature.creature.moves[3]
+            for (key, index) in [(libtcod.KEY_1, 0), (libtcod.KEY_2, 1), (libtcod.KEY_3, 2), (libtcod.KEY_4, 3)]:
+                if libtcod.console_is_key_pressed(key):
+                    if len(battle_data.player_creature.creature.moves) > index:
+                        move = battle_data.player_creature.creature.moves[index]
                 
             if move != None:
                 messages = move.act(battle_data.player_creature, battle_data.defending_creature(), self.static_game_data)

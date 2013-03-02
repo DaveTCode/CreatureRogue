@@ -97,16 +97,17 @@ class Move():
         self.pp = self.move_data.max_pp
         
     def act(self, attacking_creature, defending_creature, static_game_data):
-        messages = collections.deque()
+        messages = []
     
         if self.pp <= 0:
             messages.append('Not enough points to perform ' + self.move_data.name)
         else:
+            messages.append(attacking_creature.creature.nickname + ' used ' + self.move_data.name)
             self.pp = self.pp - 1
         
             # Check if the move misses
             if not self._hit_calculation(attacking_creature, defending_creature):
-                messages.append('The attack missed!')
+                messages.append(attacking_creature.creature.nickname + "'s attack missed!")
             else:
                 if self.move_data.damage_move():
                     new_messages, hp_loss = self._damage_calculation(attacking_creature, defending_creature, static_game_data.type_chart)

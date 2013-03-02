@@ -63,7 +63,7 @@ class XpLookup():
         
 class Species():
     
-    def __init__(self, name, types, base_stats, base_xp_yield, growth_rate, display_character, display_color):
+    def __init__(self, name, types, base_stats, base_xp_yield, growth_rate, display_character, display_color, level_moves):
         self.name = name
         self.types = types
         self.base_stats = base_stats
@@ -71,6 +71,23 @@ class Species():
         self.growth_rate = growth_rate
         self.display_character = display_character
         self.display_color = display_color
+        self.level_moves = level_moves
+        
+    def move_data_at_level(self, level):
+        '''
+            When a wild creature is encountered, it's move set is the most 
+            recent 4 moves that it would have learnt from leveling up.
+            
+            This function calculates that set of moves (may be less than 4).
+        '''
+        moves = []
+        for i in range(level, 0, -1):
+            moves = moves + self.level_moves[i]
+            
+            if len(moves) >= 4:
+                break
+                
+        return moves[:4]
         
     def level(self, xp_loader, current_xp):
         '''

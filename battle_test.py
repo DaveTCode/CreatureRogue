@@ -18,17 +18,20 @@ if __name__ == "__main__":
     game_data.is_in_battle = True
     
     attacking_id = int(raw_input("Enter the pokedex number of the attacking creature: "))
+    attacking_level = int(raw_input("Enter the level of the attacking creature: "))
     attacking_species = game.static_game_data.species[attacking_id]
-    print("You've select a: " + str(attacking_species))
+    print("You've selected a: Lv." + str(attacking_level) + " " + str(attacking_species))
     
     defending_id = int(raw_input("Enter the pokedex number of the defending creature: "))
+    defending_level = int(raw_input("Enter the level of the defending creature: "))
     defending_species = game.static_game_data.species[defending_id]
-    print("You've select a: " + str(defending_species))
+    print("You've selected a: Lv." + str(defending_level) + " " + str(defending_species))
     
-    attacking_moves = [Move(game.static_game_data.moves[1]), Move(game.static_game_data.moves[2]), Move(game.static_game_data.moves[3]), Move(game.static_game_data.moves[4])]
+    attacking_moves = [Move(move) for move in attacking_species.move_data_at_level(attacking_level)]
+    defending_moves = [Move(move) for move in defending_species.move_data_at_level(defending_level)]
     
-    game_data.battle_data.player_creature = BattleCreature(Creature(attacking_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data)
-    game_data.battle_data.wild_creature = BattleCreature(Creature(defending_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, [], 1), game.static_game_data)
+    game_data.battle_data.player_creature = BattleCreature(Creature(attacking_species, attacking_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data)
+    game_data.battle_data.wild_creature = BattleCreature(Creature(defending_species, defending_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, defending_moves, 1), game.static_game_data)
     
     game_data.battle_data.wild_creature.stats[game.static_game_data.hp_stat()] = 5
     
