@@ -1,6 +1,6 @@
 import sys
 import sqlite3
-from data import Type, Species, TypeChart, StaticGameData, Move, Stat, Color, AttackingMove, GrowthRate
+from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate
 
 class Loader():
     def __init__(self, db_file):
@@ -99,21 +99,33 @@ class Loader():
             
         return TypeChart(chart)
     
-    # TODO: Only loads attack type moves at the moment.
     def _load_moves(self, conn, types, stats):
         moves = {}
         cur = conn.cursor()
-        cur.execute('SELECT moves.id, name, pp, type_id, power, damage_class_id FROM moves INNER JOIN move_names ON moves.id = move_names.move_id AND local_language_id = 9 WHERE damage_class_id IN (2,3)')
+        cur.execute('SELECT * FROM move_data')
         
-        for id, name, pp, type_id, power, damage_class_id in cur.fetchall():
+        for id, name, pp, type_id, power, damage_class_id, accuracy, min_hits, max_hits in cur.fetchall():
             if damage_class_id == 2: # Physical
                 attack_stat = stats[2]
                 defense_stat = stats[3]
             elif damage_class_id == 3: # Special
                 attack_stat = stats[4]
                 defense_stat = stats[5]
+            else: # Non-damaging
+                attack_stat = None
+                defense_stat = None
                 
-            moves[id] = AttackingMove(name, pp, types[type_id], power, attack_stat, defense_stat)
+            accuracy_stat = stats[7]
+            evasion_stat = stats[8]
+            
+            stat_cur = conn.cursor()
+            stat_cur.execute('SELECT stat_id, change FROM move_meta_stat_changes WHERE move_id = ' + str(id))
+            
+            stat_effects = {stats[stat]: 0 for stat in stats}
+            for stat_id, change in stat_cur.fetchall():
+                stat_effects[stats[stat_id]] = change
+                
+            moves[id] = MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects, attack_stat, defense_stat, accuracy_stat, evasion_stat)
             
         return moves
 

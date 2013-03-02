@@ -66,23 +66,22 @@ class Game():
             pass
             
     def handle_battle_input(self, battle_data, key):
-        move = None
-        if libtcod.console_is_key_pressed(libtcod.KEY_CHAR):
-            if key.c == ord('a'):
-                move = battle_data.player_creature.moves[0]
-            elif key.c == ord('b'):
-                move = battle_data.player_creature.moves[1]
-            elif key.c == ord('c'):
-                move = battle_data.player_creature.moves[2]
-            elif key.c == ord('d'):
-                move = battle_data.player_creature.moves[3]
-            
-        if move != None:
-            self.perform_move(move, battle_data.player_creature, battle_data.defending_creature())
-            
-    def perform_move(self, move, attacking_creature, defending_creature):
-        if move["pp"] > 0:
-            move["pp"] = move["pp"] - 1
-            hp_stat = self.static_game_data.hp_stat()
-            defending_creature.adjust_stat(hp_stat, move["move"].damage_calculation(
-                attacking_creature, defending_creature, self.static_game_data.type_chart))
+        if len(battle_data.messages_to_display) > 0:
+            if libtcod.console_is_key_pressed(libtcod.KEY_SPACE) or libtcod.console_is_key_pressed(libtcod.KEY_ENTER):
+                battle_data.pop_message()
+        else:
+            move = None
+            if libtcod.console_is_key_pressed(libtcod.KEY_CHAR):
+                if key.c == ord('a'):
+                    move = battle_data.player_creature.creature.moves[0]
+                elif key.c == ord('b'):
+                    move = battle_data.player_creature.creature.moves[1]
+                elif key.c == ord('c'):
+                    move = battle_data.player_creature.creature.moves[2]
+                elif key.c == ord('d'):
+                    move = battle_data.player_creature.creature.moves[3]
+                
+            if move != None:
+                messages = move.act(battle_data.player_creature, battle_data.defending_creature(), self.static_game_data)
+                for message in messages:
+                    battle_data.messages_to_display.append(message)

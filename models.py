@@ -1,6 +1,15 @@
 from __future__ import division
 import math
+import random
 import sys
+import collections
+
+class BattleCreature():
+    def __init__(self, creature, static_game_data):
+        self.creature = creature
+        self.stats = {stat: self.creature.species.base_stats[stat] for stat in self.creature.species.base_stats}
+        self.stats[static_game_data.accuracy_stat()] = 1
+        self.stats[static_game_data.evasion_stat()] = 1
 
 class Creature():
     
@@ -12,7 +21,7 @@ class Creature():
         self.individual_values = individual_values
         self.effort_values = effort_values
         self.was_traded = was_traded
-        self.moves = [{'move': move, 'pp': move.max_pp} for move in moves]
+        self.moves = moves
         self.stats = {stat: self.max_stat(stat) for stat in species.base_stats}
         self.current_xp = current_xp
         
@@ -71,7 +80,79 @@ class BattleData():
         self.player_creature = player_creature
         self.wild_creature = wild_creature
         self.trainer_creature = trainer_creature
-        self.messages_to_display = []
+        self.messages_to_display = collections.deque()
 
     def defending_creature(self):
         return self.trainer_creature if self.trainer_creature != None else self.wild_creature
+        
+    def pop_message(self):
+        if (len(self.messages_to_display) > 0):
+            return self.messages_to_display.popleft()
+        else:
+            return None
+            
+class Move():
+    def __init__(self, move_data):
+        self.move_data = move_data
+        self.pp = self.move_data.max_pp
+        
+    def act(self, attacking_creature, defending_creature, static_game_data):
+        messages = collections.deque()
+    
+        if self.pp <= 0:
+            messages.append('Not enough points to perform ' + self.move_data.name)
+        else:
+            self.pp = self.pp - 1
+        
+            # Check if the move misses
+            if not self._hit_calculation(attacking_creature, defending_creature):
+                messages.append('The attack missed!')
+            else:
+                if self.move_data.damage_move():
+                    new_messages, hp_loss = self._damage_calculation(attacking_creature, defending_creature, static_game_data.type_chart)
+                    
+                    for message in new_messages:
+                        messages.append(message)
+                        
+                    defending_creature.creature.adjust_stat(static_game_data.hp_stat(), hp_loss)
+                    
+                    # TODO: Handle stat changes. Needs concept of move target
+                    
+        return messages
+                
+    def _hit_calculation(self, attacking_creature, defending_creature):
+        p = self.move_data.base_accuracy / 100 * (attacking_creature.stats[self.move_data.accuracy_stat] / defending_creature.stats[self.move_data.evasion_stat])
+        r = random.random()
+        
+        return r < p
+    
+    def _damage_calculation(self, attacking_creature, defending_creature, type_chart):
+        '''
+            To calculate the damage that a move does we need to know which
+            creature is performing the move and which is defending it.
+            
+            The return value for this is the hitpoint delta.
+        '''
+        attack_stat_value = attacking_creature.stats[self.move_data.attack_stat]
+        defence_stat_value = defending_creature.stats[self.move_data.defence_stat]
+        
+        # Modifiers
+        critical_modifier = 2 if random.uniform(0, 100) < 6.25 else 1 # TODO: Incomplete - should use items and check whether this is a high critical move etc
+        same_type_attack_bonus = 1.5 if self.move_data.type in attacking_creature.creature.species.types else 1
+        type_modifier = 1
+        for type in defending_creature.creature.species.types:
+            type_modifier = type_modifier * type_chart.damage_modifier(self.move_data.type, type) / 100
+            
+        modifier = same_type_attack_bonus * type_modifier * critical_modifier # TODO: Incomplete - Ignoring weather effects and other bits
+        
+        messages = []
+        if critical_modifier > 1:
+            messages.append('Critical hit!')
+        if type_modifier == 0:
+            messages.append('The attack had no effect!')
+        elif type_modifier < 0.9:
+            messages.append('The attack was not very effective')
+        elif type_modifier > 1.1:
+            messages.append('The attack was super effective!')
+            
+        return messages, int((((2 * attacking_creature.creature.level + 10) / 250) * (attack_stat_value / defence_stat_value) * self.move_data.base_attack + 2) * modifier)

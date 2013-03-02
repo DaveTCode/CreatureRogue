@@ -1,6 +1,6 @@
 import random
 from game import Game
-from models import GameData, BattleData, Creature
+from models import GameData, BattleData, Creature, Move, BattleCreature
 import settings
 import libtcodpy as libtcod
 
@@ -25,10 +25,10 @@ if __name__ == "__main__":
     defending_species = game.static_game_data.species[defending_id]
     print("You've select a: " + str(defending_species))
     
-    attacking_moves = [game.static_game_data.moves[1], game.static_game_data.moves[2], game.static_game_data.moves[3], game.static_game_data.moves[4]]
+    attacking_moves = [Move(game.static_game_data.moves[1]), Move(game.static_game_data.moves[2]), Move(game.static_game_data.moves[3]), Move(game.static_game_data.moves[4])]
     
-    game_data.battle_data.player_creature = Creature(attacking_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1)
-    game_data.battle_data.wild_creature = Creature(defending_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, [], 1)
+    game_data.battle_data.player_creature = BattleCreature(Creature(attacking_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data)
+    game_data.battle_data.wild_creature = BattleCreature(Creature(defending_species, 1, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, [], 1), game.static_game_data)
     
     game_data.battle_data.wild_creature.stats[game.static_game_data.hp_stat()] = 5
     

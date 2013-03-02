@@ -1,4 +1,5 @@
 from __future__ import division
+import random
 import settings
 import libtcodpy as libtcod
 
@@ -18,10 +19,15 @@ class BattleRenderer():
         '''
         self._render_lines()
         
-        self._render_defending_creature_details(battle_data.defending_creature())
-        self._render_attacking_creature_details(battle_data.player_creature)
+        self._render_defending_creature_details(battle_data.defending_creature().creature)
+        self._render_attacking_creature_details(battle_data.player_creature.creature)
         
-        self._render_moves(battle_data.player_creature, 2, 36)
+        self._render_moves(battle_data.player_creature.creature, 2, 36)
+        
+        if (len(battle_data.messages_to_display)):
+            self._render_message(battle_data.messages_to_display[0], 40, 38, 40, 12)
+        else:
+            self._render_blank_message_box(40, 34, 40, 16)
         
     def _render_lines(self):
         '''
@@ -99,13 +105,16 @@ class BattleRenderer():
             move = creature.moves[row]
                 
             libtcod.console_print(0, x, y + row, chars[row])
-            libtcod.console_print(0, x + 3, y + row, move["move"].name)
-            libtcod.console_print(0, x + 15, y + row, move["move"].type.name)
-            libtcod.console_print(0, x + 27, y + row, "(" + str(move["pp"]) + "/" + str(move["move"].max_pp) + ")")
-            
-    def _render_message(self, message, x, y):
+            libtcod.console_print(0, x + 3, y + row, move.move_data.name)
+            libtcod.console_print(0, x + 15, y + row, move.move_data.type.name)
+            libtcod.console_print(0, x + 27, y + row, "(" + str(move.pp) + "/" + str(move.move_data.max_pp) + ")")
+           
+    def _render_blank_message_box(self, x, y, width, height):
+        libtcod.console_print_frame(0, x, y, width, height)
+           
+    def _render_message(self, message, x, y, width, height):
         '''
             Utility function to render a message on top of the screen at the 
             given point.
         '''
-        pass
+        libtcod.console_print(0, x + 1, y + 1, message)

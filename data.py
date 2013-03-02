@@ -15,6 +15,12 @@ class StaticGameData():
     def hp_stat(self):
         return self.stats[1]
         
+    def accuracy_stat(self):
+        return self.stats[7]
+        
+    def evasion_stat(self):
+        return self.stats[8]
+        
 class Stat():
     
     def __init__(self, name):
@@ -85,6 +91,7 @@ class Type():
         return self.name
         
 class TypeChart():
+
     def __init__(self, chart):
         self.chart = chart
         
@@ -103,48 +110,31 @@ class TypeChart():
         s = ""
     
         for attacking_type in self.chart:
-            s = str(attacking_type) + " - "
+            s = s + str(attacking_type) + " - "
             for defending_type in self.chart[attacking_type]:
-                s = s + "(" + str(defending_type) + ":" + str(self.chart[attacking_type][defending_type]) + ")\n"
+                s = s + "(" + str(defending_type) + ":" + str(self.chart[attacking_type][defending_type]) + "),  "
                 
+            s = s + "\n"
         return s
         
-class Move():
+class MoveData():
     
-    def __init__(self, name, max_pp, type):
+    def __init__(self, name, max_pp, type, base_attack, base_accuracy, min_hits, max_hits, stat_changes, attack_stat, defence_stat, accuracy_stat, evasion_stat):
         self.name = name
         self.max_pp = max_pp
         self.type = type
-        
-    def __str__(self):
-        return self.name
-        
-class AttackingMove(Move):
-    
-    def __init__(self, name, max_pp, type, base_attack, attack_stat, defence_stat):
-        Move.__init__(self, name, max_pp, type)
         self.base_attack = base_attack
+        self.base_accuracy = base_accuracy
         self.attack_stat = attack_stat
         self.defence_stat = defence_stat
-        
-    def damage_calculation(self, attacking_creature, defending_creature, type_chart):
-        '''
-            To calculate the damage that a move does we need to know which
-            creature is performing the move and which is defending it.
-            
-            The return value for this is the hitpoint delta.
-        '''
-        attack_stat_value = attacking_creature.stats[self.attack_stat]
-        defence_stat_value = defending_creature.stats[self.defence_stat]
-        
-        # Modifiers
-        critical_modifier = 2 if random.uniform(0, 100) < 6.25 else 1 # TODO: Incomplete - should use items and check whether this is a high critical move etc
-        same_type_attack_bonus = 1.5 if self.type in attacking_creature.species.types else 1
-        type_modifier = 1
-        for type in defending_creature.species.types:
-            type_modifier = type_modifier * type_chart.damage_modifier(self.type, type) / 100
-            
-        modifier = same_type_attack_bonus * type_modifier * critical_modifier # TODO: Incomplete - Ignoring weather effects and other bits
-        print modifier
-        
-        return int((((2 * attacking_creature.level + 10) / 250) * (attack_stat_value / defence_stat_value) * self.base_attack + 2) * modifier)
+        self.accuracy_stat = accuracy_stat
+        self.evasion_stat = evasion_stat
+        self.min_hits = min_hits
+        self.max_hits = max_hits
+        self.stat_changes = stat_changes
+    
+    def damage_move(self):
+        return not self.attack_stat == None
+    
+    def __str__(self):
+        return self.name
