@@ -4,7 +4,7 @@ import libtcodpy as libtcod
 import db_layer
 import settings
 from models import GameData, Player
-import battle_renderer
+from battle_renderer import BattleRenderer
 
 class Game():
     
@@ -14,7 +14,7 @@ class Game():
         self.title = title
         self.font = font
         self.static_game_data = None
-        self.battle_renderer = BattleRenderer()
+        self.battle_renderer = BattleRenderer(self)
     
     def init(self):
         '''

@@ -8,20 +8,22 @@ class BattleRenderer():
         
         It renders the entire of the screen.
     '''
+    def __init__(self, game):
+        self.game = game
         
     def render(self, battle_data):
         '''
             The external interface to this class. Call this to render the
             given battle data object.
         '''
-        self.render_lines()
+        self._render_lines()
         
-        self.render_defending_creature_details(battle_data.defending_creature())
-        self.render_attacking_creature_details(battle_data.player_creature)
+        self._render_defending_creature_details(battle_data.defending_creature())
+        self._render_attacking_creature_details(battle_data.player_creature)
         
-        self.render_moves(battle.player_creature, 2, 36)
+        self._render_moves(battle_data.player_creature, 2, 36)
         
-    def _render_lines():
+    def _render_lines(self):
         '''
             Renders the lines which separate sections of the screen.
         '''
@@ -30,7 +32,7 @@ class BattleRenderer():
         libtcod.console_print_frame(0, 48, 22, 30, 8)
         libtcod.console_hline(0, 0, 34, 80)
 
-    def _render_defending_creature_details(creature):
+    def _render_defending_creature_details(self, creature):
         '''
             Renders the creature box for the defending creature.
         '''
@@ -38,9 +40,9 @@ class BattleRenderer():
         libtcod.console_print(0, 3, 5, creature.nickname[:10])
         libtcod.console_print(0, 24, 5, "LV." + str(creature.level))
         
-        render_health_bar(creature, 28, 3, 7)
+        self._render_health_bar(creature, 28, 3, 7)
 
-    def _render_attacking_creature_details(creature):
+    def _render_attacking_creature_details(self, creature):
         '''
             Renders the creature box for the attacking creature.
         '''
@@ -48,15 +50,15 @@ class BattleRenderer():
         libtcod.console_print(0, 49, 23, creature.nickname[:10])
         libtcod.console_print(0, 60, 23, "LV." + str(creature.level))
         
-        render_health_bar(creature, 28, 49, 25)
-        render_health_values(creature, 70, 27)
+        self._render_health_bar(creature, 28, 49, 25)
+        self._render_health_values(creature, 70, 27)
             
-    def _render_health_bar(creature, max_length, x, y):
+    def _render_health_bar(self, creature, max_length, x, y):
         '''
             Utility function to render a health bar for the given creature at
             the given x and y coordinates.
         '''
-        hp_stat = self.static_game_data.hp_stat()
+        hp_stat = self.game.static_game_data.hp_stat()
         health_bars = int((creature.current_stat(hp_stat) / creature.max_stat(hp_stat)) * max_length)
         
         if (health_bars > max_length / 2):
@@ -74,19 +76,19 @@ class BattleRenderer():
         for i in range(x + health_bars, x + max_length):
             libtcod.console_put_char(0, i, y, '=')
             
-    def _render_health_values(creature, x, y):
+    def _render_health_values(self, creature, x, y):
         '''
             Utility function to render the health values <current>/<max> at 
             the given x,y coordinates.
         '''
-        hp_stat = self.static_game_data.hp_stat()
+        hp_stat = self.game.static_game_data.hp_stat()
         current = creature.current_stat(hp_stat)
         max = creature.current_stat(hp_stat)
         
         libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
         libtcod.console_print(0, x, y, str(current) + "/" + str(max))
     
-    def _render_moves(creature, x, y):
+    def _render_moves(self, creature, x, y):
         ''' 
             Render the available moves for the player creature starting at
             the given x,y coordinates.
@@ -100,3 +102,10 @@ class BattleRenderer():
             libtcod.console_print(0, x + 3, y + row, move["move"].name)
             libtcod.console_print(0, x + 15, y + row, move["move"].type.name)
             libtcod.console_print(0, x + 27, y + row, "(" + str(move["pp"]) + "/" + str(move["move"].max_pp) + ")")
+            
+    def _render_message(self, message, x, y):
+        '''
+            Utility function to render a message on top of the screen at the 
+            given point.
+        '''
+        pass
