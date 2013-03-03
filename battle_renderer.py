@@ -9,8 +9,9 @@ class BattleRenderer():
         
         It renders the entire of the screen.
     '''
-    def __init__(self, game):
+    def __init__(self, game, console):
         self.game = game
+        self.console = console
         
     def render(self, battle_data):
         '''
@@ -32,18 +33,18 @@ class BattleRenderer():
         '''
             Renders the lines which separate sections of the screen.
         '''
-        libtcod.console_set_default_foreground(0, settings.LINE_COLOR)
-        libtcod.console_print_frame(0, 2, 4, 30, 6)
-        libtcod.console_print_frame(0, 48, 22, 30, 8)
-        libtcod.console_hline(0, 0, 34, 80)
+        libtcod.console_set_default_foreground(self.console, settings.LINE_COLOR)
+        libtcod.console_print_frame(self.console, 2, 4, 30, 6)
+        libtcod.console_print_frame(self.console, 48, 22, 30, 8)
+        libtcod.console_hline(self.console, 0, 34, 80)
 
     def _render_defending_creature_details(self, creature):
         '''
             Renders the creature box for the defending creature.
         '''
-        libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
-        libtcod.console_print(0, 3, 5, creature.nickname[:10])
-        libtcod.console_print(0, 24, 5, "LV." + str(creature.level))
+        libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
+        libtcod.console_print(self.console, 3, 5, creature.nickname[:10])
+        libtcod.console_print(self.console, 24, 5, "LV." + str(creature.level))
         
         self._render_health_bar(creature, 28, 3, 7)
 
@@ -51,9 +52,9 @@ class BattleRenderer():
         '''
             Renders the creature box for the attacking creature.
         '''
-        libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
-        libtcod.console_print(0, 49, 23, creature.nickname[:10])
-        libtcod.console_print(0, 60, 23, "LV." + str(creature.level))
+        libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
+        libtcod.console_print(self.console, 49, 23, creature.nickname[:10])
+        libtcod.console_print(self.console, 60, 23, "LV." + str(creature.level))
         
         self._render_health_bar(creature, 28, 49, 25)
         self._render_health_values(creature, 70, 27)
@@ -73,13 +74,13 @@ class BattleRenderer():
         else:
             color = settings.LOW_HEALTH_COLOR
             
-        libtcod.console_set_default_foreground(0, color)
+        libtcod.console_set_default_foreground(self.console, color)
         for i in range(x, x + health_bars):
-            libtcod.console_put_char(0, i, y, '=')
+            libtcod.console_put_char(self.console, i, y, '=')
             
-        libtcod.console_set_default_foreground(0, settings.BLANK_HEALTH_COLOR)
+        libtcod.console_set_default_foreground(self.console, settings.BLANK_HEALTH_COLOR)
         for i in range(x + health_bars, x + max_length):
-            libtcod.console_put_char(0, i, y, '=')
+            libtcod.console_put_char(self.console, i, y, '=')
             
     def _render_health_values(self, creature, x, y):
         '''
@@ -90,8 +91,8 @@ class BattleRenderer():
         current = creature.current_stat(hp_stat)
         max = creature.current_stat(hp_stat)
         
-        libtcod.console_set_default_foreground(0, settings.BATTLE_TEXT_COLOR)
-        libtcod.console_print(0, x, y, str(current) + "/" + str(max))
+        libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
+        libtcod.console_print(self.console, x, y, str(current) + "/" + str(max))
     
     def _render_moves(self, creature, x, y):
         ''' 
@@ -102,17 +103,20 @@ class BattleRenderer():
             if row < len(creature.moves):
                 move = creature.moves[row]
                 
-                libtcod.console_print(0, x, y + row, str(row + 1) + ". ")
-                libtcod.console_print(0, x + 3, y + row, move.move_data.name)
-                libtcod.console_print(0, x + 15, y + row, move.move_data.type.name)
-                libtcod.console_print(0, x + 27, y + row, "(" + str(move.pp) + "/" + str(move.move_data.max_pp) + ")")
+                libtcod.console_print(self.console, x, y + row, str(row + 1) + ". ")
+                libtcod.console_print(self.console, x + 3, y + row, move.move_data.name)
+                libtcod.console_print(self.console, x + 15, y + row, move.move_data.type.name)
+                libtcod.console_print(self.console, x + 27, y + row, "(" + str(move.pp) + "/" + str(move.move_data.max_pp) + ")")
            
     def _render_blank_message_box(self, x, y, width, height):
-        libtcod.console_print_frame(0, x, y, width, height)
+        '''
+            Utility function to render the box in which messages go.
+        '''
+        libtcod.console_print_frame(self.console, x, y, width, height)
            
     def _render_message(self, message, x, y, width, height):
         '''
             Utility function to render a message on top of the screen at the 
             given point.
         '''
-        libtcod.console_print(0, x + 1, y + 1, message)
+        libtcod.console_print(self.console, x + 1, y + 1, message)

@@ -14,7 +14,8 @@ class Game():
         self.title = title
         self.font = font
         self.static_game_data = None
-        self.battle_renderer = BattleRenderer(self)
+        self.battle_renderer = None
+        self.console = None
     
     def init(self):
         '''
@@ -24,7 +25,8 @@ class Game():
         libtcod.console_set_custom_font(self.font, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
         
         libtcod.console_init_root(self.screen_width, self.screen_height, self.title, False)
-        
+        self.console = libtcod.console_new(self.screen_width, self.screen_height)
+        self.battle_renderer = BattleRenderer(self, self.console)
         self.static_game_data = db_layer.Loader(settings.DB_FILE).load_static_data()
     
     def game_loop(self):
@@ -41,13 +43,15 @@ class Game():
             self.handle_input(game_data, key)
             
     def render(self, game_data):
-        libtcod.console_set_default_foreground(0, libtcod.white)
+        libtcod.console_set_default_foreground(self.console, libtcod.white)
+        libtcod.console_print_frame(self.console, 0, 0, self.screen_width, self.screen_height)
         
         if game_data.is_in_battle:
             self.battle_renderer.render(game_data.battle_data)
         else:
             self.render_world(game_data)
         
+        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
         
     def render_world(self, game_data):
@@ -56,10 +60,7 @@ class Game():
     def handle_input(self, game_data, key):
         '''
             Handles a single key stroke.
-        '''
-        if key.vk == libtcod.KEY_ESCAPE:
-            sys.exit(0)
-        
+        '''        
         if game_data.is_in_battle:
             self.handle_battle_input(game_data.battle_data, key)
         else:
@@ -71,8 +72,8 @@ class Game():
                 battle_data.pop_message()
         else:
             move = None
-            for (key, index) in [(libtcod.KEY_1, 0), (libtcod.KEY_2, 1), (libtcod.KEY_3, 2), (libtcod.KEY_4, 3)]:
-                if libtcod.console_is_key_pressed(key):
+            for (key_code, index) in [(libtcod.KEY_1, 0), (libtcod.KEY_2, 1), (libtcod.KEY_3, 2), (libtcod.KEY_4, 3)]:
+                if libtcod.console_is_key_pressed(key_code):
                     if len(battle_data.player_creature.creature.moves) > index:
                         move = battle_data.player_creature.creature.moves[index]
                 
@@ -80,3 +81,19 @@ class Game():
                 messages = move.act(battle_data.player_creature, battle_data.defending_creature(), self.static_game_data)
                 for message in messages:
                     battle_data.messages_to_display.append(message)
+                    
+    def handle_pokedex_input(self, pokedex_renderer, key):
+        if pokedex_renderer.displaying_species():
+            if libtcod.console_is_key_pressed(libtcod.KEY_ESCAPE):
+                pokedex_renderer.close_display()
+        else:
+            if libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
+                pokedex_renderer.shift_column(-1)
+            elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
+                pokedex_renderer.shift_column(1)
+            elif libtcod.console_is_key_pressed(libtcod.KEY_UP):
+                pokedex_renderer.shift_row(-1)
+            elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
+                pokedex_renderer.shift_row(1)
+            elif libtcod.console_is_key_pressed(libtcod.KEY_ENTER):
+                pokedex_renderer.display_selected()

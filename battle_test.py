@@ -15,7 +15,6 @@ if __name__ == "__main__":
     game.init()
     
     game_data = GameData()
-    game_data.is_in_battle = True
     
     attacking_id = int(raw_input("Enter the pokedex number of the attacking creature: "))
     attacking_level = int(raw_input("Enter the level of the attacking creature: "))
@@ -27,8 +26,8 @@ if __name__ == "__main__":
     defending_species = game.static_game_data.species[defending_id]
     print("You've selected a: Lv." + str(defending_level) + " " + str(defending_species))
     
-    attacking_moves = [Move(move) for move in attacking_species.move_data_at_level(attacking_level)]
-    defending_moves = [Move(move) for move in defending_species.move_data_at_level(defending_level)]
+    attacking_moves = [Move(move_data) for move_data in attacking_species.move_data_at_level(attacking_level)]
+    defending_moves = [Move(move_data) for move_data in defending_species.move_data_at_level(defending_level)]
     
     game_data.battle_data.player_creature = BattleCreature(Creature(attacking_species, attacking_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data)
     game_data.battle_data.wild_creature = BattleCreature(Creature(defending_species, defending_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, defending_moves, 1), game.static_game_data)
@@ -36,8 +35,9 @@ if __name__ == "__main__":
     game_data.battle_data.wild_creature.stats[game.static_game_data.hp_stat()] = 5
     
     while not libtcod.console_is_window_closed():
-        game.render(game_data)
+        game.battle_renderer.render(game_data.battle_data)
 
+        libtcod.console_blit(game.console, 0, 0, game.screen_width, game.screen_height, 0, 0, 0)
         libtcod.console_flush()
         key = libtcod.console_wait_for_keypress(True)
         game.handle_input(game_data, key)

@@ -63,8 +63,11 @@ class XpLookup():
         
 class Species():
     
-    def __init__(self, name, types, base_stats, base_xp_yield, growth_rate, display_character, display_color, level_moves):
+    def __init__(self, pokedex_number, name, height, weight, types, base_stats, base_xp_yield, growth_rate, display_character, display_color, level_moves, flavor_text, genus):
+        self.pokedex_number = pokedex_number
         self.name = name
+        self.height = height
+        self.weight = weight
         self.types = types
         self.base_stats = base_stats
         self.base_xp_yield = base_xp_yield
@@ -72,6 +75,25 @@ class Species():
         self.display_character = display_character
         self.display_color = display_color
         self.level_moves = level_moves
+        self.flavor_text = flavor_text
+        self.genus = genus
+        
+    def imperial_weight_str(self):
+        '''
+            Weight is stored in 1/10kg so this function is used to convert to
+            an appropriate imperial viewing string of lbs.
+        '''
+        return '{0:.1f} lbs.'.format(self.weight / 10 * 2.20462)
+        
+    def imperial_height_str(self):
+        '''
+            Height is stored in 1/10m in the database so this function is used
+            to convert into an imperial display format of feet and inches.
+        '''
+        feet = self.height / 10 * 3.2808399
+        inches = (feet % 1) * 12
+        
+        return '{0}\'{1:0=2d}"'.format(int(feet), int(round(inches)))
         
     def move_data_at_level(self, level):
         '''

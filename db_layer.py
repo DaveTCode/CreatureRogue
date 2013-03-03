@@ -133,9 +133,9 @@ class Loader():
     def _load_species(self, conn, types, colors, stats, growth_rates, moves):
         species = {}
         cur = conn.cursor()
-        cur.execute('SELECT species_id, creature_id, name, base_experience, color_id, growth_rate_id FROM creature_species_data WHERE pokedex_id = ' + str(settings.POKEDEX_ID) + ' AND local_language_id = ' + str(settings.LOCAL_LANGUAGE_ID))
+        cur.execute('SELECT species_id, creature_id, pokedex_number, name, height, weight, base_experience, color_id, growth_rate_id, flavor_text, genus FROM creature_species_data WHERE pokedex_id = {0} AND local_language_id = {1} AND version_id = {2}'.format(settings.POKEDEX_ID, settings.LOCAL_LANGUAGE_ID, settings.VERSION_ID))
         
-        for species_id, creature_id, name, base_exp, color_id, growth_rate_id in cur.fetchall():
+        for species_id, creature_id, pokedex_number, name, height, weight, base_exp, color_id, growth_rate_id, flavor_text, genus in cur.fetchall():
             types_cur = conn.cursor()
             types_cur.execute('SELECT type_id FROM pokemon_types WHERE pokemon_id = ' + str(creature_id))
             species_types = [types[row[0]] for row in types_cur]
@@ -150,6 +150,6 @@ class Loader():
             for move_id, level in moves_cur.fetchall():
                 level_moves[level].append(moves[move_id])
                 
-            species[species_id] = Species(name, species_types, species_stats, base_exp, growth_rates[growth_rate_id], name[0:1], colors[color_id], level_moves)
+            species[species_id] = Species(pokedex_number, name, height, weight, species_types, species_stats, base_exp, growth_rates[growth_rate_id], name[0:1], colors[color_id], level_moves, flavor_text, genus)
             
         return species
