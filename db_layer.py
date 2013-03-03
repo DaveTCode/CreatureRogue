@@ -1,6 +1,6 @@
 import sys
 import sqlite3
-from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate
+from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate, MoveTarget
 import settings
 
 class Loader():
@@ -20,10 +20,11 @@ class Loader():
             stats = self._load_stats(conn)
             colors = self._load_colors(conn)
             growth_rates = self._load_growth_rates(conn)
-            xp_lookup = self._load_xp_lookup(conn, growth_rates)
             types = self._load_types(conn)
+            move_targets = self._load_move_targets(conn)
+            xp_lookup = self._load_xp_lookup(conn, growth_rates)
             type_chart = self._load_type_chart(conn, types)
-            moves = self._load_moves(conn, types, stats)
+            moves = self._load_moves(conn, types, stats, move_targets)
             species = self._load_species(conn, types, colors, stats, growth_rates, moves)
         except sqlite3.Error as e:
             print "An error occurred: ", e.args[0]
@@ -32,7 +33,7 @@ class Loader():
             if conn:
                 conn.close()
             
-        return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates)
+        return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets)
 
     def _load_stats(self, conn):
         stats = {}
@@ -73,6 +74,16 @@ class Loader():
             xp_lookup[growth_rates[growth_rate_id]] = (level, xp)
             
         return xp_lookup
+        
+    def _load_move_targets(self, conn):
+        targets = {}
+        cur = conn.cursor()
+        cur.execute('SELECT id, identifier, name, description FROM move_targets INNER JOIN move_target_prose ON id = move_target_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
+        
+        for id, identifier, name, description in cur.fetchall():
+            targets[id] = MoveTarget(identifier, name, description)
+            
+        return targets
     
     def _load_types(self, conn):
         types = {}
@@ -100,12 +111,12 @@ class Loader():
             
         return TypeChart(chart)
     
-    def _load_moves(self, conn, types, stats):
+    def _load_moves(self, conn, types, stats, move_targets):
         moves = {}
         cur = conn.cursor()
         cur.execute('SELECT * FROM move_data')
         
-        for id, name, pp, type_id, power, damage_class_id, accuracy, min_hits, max_hits in cur.fetchall():
+        for id, name, pp, type_id, power, damage_class_id, accuracy, min_hits, max_hits, target_id in cur.fetchall():
             if damage_class_id == 2: # Physical
                 attack_stat = stats[2]
                 defense_stat = stats[3]
@@ -126,7 +137,7 @@ class Loader():
             for stat_id, change in stat_cur.fetchall():
                 stat_effects[stats[stat_id]] = change
                 
-            moves[id] = MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects, attack_stat, defense_stat, accuracy_stat, evasion_stat)
+            moves[id] = MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects, attack_stat, defense_stat, accuracy_stat, evasion_stat, move_targets[target_id])
             
         return moves
 

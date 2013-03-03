@@ -5,11 +5,45 @@ import sys
 import collections
 
 class BattleCreature():
+    stat_adjust_factors = {-6: 1/4, -5: 2/7, -4: 1/3, -3: 2/5, -2: 1/2, -1: 2/3, 
+                           0: 1.0, 
+                           1: 1.5, 2: 2.0, 3: 2.5, 4: 3.0, 5: 3.5, 6: 4.0}
+
     def __init__(self, creature, static_game_data):
         self.creature = creature
         self.stats = {stat: self.creature.species.base_stats[stat] for stat in self.creature.species.base_stats}
         self.stats[static_game_data.accuracy_stat()] = 1
         self.stats[static_game_data.evasion_stat()] = 1
+        self.stat_adjusts = {stat: 0 for stat in self.creature.species.base_stats}
+        self.stat_adjusts[static_game_data.accuracy_stat()] = 0
+        self.stat_adjusts[static_game_data.evasion_stat()] = 0
+        
+    def adjust_stat_adjusts(self, stat, value):
+        '''
+            The only adjustment to statistics of a creature in battle is done 
+            through these factors which range from -6 to 6.
+            
+            Returns the amount by which we actually adjusted the stat.
+        '''
+        old_val = self.stat_adjusts[stat]
+        self.stat_adjusts[stat] += value
+        
+        if self.stat_adjusts[stat] > 6:
+            self.stat_adjusts[stat] = 6
+        elif self.stat_adjusts[stat] < -6:
+            self.stat_adjusts[stat] = -6
+            
+        return self.stat_adjusts[stat] - old_val
+        
+    def stat_value(self, stat):
+        '''
+            The current value of a stat in battle is the base stat for that 
+            creature (i.e. the value pre battle) multiplied by the factor
+            gained from moves performed on the creature during battle.
+            
+            These factors are fixed and are capped at 1/4 to 4.
+        '''
+        return self.stats[stat] * BattleCreature.stat_adjust_factors[self.stat_adjusts[stat]]
 
 class Creature():
     
@@ -110,20 +144,46 @@ class Move():
             if not self._hit_calculation(attacking_creature, defending_creature):
                 messages.append(attacking_creature.creature.nickname + "'s attack missed!")
             else:
-                if self.move_data.damage_move():
-                    new_messages, hp_loss = self._damage_calculation(attacking_creature, defending_creature, static_game_data.type_chart)
-                    
-                    for message in new_messages:
-                        messages.append(message)
+                # TODO: Missing the "specific-move" target and only considering 1v1 battles.
+                target = None
+                if self.move_data.target.identifier in ['user', 'users-field', 'user-or-ally', 'entire-field']:
+                    target = attacking_creature
+                if self.move_data.target.identifier in ['selected-pokemon', 'random-opponent', 'all-other-pokemon', 'opponents-field', 'all-opponents', 'entire-field']:
+                    target = defending_creature
+            
+                if target:
+                    if self.move_data.damage_move():
+                        new_messages, hp_loss = self._damage_calculation(attacking_creature, target, static_game_data.type_chart)
                         
-                    defending_creature.creature.adjust_stat(static_game_data.hp_stat(), hp_loss)
-                    
-                    # TODO: Handle stat changes. Needs concept of move target
+                        for message in new_messages:
+                            messages.append(message)
+                            
+                        target.creature.adjust_stat(static_game_data.hp_stat(), hp_loss)
+                        
+                    if self.move_data.stat_change_move():
+                        for stat in self.move_data.stat_changes:
+                            # Returns the amount by which the stat was adjusted
+                            adjust_amount = target.adjust_stat_adjusts(stat, self.move_data.stat_changes[stat])
+                            if adjust_amount == 0 and self.move_data.stat_changes[stat] != 0 and not self.move_data.damage_move():
+                                direction = 'higher' if self.move_data.stat_changes[stat] > 0 else 'lower'
+                                messages.append('{0}\'s {1} won\'t go any {2}!'.format(target.creature.nickname, stat.name, direction))
+                            elif adjust_amount == 1:
+                                messages.append('{0}\'s {1} rose!'.format(target.creature.nickname, stat.name))
+                            elif adjust_amount == 2:
+                                messages.append('{0}\'s {1} sharply rose!'.format(target.creature.nickname, stat.name))
+                            elif adjust_amount > 2:
+                                messages.append('{0}\'s {1} rose drastically!'.format(target.creature.nickname, stat.name))
+                            elif adjust_amount == -1:
+                                messages.append('{0}\'s {1} fell!'.format(target.creature.nickname, stat.name))
+                            elif adjust_amount == -2:
+                                messages.append('{0}\'s {1} harshly fell!'.format(target.creature.nickname, stat.name))
+                            elif adjust_amount < -2:
+                                messages.append('{0}\'s {1} severely fell!'.format(target.creature.nickname, stat.name))
                     
         return messages
                 
     def _hit_calculation(self, attacking_creature, defending_creature):
-        p = self.move_data.base_accuracy / 100 * (attacking_creature.stats[self.move_data.accuracy_stat] / defending_creature.stats[self.move_data.evasion_stat])
+        p = self.move_data.base_accuracy / 100 * (attacking_creature.stat_value(self.move_data.accuracy_stat) / defending_creature.stat_value(self.move_data.evasion_stat))
         r = random.random()
         
         return r < p
@@ -135,8 +195,8 @@ class Move():
             
             The return value for this is the hitpoint delta.
         '''
-        attack_stat_value = attacking_creature.stats[self.move_data.attack_stat]
-        defence_stat_value = defending_creature.stats[self.move_data.defence_stat]
+        attack_stat_value = attacking_creature.stat_value(self.move_data.attack_stat)
+        defence_stat_value = defending_creature.stat_value(self.move_data.defence_stat)
         
         # Modifiers
         critical_modifier = 2 if random.uniform(0, 100) < 6.25 else 1 # TODO: Incomplete - should use items and check whether this is a high critical move etc

@@ -3,7 +3,7 @@ import random
 import math
 
 class StaticGameData():
-    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates):
+    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets):
         self.species = species
         self.types = types
         self.type_chart = type_chart
@@ -11,6 +11,7 @@ class StaticGameData():
         self.stats = stats
         self.colors = colors
         self.growth_rates = growth_rates
+        self.move_targets = move_targets
         
     def hp_stat(self):
         return self.stats[1]
@@ -156,9 +157,16 @@ class TypeChart():
             s = s + "\n"
         return s
         
+class MoveTarget():
+    
+    def __init__(self, identifier, name, description):
+        self.identifier = identifier
+        self.name = name
+        self.description = description
+        
 class MoveData():
     
-    def __init__(self, name, max_pp, type, base_attack, base_accuracy, min_hits, max_hits, stat_changes, attack_stat, defence_stat, accuracy_stat, evasion_stat):
+    def __init__(self, name, max_pp, type, base_attack, base_accuracy, min_hits, max_hits, stat_changes, attack_stat, defence_stat, accuracy_stat, evasion_stat, target):
         self.name = name
         self.max_pp = max_pp
         self.type = type
@@ -171,9 +179,20 @@ class MoveData():
         self.min_hits = min_hits
         self.max_hits = max_hits
         self.stat_changes = stat_changes
+        self.target = target
     
     def damage_move(self):
         return not self.attack_stat == None
+        
+    def stat_change_move(self):
+        '''
+            Determines whether a move affects the 
+        '''
+        for stat in self.stat_changes:
+            if self.stat_changes[stat] != 0:
+                return True
+                
+        return False
     
     def __str__(self):
         return self.name
