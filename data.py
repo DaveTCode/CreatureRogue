@@ -3,7 +3,7 @@ import random
 import math
 
 class StaticGameData():
-    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets):
+    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas):
         self.species = species
         self.types = types
         self.type_chart = type_chart
@@ -12,6 +12,9 @@ class StaticGameData():
         self.colors = colors
         self.growth_rates = growth_rates
         self.move_targets = move_targets
+        self.regions = regions
+        self.locations = locations
+        self.location_areas = location_areas
         
     def hp_stat(self):
         return self.stats[1]
@@ -182,11 +185,15 @@ class MoveData():
         self.target = target
     
     def damage_move(self):
+        '''
+            Determines whether a move affects the targets health.
+        '''
         return not self.attack_stat == None
         
     def stat_change_move(self):
         '''
-            Determines whether a move affects the 
+            Determines whether a move affects the targets stats. This is 
+            independent of whether it affects their health.
         '''
         for stat in self.stat_changes:
             if self.stat_changes[stat] != 0:
@@ -194,5 +201,34 @@ class MoveData():
                 
         return False
     
+    def __str__(self):
+        return self.name
+        
+class Region():
+
+    def __init__(self, identifier, name):
+        self.identifier = identifier
+        self.name = name
+        
+    def __str__(self):
+        return self.name
+        
+class Location():
+
+    def __init__(self, identifier, name, region):
+        self.region = region
+        self.identifier = identifier
+        self.name = name
+        
+    def __str__(self):
+        return self.name
+        
+class LocationArea():
+
+    def __init__(self, identifier, name, location):
+        self.location = location
+        self.identifier = identifier
+        self.name = name
+        
     def __str__(self):
         return self.name

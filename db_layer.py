@@ -1,6 +1,6 @@
 import sys
 import sqlite3
-from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate, MoveTarget
+from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate, MoveTarget, Location, LocationArea, Region
 import settings
 
 class Loader():
@@ -17,14 +17,28 @@ class Loader():
         try:
             conn = sqlite3.connect(self.db_file)
             
-            stats = self._load_stats(conn)
-            colors = self._load_colors(conn)
+            # Regions/Areas
+            regions = self._load_regions(conn)
+            locations = self._load_locations(conn, regions)
+            location_areas = self._load_location_areas(conn, locations)
+            
+            # XP
             growth_rates = self._load_growth_rates(conn)
-            types = self._load_types(conn)
-            move_targets = self._load_move_targets(conn)
             xp_lookup = self._load_xp_lookup(conn, growth_rates)
+            
+            # Types
+            types = self._load_types(conn)
             type_chart = self._load_type_chart(conn, types)
+            
+            # Stats
+            stats = self._load_stats(conn)
+            
+            # Moves
+            move_targets = self._load_move_targets(conn)
             moves = self._load_moves(conn, types, stats, move_targets)
+            
+            # Species
+            colors = self._load_colors(conn)
             species = self._load_species(conn, types, colors, stats, growth_rates, moves)
         except sqlite3.Error as e:
             print "An error occurred: ", e.args[0]
@@ -33,7 +47,7 @@ class Loader():
             if conn:
                 conn.close()
             
-        return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets)
+        return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas)
 
     def _load_stats(self, conn):
         stats = {}
@@ -164,3 +178,33 @@ class Loader():
             species[species_id] = Species(pokedex_number, name, height, weight, species_types, species_stats, base_exp, growth_rates[growth_rate_id], name[0:1], colors[color_id], level_moves, flavor_text, genus)
             
         return species
+        
+    def _load_regions(self, conn):
+        regions = {}
+        cur = conn.cursor()
+        cur.execute('SELECT id, identifier, name FROM regions INNER JOIN region_names ON regions.id = region_names.region_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
+        
+        for id, identifier, name in cur.fetch_all():
+            regions[id] = Region(identifier, name)
+            
+        return regions
+        
+    def _load_locations(self, conn, regions):
+        locations = {}
+        cur = conn.cursor()
+        cur.execute('SELECT id, identifier, name, region_id FROM locations INNER JOIN location_names ON locations.id = location_names.location_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
+        
+        for id, identifier, name, region_id in cur.fetch_all():
+            locations[id] = Location(identifier, name, regions[region_id])
+            
+        return locations
+        
+    def _load_location_areas(self, conn, locations):
+        location_areas = {}
+        cur = conn.cursor()
+        cur.execute('SELECT id, identifier, name, location_id FROM location_areas INNER JOIN location_area_prose ON location_areas.id = location_area_prose.location_area_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
+        
+        for id, identifier, name, region_id in cur.fetch_all():
+            location_areas[id] = LocationArea(identifier, name, locations[location_id])
+            
+        return location_areas

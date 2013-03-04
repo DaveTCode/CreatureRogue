@@ -218,3 +218,9 @@ class Move():
             messages.append('The attack was super effective!')
             
         return messages, int((((2 * attacking_creature.creature.level + 10) / 250) * (attack_stat_value / defence_stat_value) * self.move_data.base_attack + 2) * modifier)
+        
+class Map():
+    
+    def __init__(self, location_area, tiles):
+        self.tiles = tiles
+        self.location_area = location_area
