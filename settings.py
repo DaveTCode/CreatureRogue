@@ -5,7 +5,7 @@ SCREEN_HEIGHT = 50
 LIMIT_FPS = 20
 TITLE = 'Creature Rogue'
 
-FONT = 'arial10x10.png'
+FONT = 'terminal16x16_gs_ro.png'
 
 DB_FILE = 'pokedex.db3'
 
@@ -22,6 +22,7 @@ POKEDEX_UNKNOWN_COLOR = libtcod.Color(90, 90, 90)
 POKEDEX_SEEN_COLOR = libtcod.Color(0, 0, 255)
 POKEDEX_KNOWN_COLOR = libtcod.Color(0, 255, 0)
 POKEDEX_LINE_COLOR = libtcod.white
+PLAYER_COLOR = libtcod.yellow
 
 LOCAL_LANGUAGE_ID = 9 # English
 VERSION_GROUP_ID = 6 # Emerald

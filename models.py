@@ -97,10 +97,12 @@ class Creature():
         
 class Player():
 
-    def __init__(self, name, static_game_data):
+    def __init__(self, name, static_game_data, map, x, y):
         self.name = name
         self.creatures = []
         self.pokedex = { static_game_data.species[id].pokedex_number: (0, static_game_data.species[id]) for id in static_game_data.species }
+        self.map = map
+        self.coords = (x, y)
         
 class GameData():
         

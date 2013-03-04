@@ -184,7 +184,7 @@ class Loader():
         cur = conn.cursor()
         cur.execute('SELECT id, identifier, name FROM regions INNER JOIN region_names ON regions.id = region_names.region_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, identifier, name in cur.fetch_all():
+        for id, identifier, name in cur.fetchall():
             regions[id] = Region(identifier, name)
             
         return regions
@@ -192,9 +192,9 @@ class Loader():
     def _load_locations(self, conn, regions):
         locations = {}
         cur = conn.cursor()
-        cur.execute('SELECT id, identifier, name, region_id FROM locations INNER JOIN location_names ON locations.id = location_names.location_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
+        cur.execute('SELECT id, identifier, name, region_id FROM locations INNER JOIN location_names ON locations.id = location_names.location_id WHERE local_language_id={0} AND NOT region_id IS NULL'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, identifier, name, region_id in cur.fetch_all():
+        for id, identifier, name, region_id in cur.fetchall():
             locations[id] = Location(identifier, name, regions[region_id])
             
         return locations
@@ -204,7 +204,7 @@ class Loader():
         cur = conn.cursor()
         cur.execute('SELECT id, identifier, name, location_id FROM location_areas INNER JOIN location_area_prose ON location_areas.id = location_area_prose.location_area_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, identifier, name, region_id in cur.fetch_all():
+        for id, identifier, name, location_id in cur.fetchall():
             location_areas[id] = LocationArea(identifier, name, locations[location_id])
             
         return location_areas

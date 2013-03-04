@@ -22,7 +22,7 @@ class Game():
             Set up the libtcod window with the parameters given to the game. 
             This must be called before the game loop is run.
         '''
-        libtcod.console_set_custom_font(self.font, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+        libtcod.console_set_custom_font(self.font, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
         
         libtcod.console_init_root(self.screen_width, self.screen_height, self.title, False)
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
