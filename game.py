@@ -66,6 +66,32 @@ class Game():
         else:
             pass
             
+    def handle_map_input(self, player, key):
+        '''
+            Handles a single key stroke when the player is traversing the map.
+        '''
+        x_delta, y_delta = 0,0
+        if libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
+            x_delta = -1
+        elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
+            x_delta = 1
+        elif libtcod.console_is_key_pressed(libtcod.KEY_UP):
+            y_delta = -1
+        elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
+            y_delta = 1
+        
+        if x_delta != 0 or y_delta != 0:
+            new_y, new_x = y_delta + player.coords[1], x_delta + player.coords[0]
+            next_cell = None
+            
+            try:
+                next_cell = player.map.tiles[new_y][new_x]
+                
+                if player.can_traverse(next_cell):
+                    player.coords = new_x, new_y
+            except KeyError:
+                pass
+            
     def handle_battle_input(self, battle_data, key):
         if len(battle_data.messages_to_display) > 0:
             if libtcod.console_is_key_pressed(libtcod.KEY_SPACE) or libtcod.console_is_key_pressed(libtcod.KEY_ENTER):

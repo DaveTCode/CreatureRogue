@@ -19,4 +19,4 @@ if __name__ == "__main__":
         libtcod.console_blit(game.console, 0, 0, game.screen_width, game.screen_height, 0, 0, 0)
         libtcod.console_flush()
         key = libtcod.console_wait_for_keypress(True)
-        game.handle_map_input(player, map, key)
+        game.handle_map_input(player, key)

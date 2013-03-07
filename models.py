@@ -1,4 +1,5 @@
 from __future__ import division
+from map_renderer import EMPTY_CELL
 import math
 import random
 import sys
@@ -103,6 +104,10 @@ class Player():
         self.pokedex = { static_game_data.species[id].pokedex_number: (0, static_game_data.species[id]) for id in static_game_data.species }
         self.map = map
         self.coords = (x, y)
+        
+    def can_traverse(self, cell):
+        # TODO - Only really check that the cell is always travesable at the moment
+        return cell.base_cell.cell_passable_type == EMPTY_CELL
         
 class GameData():
         

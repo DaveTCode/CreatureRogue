@@ -1,20 +1,27 @@
 import libtcodpy as libtcod
 import settings
 
-TREE = 0
-GRASS = 1
-FLOWERS = 2
-WATER = 3
-WATER_BANK = 4
-LONG_GRASS = 5
-EXIT_NORTH = 6
-EXIT_SOUTH = 7
-EXIT_EAST = 8
-EXIT_WEST = 9
+class MapCell():
+
+    def __init__(self, base_cell, exit_location = None):
+        self.base_cell = base_cell
+        self.exit_location = exit_location
+    
+    def color(self):
+        return self.base_cell.display_color
+        
+    def char(self):
+        return self.base_cell.display_char
+
+class BaseMapCell():
+
+    def __init__(self, identifier, display_char, display_color, cell_passable_type):
+        self.identifier = identifier
+        self.display_char = display_char
+        self.display_color = display_color
+        self.cell_passable_type = cell_passable_type
 
 class MapRenderer():
-
-    type_char_map = {TREE: (libtcod.CHAR_SPADE, libtcod.green), GRASS: ('.', libtcod.white), WATER: ('.', libtcod.blue), WATER_BANK: (',', libtcod.blue), LONG_GRASS: (',', libtcod.white), EXIT_NORTH: ('^', libtcod.white), EXIT_SOUTH: ('^', libtcod.white), EXIT_WEST: ('<', libtcod.white), EXIT_EAST : ('>', libtcod.white)}
     
     def __init__(self, console):
         self.console = console
@@ -34,7 +41,26 @@ class MapRenderer():
             row = map.tiles[y - y_start]
             for x in range(x_start, x_start + len(row)):
                 cell = row[x - x_start]
-                char, color = MapRenderer.type_char_map[cell]
                 
-                libtcod.console_set_default_foreground(self.console, color)
-                libtcod.console_put_char(self.console, x, y, char)
+                libtcod.console_set_default_foreground(self.console, cell.color())
+                libtcod.console_put_char(self.console, x, y, cell.char())
+                
+# Passable cell types
+BLOCK_CELL = 0
+WATER_CELL = 1
+EMPTY_CELL = 2
+
+# Base cell types that maps can be made from
+TREE = BaseMapCell('tree', libtcod.CHAR_SPADE, libtcod.green, BLOCK_CELL)
+GRASS = BaseMapCell('grass', '.', libtcod.white, EMPTY_CELL)
+WATER = BaseMapCell('water', '.', libtcod.blue, WATER_CELL)
+WATER_BANK = BaseMapCell('waterbank', ',', libtcod.blue, WATER_CELL)
+LONG_GRASS = BaseMapCell('longgrass', ';', libtcod.white, EMPTY_CELL)
+EXIT_NORTH = BaseMapCell('exitnorth', '^', libtcod.white, EMPTY_CELL)
+EXIT_SOUTH = BaseMapCell('exitsouth', '^', libtcod.white, EMPTY_CELL)
+EXIT_EAST = BaseMapCell('exiteast', '>', libtcod.white, EMPTY_CELL)
+EXIT_WEST = BaseMapCell('exitwest', '<', libtcod.white, EMPTY_CELL)
+WATER_EXIT_NORTH = BaseMapCell('exitnorth', '^', libtcod.blue, WATER_CELL)
+WATER_EXIT_SOUTH = BaseMapCell('exitsouth', '^', libtcod.blue, WATER_CELL)
+WATER_EXIT_EAST = BaseMapCell('exiteast', '>', libtcod.blue, WATER_CELL)
+WATER_EXIT_WEST = BaseMapCell('exitwest', '<', libtcod.blue, WATER_CELL)
