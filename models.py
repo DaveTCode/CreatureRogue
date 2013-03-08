@@ -1,5 +1,6 @@
 from __future__ import division
 from map_renderer import EMPTY_CELL
+import maps
 import math
 import random
 import sys
@@ -108,6 +109,16 @@ class Player():
     def can_traverse(self, cell):
         # TODO - Only really check that the cell is always travesable at the moment
         return cell.base_cell.cell_passable_type == EMPTY_CELL
+
+    def move_to_cell(self, x, y):
+        '''
+            Move to the cell specified by x,y in the current map. Note that
+            this doesn't check that the cell is travesable.
+        '''
+        self.coords = (x, y)
+
+        if (map.tiles[y][x].exit_location != None):
+            self.map = maps.map_from_location_area_id(map.tiles[y][x].exit_location)
         
 class GameData():
         

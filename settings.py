@@ -28,3 +28,4 @@ LOCAL_LANGUAGE_ID = 9 # English
 VERSION_GROUP_ID = 6 # Emerald
 POKEDEX_ID = 1 # Entire national dex
 VERSION_ID = 7 # Flavor text version. Set this to 1 for original 151 pokemon.
+LOCATION_GENERATION_ID = 4 # Can be 4 or 5 (Gen 4 or 5 apparently)

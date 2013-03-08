@@ -202,7 +202,7 @@ class Loader():
     def _load_location_areas(self, conn, locations):
         location_areas = {}
         cur = conn.cursor()
-        cur.execute('SELECT id, identifier, name, location_id FROM location_areas INNER JOIN location_area_prose ON location_areas.id = location_area_prose.location_area_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
+        cur.execute('SELECT id, identifier, name, location_id FROM location_areas INNER JOIN location_area_prose ON location_areas.id = location_area_prose.location_area_id INNER JOIN location_game_indices ON location_game_indices.location_id = location_areas.location_ia WHERE local_language_id={0} AND NOT location_id IS NULL AND generation_id={1}'.format(settings.LOCAL_LANGUAGE_ID, settings.LOCATION_GENERATION_ID))
         
         for id, identifier, name, location_id in cur.fetchall():
             location_areas[id] = LocationArea(identifier, name, locations[location_id])

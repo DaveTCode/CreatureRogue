@@ -88,7 +88,7 @@ class Game():
                 next_cell = player.map.tiles[new_y][new_x]
                 
                 if player.can_traverse(next_cell):
-                    player.coords = new_x, new_y
+                    player.move_to_cell(new_x, new_y)
             except KeyError:
                 pass
             
