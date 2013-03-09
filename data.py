@@ -225,10 +225,39 @@ class Location():
         
 class LocationArea():
 
-    def __init__(self, identifier, name, location):
+    def __init__(self, identifier, name, location, walk_encounters, map, walk_encounter_rate):
         self.location = location
         self.identifier = identifier
         self.name = name
+        self.walk_encounters = walk_encounters
+        self.map = map
+        self.walk_encounter_rate = walk_encounter_rate
         
+    def get_encounter(self):
+        '''
+
+        '''
+        total_rarity = reduce(lambda x,y: x + y.rarity, self.walk_encounters, 0)
+        r = random.randint(0, total_rarity if total_rarity == 0 else total_rarity - 1)
+
+        total = 0
+        for encounter in self.walk_encounters:
+            total += encounter.rarity
+            if total > r:
+                return encounter
+
+        return None
+
     def __str__(self):
         return self.name
+
+class Encounter():
+
+    def __init__(self, species, min_level, max_level, rarity):
+        self.species = species
+        self.min_level = min_level
+        self.max_level = max_level
+        self.rarity = rarity
+
+    def __str__(self):
+        return "Encounter: " + str(self.species) + " (" + str(self.min_level) + "," + str(self.max_level) + ")"

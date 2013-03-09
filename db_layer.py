@@ -1,6 +1,7 @@
 import sys
 import sqlite3
-from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate, MoveTarget, Location, LocationArea, Region
+from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate, MoveTarget, Location, LocationArea, Region, Encounter
+from map_loader import MapLoader
 import settings
 
 class Loader():
@@ -16,11 +17,6 @@ class Loader():
         conn = None
         try:
             conn = sqlite3.connect(self.db_file)
-            
-            # Regions/Areas
-            regions = self._load_regions(conn)
-            locations = self._load_locations(conn, regions)
-            location_areas = self._load_location_areas(conn, locations)
             
             # XP
             growth_rates = self._load_growth_rates(conn)
@@ -40,6 +36,11 @@ class Loader():
             # Species
             colors = self._load_colors(conn)
             species = self._load_species(conn, types, colors, stats, growth_rates, moves)
+
+            # Regions/Areas
+            regions = self._load_regions(conn)
+            locations = self._load_locations(conn, regions)
+            location_areas = self._load_location_areas(conn, locations, species)
         except sqlite3.Error as e:
             print "An error occurred: ", e.args[0]
             sys.exit(1)
@@ -158,7 +159,7 @@ class Loader():
     def _load_species(self, conn, types, colors, stats, growth_rates, moves):
         species = {}
         cur = conn.cursor()
-        cur.execute('SELECT species_id, creature_id, pokedex_number, name, height, weight, base_experience, color_id, growth_rate_id, flavor_text, genus FROM creature_species_data WHERE pokedex_id = {0} AND local_language_id = {1} AND version_id = {2}'.format(settings.POKEDEX_ID, settings.LOCAL_LANGUAGE_ID, settings.VERSION_ID))
+        cur.execute('SELECT species_id, creature_id, pokedex_number, name, height, weight, base_experience, color_id, growth_rate_id, flavor_text, genus FROM creature_species_data WHERE pokedex_id = {0} AND local_language_id = {1}'.format(settings.POKEDEX_ID, settings.LOCAL_LANGUAGE_ID))
         
         for species_id, creature_id, pokedex_number, name, height, weight, base_exp, color_id, growth_rate_id, flavor_text, genus in cur.fetchall():
             types_cur = conn.cursor()
@@ -199,12 +200,33 @@ class Loader():
             
         return locations
         
-    def _load_location_areas(self, conn, locations):
+    def _load_location_areas(self, conn, locations, species):
         location_areas = {}
         cur = conn.cursor()
-        cur.execute('SELECT id, identifier, name, location_areas.location_id FROM location_areas INNER JOIN location_area_prose ON location_areas.id = location_area_prose.location_area_id INNER JOIN location_game_indices ON location_game_indices.location_id = location_areas.location_id WHERE local_language_id={0} AND NOT location_areas.location_id IS NULL AND generation_id={1}'.format(settings.LOCAL_LANGUAGE_ID, settings.LOCATION_GENERATION_ID))
+        cur.execute('SELECT location_areas.id, location_areas.identifier, location_area_prose.name, location_areas.location_id FROM location_areas INNER JOIN location_area_prose ON location_areas.id = location_area_prose.location_area_id WHERE NOT location_areas.location_id IS NULL AND local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
         for id, identifier, name, location_id in cur.fetchall():
-            location_areas[id] = LocationArea(identifier, name, locations[location_id])
+            rate_cur = conn.cursor()
+            rate_cur.execute('SELECT encounter_method_id, rate FROM location_area_encounter_rates WHERE version_id = (SELECT MAX(version_id) FROM location_area_encounter_rates WHERE location_area_id = {0}) AND location_area_id = {0}'.format(id))
+
+            walk_encounter_rate = 0
+            for method_id, rate in rate_cur.fetchall():
+                if method_id == 1:
+                    walk_encounter_rate = rate
+
+            enc_cur = conn.cursor()
+            enc_cur.execute('SELECT species_id, MIN(min_level), MAX(max_level), MAX(rarity), encounter_method_id FROM encounters INNER JOIN pokemon on pokemon_id = pokemon.id INNER JOIN encounter_slots ON encounter_slots.id = encounters.encounter_slot_id WHERE location_area_id = {0} GROUP BY pokemon_id, encounter_method_id'.format(id))
+
+            walk_encs = []
+            for species_id, min_level, max_level, rarity, method_id in enc_cur.fetchall():
+                if method_id == 1:
+                    walk_encs.append(Encounter(species[species_id], min_level, max_level, rarity))
+
+            try:
+                map_tiles = MapLoader.map_from_location_area_id(id)
+            except KeyError:
+                map_tiles = []
+
+            location_areas[id] = LocationArea(identifier, name, locations[location_id], walk_encs, map_tiles, walk_encounter_rate)
             
         return location_areas

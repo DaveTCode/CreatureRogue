@@ -49,13 +49,10 @@ class Game():
         if game_data.is_in_battle:
             self.battle_renderer.render(game_data.battle_data)
         else:
-            self.render_world(game_data)
+            pass
         
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
-        
-    def render_world(self, game_data):
-        pass
         
     def handle_input(self, game_data, key):
         '''
@@ -82,13 +79,14 @@ class Game():
         
         if x_delta != 0 or y_delta != 0:
             new_y, new_x = y_delta + player.coords[1], x_delta + player.coords[0]
-            next_cell = None
             
             try:
                 next_cell = player.map.tiles[new_y][new_x]
                 
-                if player.can_traverse(next_cell):
-                    player.move_to_cell(new_x, new_y)
+                (moved, caused_wild_encounter) = player.move_to_cell(new_x, new_y)
+
+                if caused_wild_encounter:
+                    self.start_wild_battle()
             except KeyError:
                 pass
             
@@ -123,3 +121,7 @@ class Game():
                 pokedex_renderer.shift_row(1)
             elif libtcod.console_is_key_pressed(libtcod.KEY_ENTER):
                 pokedex_renderer.display_selected()
+
+    def start_wild_batle(self):
+        self.game_data.is_in_battle = True
+        self.game_data.battle_data = BattleData(self.game_data, self.player, wild_creature = self.player.location_area.get_encounter_creature())

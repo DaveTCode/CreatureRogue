@@ -99,32 +99,64 @@ class Creature():
         
 class Player():
 
-    def __init__(self, name, static_game_data, map, x, y):
+    def __init__(self, name, static_game_data, location_area, x, y):
         self.name = name
         self.creatures = []
         self.pokedex = { static_game_data.species[id].pokedex_number: (0, static_game_data.species[id]) for id in static_game_data.species }
-        self.map = map
+        self.location_area = location_area
         self.coords = (x, y)
+        self.steps_in_long_grass_since_encounter = 0
+        self.static_game_data = static_game_data
         
-    def can_traverse(self, cell):
+    def _can_traverse(self, cell):
         # TODO - Only really check that the cell is always travesable at the moment
         return cell.base_cell.cell_passable_type == EMPTY_CELL
 
+    def _causes_encounter(self):
+        encounter_rate = 100 if self.location_area.rate > 100 else self.location_area.rate
+
+        if 8 - encounter_rate // 10 < self.steps_in_long_grass_since_encounter:
+            if random.random() < 0.95:
+                return False
+
+        if random.randint(0, 99) < encounter_rate and random.randint(0, 99) < 40:
+            return True
+        else:
+            return False
+
     def move_to_cell(self, x, y):
         '''
-            Move to the cell specified by x,y in the current map. Note that
-            this doesn't check that the cell is travesable.
-        '''
-        self.coords = (x, y)
+            Move to the cell specified by x,y in the current map.
 
-        if (self.map.tiles[y][x].exit_location != None):
-            self.map = MapLoader.map_from_location_area_id(self.map.tiles[y][x].exit_location)
+            Returns (whether moved, whether caused a wild encounter)
+        '''
+        if self._can_traverse(self.location_area.map.tiles[y][x]):
+            self.coords = (x, y)
+            causes_encounter = False
+
+            if (self.location_area.map.tiles[y][x].exit_location != None):
+                self.location_area = self.static_game_data.location_areas[self.location_area.map.tiles[y][x].exit_location]
+                self.steps_in_long_grass_since_encounter = 0
+            else:
+                if self.get_cell().base_cell == LONG_GRASS:
+                    self.steps_in_long_grass_since_encounter += 1
+
+                    causes_encounter = self._causes_encounter()
+                else:
+                    self.steps_in_long_grass_since_encounter = 0
+
+            return True, causes_encounter
+        else:
+            return false, None
+
+    def get_cell(self):
+        return self.map.tiles[self.coords[1], self.coords[0]]
         
 class GameData():
         
     def __init__(self):
         self.is_in_battle = True
-        self.battle_data = BattleData(self, None, None, None)
+        self.battle_data = None
         
 class BattleData():
 
