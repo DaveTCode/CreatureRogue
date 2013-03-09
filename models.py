@@ -1,6 +1,6 @@
 from __future__ import division
-from map_renderer import EMPTY_CELL
-import maps
+from maps.map_renderer import *
+from map_loader import MapLoader
 import math
 import random
 import sys
@@ -117,8 +117,8 @@ class Player():
         '''
         self.coords = (x, y)
 
-        if (map.tiles[y][x].exit_location != None):
-            self.map = maps.map_from_location_area_id(map.tiles[y][x].exit_location)
+        if (self.map.tiles[y][x].exit_location != None):
+            self.map = MapLoader.map_from_location_area_id(self.map.tiles[y][x].exit_location)
         
 class GameData():
         
