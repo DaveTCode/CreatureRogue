@@ -1,4 +1,6 @@
 import math
+import os
+import shutil
 import Image
 import ImageChops
 
@@ -12,7 +14,7 @@ def compare_tiles_cheap(tile_1, tile_2):
     '''
     tile_1_data = tile_1.getdata()
     tile_2_data = tile_2.getdata()
-    return all(tile_1_data[i] == tile_2_data[i] for i in range(16))
+    return all(tile_1_data[i] == tile_2_data[i] for i in range(len(tile_1_data)))
 
 def compare_tiles_expensive(tile_1, tile_2):
     '''
@@ -33,6 +35,12 @@ def compare_tiles_expensive(tile_1, tile_2):
     return rms < COMPARE_CONSTANT
 
 tiles = {}
+
+if os.path.isdir('tiles'):
+    if raw_input('tiles directory already exists. Would you like to empty it? (Y/N)').lower() == 'y':
+        shutil.rmtree('tiles')
+
+os.makedirs('tiles')
 
 #filename = raw_input('Please enter the base image filename: ')
 #tile_width = int(raw_input('Please enter the tile width: '))
