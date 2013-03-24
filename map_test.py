@@ -12,7 +12,7 @@ if __name__ == "__main__":
     location_area_id = int(raw_input('Which location do you want to load (by id)? '))
     
     map_renderer = MapRenderer(game.console)
-    player = Player("Test Player", game.static_game_data, Map(game.static_game_data.location_areas[location_area_id], 3, 3)
+    player = Player("Test Player", game.static_game_data, Map(game.static_game_data.location_areas[location_area_id], MapLoader.map_from_location_area_id(location_area_id)), 3, 3)
     
     while not libtcod.console_is_window_closed():
         libtcod.console_clear(game.console)

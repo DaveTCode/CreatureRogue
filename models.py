@@ -99,11 +99,11 @@ class Creature():
         
 class Player():
 
-    def __init__(self, name, static_game_data, location_area, x, y):
+    def __init__(self, name, static_game_data, map, x, y):
         self.name = name
         self.creatures = []
         self.pokedex = { static_game_data.species[id].pokedex_number: (0, static_game_data.species[id]) for id in static_game_data.species }
-        self.location_area = location_area
+        self.map = map
         self.coords = (x, y)
         self.steps_in_long_grass_since_encounter = 0
         self.static_game_data = static_game_data
@@ -130,12 +130,13 @@ class Player():
 
             Returns (whether moved, whether caused a wild encounter)
         '''
-        if self._can_traverse(self.location_area.map.tiles[y][x]):
+        if self._can_traverse(self.map.tiles[y][x]):
             self.coords = (x, y)
             causes_encounter = False
 
-            if (self.location_area.map.tiles[y][x].exit_location != None):
-                self.location_area = self.static_game_data.location_areas[self.location_area.map.tiles[y][x].exit_location]
+            if self.map.tiles[y][x].exit_location != None:
+                location_area = self.static_game_data.location_areas[self.map.tiles[y][x].exit_location]
+                self.map = Map(location_area, MapLoader.map_from_location_area_id(location_area))
                 self.steps_in_long_grass_since_encounter = 0
             else:
                 if self.get_cell().base_cell == LONG_GRASS:
@@ -147,10 +148,10 @@ class Player():
 
             return True, causes_encounter
         else:
-            return false, None
+            return False, None
 
     def get_cell(self):
-        return self.map.tiles[self.coords[1], self.coords[0]]
+        return self.map.tiles[self.coords[1]][self.coords[0]]
         
 class GameData():
         

@@ -28,11 +28,10 @@ if __name__ == "__main__":
     
     attacking_moves = [Move(move_data) for move_data in attacking_species.move_data_at_level(attacking_level)]
     defending_moves = [Move(move_data) for move_data in defending_species.move_data_at_level(defending_level)]
-    
-    game_data.battle_data.player_creature = BattleCreature(Creature(attacking_species, attacking_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data)
-    game_data.battle_data.wild_creature = BattleCreature(Creature(defending_species, defending_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, defending_moves, 1), game.static_game_data)
-    
-    game_data.battle_data.wild_creature.stats[game.static_game_data.hp_stat()] = 5
+
+    game_data.battle_data = BattleData(game_data, 
+                                       BattleCreature(Creature(attacking_species, attacking_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data),
+                                       wild_creature=BattleCreature(Creature(defending_species, defending_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, defending_moves, 1), game.static_game_data))
     
     while not libtcod.console_is_window_closed():
         game.battle_renderer.render(game_data.battle_data)
