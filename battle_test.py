@@ -1,6 +1,8 @@
 import random
 from game import Game
 from models import GameData, BattleData, Creature, Move, BattleCreature
+from battle_state import BattleState
+from battle_ai import RandomMoveAi
 import settings
 import libtcodpy as libtcod
 
@@ -29,14 +31,13 @@ if __name__ == "__main__":
     attacking_moves = [Move(move_data) for move_data in attacking_species.move_data_at_level(attacking_level)]
     defending_moves = [Move(move_data) for move_data in defending_species.move_data_at_level(defending_level)]
 
+    wild_creature = BattleCreature(Creature(defending_species, defending_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, defending_moves, 1), game.static_game_data)
+
     game_data.battle_data = BattleData(game_data, 
                                        BattleCreature(Creature(attacking_species, attacking_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data),
-                                       wild_creature=BattleCreature(Creature(defending_species, defending_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, defending_moves, 1), game.static_game_data))
+                                       RandomMoveAi(wild_creature),
+                                       wild_creature=wild_creature)
     
-    while not libtcod.console_is_window_closed():
-        game.battle_renderer.render(game_data.battle_data)
-
-        libtcod.console_blit(game.console, 0, 0, game.screen_width, game.screen_height, 0, 0, 0)
-        libtcod.console_flush()
-        key = libtcod.console_wait_for_keypress(True)
-        game.handle_input(game_data, key)
+    game.game_data = game_data
+    game.state = BattleState(game, game.game_data, game.battle_renderer)
+    game.game_loop()

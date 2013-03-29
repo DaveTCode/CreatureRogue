@@ -23,7 +23,8 @@ class BaseMapCell():
 
 class MapRenderer():
     
-    def __init__(self, console):
+    def __init__(self, game, console):
+        self.game = game
         self.console = console
         
     def render(self, player):

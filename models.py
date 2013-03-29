@@ -1,6 +1,7 @@
 from __future__ import division
 from maps.map_renderer import *
 from map_loader import MapLoader
+import data
 import math
 import random
 import sys
@@ -14,11 +15,11 @@ class BattleCreature():
     def __init__(self, creature, static_game_data):
         self.creature = creature
         self.stats = {stat: self.creature.species.base_stats[stat] for stat in self.creature.species.base_stats}
-        self.stats[static_game_data.accuracy_stat()] = 1
-        self.stats[static_game_data.evasion_stat()] = 1
+        self.stats[static_game_data.stat(data.ACCURACY_STAT)] = 1
+        self.stats[static_game_data.stat(data.EVASION_STAT)] = 1
         self.stat_adjusts = {stat: 0 for stat in self.creature.species.base_stats}
-        self.stat_adjusts[static_game_data.accuracy_stat()] = 0
-        self.stat_adjusts[static_game_data.evasion_stat()] = 0
+        self.stat_adjusts[static_game_data.stat(data.ACCURACY_STAT)] = 0
+        self.stat_adjusts[static_game_data.stat(data.EVASION_STAT)] = 0
         
     def adjust_stat_adjusts(self, stat, value):
         '''
@@ -161,21 +162,18 @@ class GameData():
         
 class BattleData():
 
-    def __init__(self, game_data, player_creature, trainer_creature=None, wild_creature=None):
+    def __init__(self, game_data, player_creature, computer_ai, trainer_creature=None, wild_creature=None):
         self.game_data = game_data
         self.player_creature = player_creature
         self.wild_creature = wild_creature
         self.trainer_creature = trainer_creature
-        self.messages_to_display = collections.deque()
+        self.computer_ai = computer_ai
 
     def defending_creature(self):
         return self.trainer_creature if self.trainer_creature != None else self.wild_creature
-        
-    def pop_message(self):
-        if (len(self.messages_to_display) > 0):
-            return self.messages_to_display.popleft()
-        else:
-            return None
+
+    def computer_move(self):
+        return self.computer_ai.select_move(self.defending_creature().creature.moves)
             
 class Move():
     def __init__(self, move_data):
@@ -209,7 +207,7 @@ class Move():
                         for message in new_messages:
                             messages.append(message)
                             
-                        target.creature.adjust_stat(static_game_data.hp_stat(), hp_loss)
+                        target.creature.adjust_stat(static_game_data.stat(data.HP_STAT), hp_loss)
                         
                     if self.move_data.stat_change_move():
                         for stat in self.move_data.stat_changes:

@@ -2,7 +2,7 @@ import libtcodpy as libtcod
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
-LIMIT_FPS = 20
+FPS_LIMIT = 30
 TITLE = 'Creature Rogue'
 
 FONT = 'terminal16x16_gs_ro.png'

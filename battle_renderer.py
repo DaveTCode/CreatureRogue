@@ -1,4 +1,5 @@
 from __future__ import division
+import data
 import random
 import settings
 import libtcodpy as libtcod
@@ -13,7 +14,7 @@ class BattleRenderer():
         self.game = game
         self.console = console
         
-    def render(self, battle_data):
+    def render(self, battle_data, messages):
         '''
             The external interface to this class. Call this to render the
             given battle data object.
@@ -26,8 +27,8 @@ class BattleRenderer():
         self._render_moves(battle_data.player_creature.creature, 2, 36)
         
         self._render_blank_message_box(40, 34, 40, 16)
-        if (len(battle_data.messages_to_display)):
-            self._render_message(battle_data.messages_to_display[0], 40, 38, 40, 12)
+        if len(messages):
+            self._render_message(messages[0], 40, 38, 40, 12)
         
     def _render_lines(self):
         '''
@@ -64,7 +65,7 @@ class BattleRenderer():
             Utility function to render a health bar for the given creature at
             the given x and y coordinates.
         '''
-        hp_stat = self.game.static_game_data.hp_stat()
+        hp_stat = self.game.static_game_data.stat(data.HP_STAT)
         health_bars = int((creature.current_stat(hp_stat) / creature.max_stat(hp_stat)) * max_length)
         
         if (health_bars > max_length / 2):
@@ -87,7 +88,7 @@ class BattleRenderer():
             Utility function to render the health values <current>/<max> at 
             the given x,y coordinates.
         '''
-        hp_stat = self.game.static_game_data.hp_stat()
+        hp_stat = self.game.static_game_data.stat(data.HP_STAT)
         current = creature.current_stat(hp_stat)
         max = creature.current_stat(hp_stat)
         

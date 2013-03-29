@@ -2,6 +2,15 @@ from __future__ import division
 import random
 import math
 
+HP_STAT = 1
+ATTACK_STAT = 2
+DEFENSE_STAT = 3
+SP_ATTACK_STAT = 4
+SP_DEFENSE_STAT = 5
+SPEED_STAT = 6
+ACCURACY_STAT = 7
+EVASION_STAT = 8
+
 class StaticGameData():
     def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas):
         self.species = species
@@ -16,14 +25,8 @@ class StaticGameData():
         self.locations = locations
         self.location_areas = location_areas
         
-    def hp_stat(self):
-        return self.stats[1]
-        
-    def accuracy_stat(self):
-        return self.stats[7]
-        
-    def evasion_stat(self):
-        return self.stats[8]
+    def stat(self, stat):
+        return self.stats[stat]
         
 class Stat():
     
