@@ -1,1 +1,1 @@
-__all__ = ["pallet_town", "route_1"]
+__all__ = ["kanto"]

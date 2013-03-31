@@ -19,24 +19,35 @@ class Game():
         self.title = title
         self.font = font
         self.static_game_data = None
-        self.battle_renderer = None
-        self.console = None
-        self.state = None
     
+    def load_static_data(self):
+        '''
+            This is required all over and must be called before init is called
+            to create the renderers.
+        '''
+        self.static_game_data = db_layer.Loader(settings.DB_FILE).load_static_data()
+
     def init(self):
         '''
             Set up the libtcod window with the parameters given to the game. 
             This must be called before the game loop is run.
         '''
+        if self.static_game_data == None:
+            print("You must load the static game data before calling init")
+            sys.exit(1)
+            
         libtcod.console_set_custom_font(self.font, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
         libtcod.console_init_root(self.screen_width, self.screen_height, self.title, False)
         libtcod.sys_set_fps(settings.FPS_LIMIT)
 
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
+
+        self.game_data = GameData()
+
         self.battle_renderer = BattleRenderer(self, self.console)
         self.map_renderer = MapRenderer(self, self.console)
-        self.static_game_data = db_layer.Loader(settings.DB_FILE).load_static_data()
-        self.game_data = GameData()
+        self.pokedex_renderer = PokedexRenderer(self, self.console)
+        
         self.state = MapState(self, self.game_data, self.map_renderer)
     
     def game_loop(self):
@@ -56,7 +67,3 @@ class Game():
             key = libtcod.console_check_for_keypress()
             if key and key.vk != libtcod.KEY_NONE:
                 self.state.handle_input(key)
-
-    def start_wild_batle(self):
-        self.game_data.is_in_battle = True
-        self.game_data.battle_data = BattleData(self.game_data, self.player, wild_creature = self.player.location_area.get_encounter_creature())

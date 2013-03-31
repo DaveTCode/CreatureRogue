@@ -14,6 +14,7 @@ def zero_stat_values(stats):
 
 if __name__ == "__main__":
     game = Game(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, settings.TITLE, settings.FONT)
+    game.load_static_data()
     game.init()
     
     game_data = GameData()

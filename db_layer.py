@@ -1,7 +1,6 @@
 import sys
 import sqlite3
 from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate, MoveTarget, Location, LocationArea, Region, Encounter
-from map_loader import MapLoader
 import settings
 
 class Loader():
@@ -222,11 +221,6 @@ class Loader():
                 if method_id == 1:
                     walk_encs.append(Encounter(species[species_id], min_level, max_level, rarity))
 
-            try:
-                map_tiles = MapLoader.map_from_location_area_id(id)
-            except KeyError:
-                map_tiles = []
-
-            location_areas[id] = LocationArea(identifier, name, locations[location_id], walk_encs, map_tiles, walk_encounter_rate)
+            location_areas[id] = LocationArea(identifier, name, locations[location_id], walk_encs, walk_encounter_rate)
             
         return location_areas

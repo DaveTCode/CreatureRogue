@@ -228,12 +228,11 @@ class Location():
         
 class LocationArea():
 
-    def __init__(self, identifier, name, location, walk_encounters, map, walk_encounter_rate):
+    def __init__(self, identifier, name, location, walk_encounters, walk_encounter_rate):
         self.location = location
         self.identifier = identifier
         self.name = name
         self.walk_encounters = walk_encounters
-        self.map = map
         self.walk_encounter_rate = walk_encounter_rate
         
     def get_encounter(self):

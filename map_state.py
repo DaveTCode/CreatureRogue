@@ -6,6 +6,8 @@ class MapState():
         self.game = game
         self.game_data = game_data
         self.map_renderer = map_renderer
+        self.top_left = 0
+        self.top_right = 0
 
     def handle_input(self, key):
         '''
@@ -27,7 +29,7 @@ class MapState():
             try:
                 next_cell = self.game_data.player.map.tiles[new_y][new_x]
                 
-                (moved, caused_wild_encounter) = self.game_data.player.move_to_cell(new_x, new_y)
+                moved, caused_wild_encounter = self.game_data.player.move_to_cell(new_x, new_y)
 
                 if caused_wild_encounter:
                     self.game.start_wild_battle()

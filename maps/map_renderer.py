@@ -3,9 +3,8 @@ import settings
 
 class MapCell():
 
-    def __init__(self, base_cell, exit_location = None):
+    def __init__(self, base_cell):
         self.base_cell = base_cell
-        self.exit_location = exit_location
     
     def color(self):
         return self.base_cell.display_color
@@ -52,16 +51,30 @@ WATER_CELL = 1
 EMPTY_CELL = 2
 
 # Base cell types that maps can be made from
-TREE = BaseMapCell('tree', libtcod.CHAR_SPADE, libtcod.green, BLOCK_CELL)
-GRASS = BaseMapCell('grass', '.', libtcod.white, EMPTY_CELL)
-WATER = BaseMapCell('water', '.', libtcod.blue, WATER_CELL)
-WATER_BANK = BaseMapCell('waterbank', ',', libtcod.blue, WATER_CELL)
-LONG_GRASS = BaseMapCell('longgrass', ';', libtcod.white, EMPTY_CELL)
-EXIT_NORTH = BaseMapCell('exitnorth', '^', libtcod.white, EMPTY_CELL)
-EXIT_SOUTH = BaseMapCell('exitsouth', '^', libtcod.white, EMPTY_CELL)
-EXIT_EAST = BaseMapCell('exiteast', '>', libtcod.white, EMPTY_CELL)
-EXIT_WEST = BaseMapCell('exitwest', '<', libtcod.white, EMPTY_CELL)
-WATER_EXIT_NORTH = BaseMapCell('exitnorth', '^', libtcod.blue, WATER_CELL)
-WATER_EXIT_SOUTH = BaseMapCell('exitsouth', '^', libtcod.blue, WATER_CELL)
-WATER_EXIT_EAST = BaseMapCell('exiteast', '>', libtcod.blue, WATER_CELL)
-WATER_EXIT_WEST = BaseMapCell('exitwest', '<', libtcod.blue, WATER_CELL)
+BRIDGE = BaseMapCell('', '-', libtcod.Color(255, 255, 0), EMPTY_CELL)
+STATUE = BaseMapCell('', 'S', libtcod.Color(70, 70, 70), BLOCK_CELL)
+PATH = BaseMapCell('', '-', libtcod.Color(255, 255, 255), EMPTY_CELL)
+FENCE_HORIZONTAL = BaseMapCell('', 'X', libtcod.Color(139, 69, 19), BLOCK_CELL)
+GRASS = BaseMapCell('', '.', libtcod.Color(255, 255, 255), EMPTY_CELL)
+LETTERBOX = BaseMapCell('', 'L', libtcod.Color(100, 100, 100), BLOCK_CELL)
+FLOWER = BaseMapCell('', '.', libtcod.Color(255, 0, 0), EMPTY_CELL)
+BLUE_BUILDING = BaseMapCell('', '#', libtcod.Color(0, 0, 255), BLOCK_CELL)
+SAND = BaseMapCell('', '.', libtcod.Color(255, 255, 0), EMPTY_CELL)
+BIKE = BaseMapCell('', 'b', libtcod.Color(50, 50, 250), BLOCK_CELL)
+BLANK = BaseMapCell('', '_', libtcod.Color(255, 255, 255), BLOCK_CELL)
+CAVE_ENTRANCE = BaseMapCell('', '>', libtcod.Color(200, 200, 200), BLOCK_CELL)
+HEDGE = BaseMapCell('', '=', libtcod.Color(0, 255, 0), BLOCK_CELL)
+LONG_GRASS = BaseMapCell('', ';', libtcod.Color(255, 255, 255), EMPTY_CELL)
+DOOR = BaseMapCell('', '>', libtcod.Color(200, 200, 200), BLOCK_CELL)
+ORANGE_BUILDING = BaseMapCell('', '#', libtcod.Color(200, 100, 0), BLOCK_CELL)
+PINK_BUILDING = BaseMapCell('', '#', libtcod.Color(255, 100, 100), BLOCK_CELL)
+YELLOW_BUILDING = BaseMapCell('', '#', libtcod.Color(200, 200, 0), BLOCK_CELL)
+ROCK = BaseMapCell('', '^', libtcod.Color(70, 70, 70), BLOCK_CELL)
+SIGN = BaseMapCell('', 's', libtcod.Color(200, 200, 200), BLOCK_CELL)
+GREEN_BUILDING = BaseMapCell('', '#', libtcod.Color(0, 255, 0), BLOCK_CELL)
+LEDGE = BaseMapCell('', '^', libtcod.Color(139, 69, 19), BLOCK_CELL)
+GREY_BUILDING = BaseMapCell('', '#', libtcod.Color(100, 100, 100), BLOCK_CELL)
+TREE = BaseMapCell('', '$', libtcod.Color(0, 255, 0), BLOCK_CELL)
+WATER = BaseMapCell('', '.', libtcod.Color(0, 0, 255), WATER_CELL)
+FENCE_VERTICAL = BaseMapCell('', 'X', libtcod.Color(139, 69, 19), BLOCK_CELL)
+RED_BUILDING = BaseMapCell('', '#', libtcod.Color(200, 0, 0), BLOCK_CELL)

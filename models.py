@@ -1,6 +1,5 @@
 from __future__ import division
 from maps.map_renderer import *
-from map_loader import MapLoader
 import data
 import math
 import random
@@ -135,17 +134,12 @@ class Player():
             self.coords = (x, y)
             causes_encounter = False
 
-            if self.map.tiles[y][x].exit_location != None:
-                location_area = self.static_game_data.location_areas[self.map.tiles[y][x].exit_location]
-                self.map = Map(location_area, MapLoader.map_from_location_area_id(location_area))
-                self.steps_in_long_grass_since_encounter = 0
-            else:
-                if self.get_cell().base_cell == LONG_GRASS:
-                    self.steps_in_long_grass_since_encounter += 1
+            if self.get_cell().base_cell == LONG_GRASS:
+                self.steps_in_long_grass_since_encounter += 1
 
-                    causes_encounter = self._causes_encounter()
-                else:
-                    self.steps_in_long_grass_since_encounter = 0
+                causes_encounter = self._causes_encounter()
+            else:
+                self.steps_in_long_grass_since_encounter = 0
 
             return True, causes_encounter
         else:
@@ -159,6 +153,7 @@ class GameData():
     def __init__(self):
         self.is_in_battle = True
         self.battle_data = None
+        self.player = None
         
 class BattleData():
 
@@ -270,6 +265,6 @@ class Move():
         
 class Map():
     
-    def __init__(self, location_area, tiles):
+    def __init__(self, name, tiles):
+        self.name = name
         self.tiles = tiles
-        self.location_area = location_area
