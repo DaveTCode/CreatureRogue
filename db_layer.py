@@ -1,6 +1,7 @@
 import sys
 import sqlite3
 from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate, MoveTarget, Location, LocationArea, Region, Encounter
+import data
 import settings
 
 class Loader():
@@ -162,15 +163,17 @@ class Loader():
         
         for species_id, creature_id, pokedex_number, name, height, weight, base_exp, color_id, growth_rate_id, flavor_text, genus in cur.fetchall():
             types_cur = conn.cursor()
-            types_cur.execute('SELECT type_id FROM pokemon_types WHERE pokemon_id = ' + str(creature_id))
+            types_cur.execute('SELECT type_id FROM pokemon_types WHERE pokemon_id = {0}'.format(creature_id))
             species_types = [types[row[0]] for row in types_cur]
             
             stats_cur = conn.cursor()
-            stats_cur.execute('SELECT stat_id, base_stat FROM pokemon_stats INNER JOIN stats ON stats.id = pokemon_stats.stat_id WHERE pokemon_id = ' + str(creature_id))
+            stats_cur.execute('SELECT stat_id, base_stat FROM pokemon_stats INNER JOIN stats ON stats.id = pokemon_stats.stat_id WHERE pokemon_id = {0}'.format(creature_id))
             species_stats = {stats[row[0]]: row[1] for row in stats_cur}
+            species_stats[stats[data.EVASION_STAT]] = 1
+            species_stats[stats[data.ACCURACY_STAT]] = 1
             
             moves_cur = conn.cursor()
-            moves_cur.execute('SELECT move_id, level FROM pokemon_moves WHERE pokemon_move_method_id=1 AND pokemon_id=' + str(creature_id) + ' AND version_group_id = ' + str(settings.VERSION_GROUP_ID))
+            moves_cur.execute('SELECT move_id, level FROM pokemon_moves WHERE pokemon_move_method_id=1 AND pokemon_id={0} AND version_group_id = {1}'.format(creature_id, settings.VERSION_GROUP_ID))
             level_moves = {n:[] for n in range(1,101)}
             for move_id, level in moves_cur.fetchall():
                 level_moves[level].append(moves[move_id])

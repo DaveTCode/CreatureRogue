@@ -13,12 +13,7 @@ class BattleCreature():
 
     def __init__(self, creature, static_game_data):
         self.creature = creature
-        self.stats = {stat: self.creature.species.base_stats[stat] for stat in self.creature.species.base_stats}
-        self.stats[static_game_data.stat(data.ACCURACY_STAT)] = 1
-        self.stats[static_game_data.stat(data.EVASION_STAT)] = 1
-        self.stat_adjusts = {stat: 0 for stat in self.creature.species.base_stats}
-        self.stat_adjusts[static_game_data.stat(data.ACCURACY_STAT)] = 0
-        self.stat_adjusts[static_game_data.stat(data.EVASION_STAT)] = 0
+        self.stat_adjusts = {stat: 0 for stat in self.creature.stats}
         
     def adjust_stat_adjusts(self, stat, value):
         '''
@@ -45,7 +40,7 @@ class BattleCreature():
             
             These factors are fixed and are capped at 1/4 to 4.
         '''
-        return self.stats[stat] * BattleCreature.stat_adjust_factors[self.stat_adjusts[stat]]
+        return self.creature.stats[stat] * BattleCreature.stat_adjust_factors[self.stat_adjusts[stat]]
 
 class Creature():
     
@@ -60,6 +55,7 @@ class Creature():
         self.moves = moves
         self.stats = {stat: self.max_stat(stat) for stat in species.base_stats}
         self.current_xp = current_xp
+        self.fainted = False
         
     def adjust_stat(self, stat, delta):
         self.stats[stat] = self.stats[stat] - delta
@@ -96,6 +92,16 @@ class Creature():
             xp = xp * 1.5
         
         return int(xp)
+
+    def in_battle_name(self):
+        '''
+            When describing the creature in battle (e.g. to say "Wild pikachu 
+            fainted!") this is the name used.
+        '''
+        if self.trainer:
+            return u"{0}'s {1}".format(self.trainer.name, self.nickname)
+        else:
+            return u"Wild {0}".format(self.nickname)
         
 class Player():
 
@@ -108,12 +114,28 @@ class Player():
         self.steps_in_long_grass_since_encounter = 0
         self.static_game_data = static_game_data
         
+    def get_location_area(self):
+        '''
+            The location area of a player is determined by the x, y coordinates 
+            and the static game data.
+        '''
+        x, y = self.coords
+        location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x, y)
+
+        if location_area_id != None:
+            location_area = self.static_game_data.location_areas[location_area_id]
+
+            return location_area
+
+        return None
+
     def _can_traverse(self, cell):
         # TODO - Only really check that the cell is always travesable at the moment
         return cell.base_cell.cell_passable_type == EMPTY_CELL
 
     def _causes_encounter(self):
-        encounter_rate = 100 if self.location_area.rate > 100 else self.location_area.rate
+        location_area = self.get_location_area()
+        encounter_rate = min(100, location_area.walk_encounter_rate)
 
         if 8 - encounter_rate // 10 < self.steps_in_long_grass_since_encounter:
             if random.random() < 0.95:
@@ -179,14 +201,14 @@ class Move():
         messages = []
     
         if self.pp <= 0:
-            messages.append('Not enough points to perform ' + self.move_data.name)
+            messages.append(u"Not enough points to perform {0}".format(self.move_data.name))
         else:
-            messages.append(attacking_creature.creature.nickname + ' used ' + self.move_data.name)
-            self.pp = self.pp - 1
+            messages.append(u"{0} used {1}".format(attacking_creature.creature.in_battle_name(), self.move_data.name))
+            self.pp -= 1
         
             # Check if the move misses
             if not self._hit_calculation(attacking_creature, defending_creature):
-                messages.append(attacking_creature.creature.nickname + "'s attack missed!")
+                messages.append(u"{0}'s attack missed!".format(attacking_creature.creature.in_battle_name()))
             else:
                 # TODO: Missing the "specific-move" target and only considering 1v1 battles.
                 target = None
@@ -202,35 +224,39 @@ class Move():
                         for message in new_messages:
                             messages.append(message)
                             
-                        target.creature.adjust_stat(static_game_data.stat(data.HP_STAT), hp_loss)
+                        hp_stat = static_game_data.stat(data.HP_STAT)
+                        target.creature.adjust_stat(hp_stat, hp_loss)
+
+                        if target.stat_value(hp_stat) <= 0:
+                            target.creature.fainted = True
+                            messages.append(u"{0} fainted!".format(target.creature.in_battle_name()))
                         
                     if self.move_data.stat_change_move():
                         for stat in self.move_data.stat_changes:
-                            # Returns the amount by which the stat was adjusted
                             adjust_amount = target.adjust_stat_adjusts(stat, self.move_data.stat_changes[stat])
+
                             if adjust_amount == 0 and self.move_data.stat_changes[stat] != 0 and not self.move_data.damage_move():
                                 direction = 'higher' if self.move_data.stat_changes[stat] > 0 else 'lower'
-                                messages.append('{0}\'s {1} won\'t go any {2}!'.format(target.creature.nickname, stat.name, direction))
+                                messages.append(u"{0}'s {1} won't go any {2}!".format(target.creature.in_battle_name(), stat.name, direction))
                             elif adjust_amount == 1:
-                                messages.append('{0}\'s {1} rose!'.format(target.creature.nickname, stat.name))
+                                messages.append(u"{0}'s {1} rose!".format(target.creature.in_battle_name(), stat.name))
                             elif adjust_amount == 2:
-                                messages.append('{0}\'s {1} sharply rose!'.format(target.creature.nickname, stat.name))
+                                messages.append(u"{0}'s {1} sharply rose!".format(target.creature.in_battle_name(), stat.name))
                             elif adjust_amount > 2:
-                                messages.append('{0}\'s {1} rose drastically!'.format(target.creature.nickname, stat.name))
+                                messages.append(u"{0}'s {1} rose drastically!".format(target.creature.in_battle_name(), stat.name))
                             elif adjust_amount == -1:
-                                messages.append('{0}\'s {1} fell!'.format(target.creature.nickname, stat.name))
+                                messages.append(u"{0}'s {1} fell!".format(target.creature.in_battle_name(), stat.name))
                             elif adjust_amount == -2:
-                                messages.append('{0}\'s {1} harshly fell!'.format(target.creature.nickname, stat.name))
+                                messages.append(u"{0}'s {1} harshly fell!".format(target.creature.in_battle_name(), stat.name))
                             elif adjust_amount < -2:
-                                messages.append('{0}\'s {1} severely fell!'.format(target.creature.nickname, stat.name))
+                                messages.append(u"{0}'s {1} severely fell!".format(target.creature.in_battle_name(), stat.name))
                     
         return messages
                 
     def _hit_calculation(self, attacking_creature, defending_creature):
         p = self.move_data.base_accuracy / 100 * (attacking_creature.stat_value(self.move_data.accuracy_stat) / defending_creature.stat_value(self.move_data.evasion_stat))
-        r = random.random()
         
-        return r < p
+        return random.random() < p
     
     def _damage_calculation(self, attacking_creature, defending_creature, type_chart):
         '''
@@ -253,13 +279,13 @@ class Move():
         
         messages = []
         if critical_modifier > 1:
-            messages.append('Critical hit!')
+            messages.append("Critical hit!")
         if type_modifier == 0:
-            messages.append('The attack had no effect!')
+            messages.append("The attack had no effect!")
         elif type_modifier < 0.9:
-            messages.append('The attack was not very effective')
+            messages.append("The attack was not very effective")
         elif type_modifier > 1.1:
-            messages.append('The attack was super effective!')
+            messages.append("The attack was super effective!")
             
         return messages, int((((2 * attacking_creature.creature.level + 10) / 250) * (attack_stat_value / defence_stat_value) * self.move_data.base_attack + 2) * modifier)
         

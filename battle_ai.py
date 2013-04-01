@@ -11,6 +11,11 @@ class RandomMoveAi():
 
     def select_move(self, moves):
         '''
-            Will break if no move has PP > 0. Need to fix at some point.
+            Should use struggle if the creature has no moves. Just doesn't 
+            select a move for now.
         '''
-        return choice(filter(lambda move: move.pp > 0, self.battle_creature.creature.moves))
+        pp_moves = filter(lambda move: move.pp > 0, self.battle_creature.creature.moves)
+        if len(pp_moves) == 0:
+            return None
+
+        return choice(pp_moves)

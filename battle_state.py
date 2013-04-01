@@ -10,6 +10,7 @@ class BattleState():
         self.game_data = game_data
         self.game = game
         self.messages = collections.deque()
+        self.end_battle = False
 
     def handle_input(self, key):
         '''
@@ -21,6 +22,11 @@ class BattleState():
         if len(self.messages) > 0:
             if key.vk == libtcod.KEY_SPACE or key.vk == libtcod.KEY_ENTER:
                 self.messages.popleft()
+
+                # The battle will only be closed when there are no messages 
+                # left on the queue.
+                if len(self.messages) == 0 and self.end_battle:
+                    self.game.end_wild_battle()
         else:
             move = None
             for key_code, index in [(libtcod.KEY_1, 0), (libtcod.KEY_2, 1), (libtcod.KEY_3, 2), (libtcod.KEY_4, 3)]:
@@ -48,12 +54,23 @@ class BattleState():
                         second_move = (move, battle_data.player_creature, battle_data.defending_creature())
 
                 for move, aggressor, defender in [first_move, second_move]:
-                    messages = move.act(aggressor, defender, self.game.static_game_data)
-                    
-                    for message in messages:
-                        self.messages.append(message)
+                    # The move can actually be None if there were no valid 
+                    # moves to select from.
+                    if move:
+                        messages = move.act(aggressor, defender, self.game.static_game_data)
+                        
+                        for message in messages:
+                            self.messages.append(message)
 
-                    # TODO - Check battle state now.
+                        # Check the state of the creatures, we don't end the battle 
+                        # immediately because we still want to process any 
+                        # remaining messages.
+                        #
+                        # We do need to break out though so that the fainted 
+                        # creature can't have it's turn.
+                        if aggressor.creature.fainted or defender.creature.fainted:
+                            self.end_battle = True
+                            break
 
     def render(self):
         '''

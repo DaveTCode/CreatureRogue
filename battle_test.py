@@ -5,12 +5,7 @@ from battle_state import BattleState
 from battle_ai import RandomMoveAi
 import settings
 import libtcodpy as libtcod
-
-def random_stat_values(stats, min, max):
-    return {stats[stat]: random.randint(min, max) for stat in stats}
-    
-def zero_stat_values(stats):
-    return {stats[stat]: 0 for stat in stats}
+import creature_creator
 
 if __name__ == "__main__":
     game = Game(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, settings.TITLE, settings.FONT)
@@ -30,12 +25,11 @@ if __name__ == "__main__":
     print("You've selected a: Lv." + str(defending_level) + " " + str(defending_species))
     
     attacking_moves = [Move(move_data) for move_data in attacking_species.move_data_at_level(attacking_level)]
-    defending_moves = [Move(move_data) for move_data in defending_species.move_data_at_level(defending_level)]
 
-    wild_creature = BattleCreature(Creature(defending_species, defending_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, defending_moves, 1), game.static_game_data)
+    wild_creature = BattleCreature(creature_creator.create_wild_creature(game.static_game_data, defending_species, defending_level), game.static_game_data)
 
     game_data.battle_data = BattleData(game_data, 
-                                       BattleCreature(Creature(attacking_species, attacking_level, None, None, random_stat_values(game.static_game_data.stats, 1, 15), zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data),
+                                       BattleCreature(Creature(attacking_species, attacking_level, None, None, creature_creator.random_stat_values(game.static_game_data.stats, 1, 15), creature_creator.zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data),
                                        RandomMoveAi(wild_creature),
                                        wild_creature=wild_creature)
     

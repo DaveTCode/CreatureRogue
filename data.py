@@ -11,6 +11,18 @@ SPEED_STAT = 6
 ACCURACY_STAT = 7
 EVASION_STAT = 8
 
+def load_location_area_rects(rects_file_name):
+    '''
+        Will probably move this elsewhere at some point.
+    '''
+    rects = LocationAreaRectCollection()
+    with open(rects_file_name) as rects_file:
+        for line in rects_file:
+            location_area_id, x1, y1, x2, y2 = map(int, line.strip().split(','))
+            rects.add_location_area_rect(LocationAreaRect(location_area_id, x1, y1, x2, y2))
+
+    return rects
+
 class StaticGameData():
     def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas):
         self.species = species
@@ -28,6 +40,39 @@ class StaticGameData():
     def stat(self, stat):
         return self.stats[stat]
         
+class LocationAreaRectCollection():
+    '''
+        This exists as a separate collection so that we could speed up 
+        searching by location using better data structures if required.
+
+        To facilitate this all access must be through accessor functions
+        not to data directly.
+    '''
+
+    def __init__(self):
+        self.by_id = {}
+
+    def add_location_area_rect(self, rect):
+        self.by_id[rect.location_area_id] = rect
+
+    def get_location_area_by_position(self, x, y):
+        for location_area_id, rect in self.by_id.iteritems():
+            if x >= rect.x1 and x <= rect.x2 and y >= rect.y1 and y <= rect.y2:
+                return location_area_id
+
+        return None
+
+class LocationAreaRect():
+    def __init__(self, location_area_id, x1, y1, x2, y2):
+        self.location_area_id = location_area_id
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
+    def __str__(self):
+        return "{0} - ({1},{2}),({3},{4})".format(self.location_area_id, self.x1, self.y1, self.x2, self.y2)
+
 class Stat():
     
     def __init__(self, name):
@@ -45,7 +90,7 @@ class Color():
         self.b = b
         
     def __str__(self):
-        return self.name + "(" + str(self.r) + "," + str(self.g) + "," + str(self.b) + ")"
+        return "{0} - ({1},{2},{3})".format(self.name, self.r, self.g, self.b)
         
 class GrowthRate():
     def __init__(self, name):

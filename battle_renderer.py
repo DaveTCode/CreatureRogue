@@ -90,7 +90,7 @@ class BattleRenderer():
         '''
         hp_stat = self.game.static_game_data.stat(data.HP_STAT)
         current = creature.current_stat(hp_stat)
-        max = creature.current_stat(hp_stat)
+        max = creature.max_stat(hp_stat)
         
         libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
         libtcod.console_print(self.console, x, y, str(current) + "/" + str(max))

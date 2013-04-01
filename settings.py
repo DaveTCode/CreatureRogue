@@ -8,6 +8,7 @@ TITLE = 'Creature Rogue'
 FONT = 'terminal16x16_gs_ro.png'
 
 DB_FILE = 'pokedex.db3'
+LOCATION_AREA_RECTS_FILE = 'location_area_rects.txt'
 
 # Colors
 BACKGROUND_COLOR = libtcod.Color(0, 0, 0)
