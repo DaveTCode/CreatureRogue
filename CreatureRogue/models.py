@@ -24,10 +24,7 @@ class BattleCreature():
         old_val = self.stat_adjusts[stat]
         self.stat_adjusts[stat] += value
         
-        if self.stat_adjusts[stat] > 6:
-            self.stat_adjusts[stat] = 6
-        elif self.stat_adjusts[stat] < -6:
-            self.stat_adjusts[stat] = -6
+        self.stat_adjusts[stat] = max(-6, min(6, self.stat_adjusts[stat]))
             
         return self.stat_adjusts[stat] - old_val
         
@@ -67,15 +64,21 @@ class Creature():
     def current_stat(self, stat):
         return self.stats[stat]
         
-    def max_stat(self, stat):
+    def max_stat(self, stat, level=None):
         '''
             The stat value of a creature is a function of it's level, species,
             IVs and EVs and differs slightly for hitpoints and normal stats.
+
+            Can optionally pass in a level to calculate what the stats were at
+            a particular level.
         '''
+        if level == None:
+            level = self.level
+
         if stat.name.upper() == "HP":
-            value = (self.individual_values[stat] + self.species.base_stats[stat] + math.sqrt(self.effort_values[stat]) / 8 + 50) * self.level / 50 + 10
+            value = (self.individual_values[stat] + self.species.base_stats[stat] + math.sqrt(self.effort_values[stat]) / 8 + 50) * level / 50 + 10
         else:
-            value = (self.individual_values[stat] + self.species.base_stats[stat] + math.sqrt(self.effort_values[stat]) / 8) * self.level / 50 + 5
+            value = (self.individual_values[stat] + self.species.base_stats[stat] + math.sqrt(self.effort_values[stat]) / 8) * level / 50 + 5
             
         return int(value)
         
@@ -85,10 +88,31 @@ class Creature():
             defeating this creature.
         '''
         xp_given = self.species.base_xp_yield * winner_modifier * self.level / (7 * number_winners)
-        if self.trainer != None or winner_traded:
+        if winner_traded:
+            xp_given *= 1.5
+        if self.trainer != None:
             xp_given *= 1.5
         
         return int(xp_given)
+
+    def add_xp(self, xp_lookup, xp):
+        '''
+            Increases the pokemon experience points. This can also cause a 
+            level up to occur.
+
+            Returns messages indicating what has happened to be displayed by
+            whatever calls this function.
+        '''
+        self.current_xp += xp
+        old_level = self.level
+        self.level = self.species.level(xp_lookup, self.current_xp)
+
+        messages = [u"{0} gains {1} experience".format(self.in_battle_name(), xp)]
+
+        if old_level != self.level:
+            messages.append(u"{0} is now level {1}!".format(self.in_battle_name(), self.level))
+
+        return messages
 
     def in_battle_name(self):
         '''
@@ -187,7 +211,7 @@ class BattleData():
         return self.trainer_creature if self.trainer_creature != None else self.wild_creature
 
     def computer_move(self):
-        return self.computer_ai.select_move(self.defending_creature().creature.moves)
+        return self.computer_ai.select_move()
             
 class Move():
     def __init__(self, move_data):

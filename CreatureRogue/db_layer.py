@@ -51,7 +51,7 @@ class Loader():
             if conn:
                 conn.close()
             
-        return data.StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas)
+        return data.StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup)
 
     def _load_stats(self, conn):
         stats = {}
@@ -84,14 +84,14 @@ class Loader():
         return growth_rates
         
     def _load_xp_lookup(self, conn, growth_rates):
-        xp_lookup = {}
+        xp_lookup = { growth_rates[growth_rate_id]: {} for growth_rate_id in growth_rates }
         cur = conn.cursor()
         cur.execute('SELECT growth_rate_id, level, experience FROM experience ORDER BY growth_rate_id, level')
         
         for growth_rate_id, level, xp in cur.fetchall():
-            xp_lookup[growth_rates[growth_rate_id]] = (level, xp)
+            xp_lookup[growth_rates[growth_rate_id]][level] = xp
             
-        return xp_lookup
+        return data.XpLookup(xp_lookup)
         
     def _load_move_targets(self, conn):
         targets = {}

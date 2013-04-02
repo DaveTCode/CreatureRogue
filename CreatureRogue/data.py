@@ -27,7 +27,7 @@ def load_location_area_rects(rects_file_name):
     return rects
 
 class StaticGameData():
-    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas):
+    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup):
         self.species = species
         self.types = types
         self.type_chart = type_chart
@@ -39,6 +39,7 @@ class StaticGameData():
         self.regions = regions
         self.locations = locations
         self.location_areas = location_areas
+        self.xp_lookup = xp_lookup
         
     def stat(self, stat):
         return self.stats[stat]
@@ -120,14 +121,16 @@ class XpLookup():
         self.xp_map = xp_map
         
     def level_at_xp(self, species, xp):
+        '''
+            The level that a creature is when it has exactly xp amount of 
+            experience is determined by the species growth rate and some static
+            data which is checked here.
+        '''
         level_xps = self.xp_map[species.growth_rate]
         
-        prev_xp = 0
-        for level_xp in level_xps:
-            if xp > prev_xp and xp < level_xp[1]:
-                return level_xp[0]
-            
-            prev_xp = level_xp[1]
+        for level, level_xp in level_xps.iteritems():
+            if xp < level_xp:
+                return level
 
         return 0
         
@@ -183,8 +186,7 @@ class Species():
         
     def level(self, xp_loader, current_xp):
         '''
-            The level of a species is determined solely by its current xp so
-            we don't store the data directly.
+            The level of a species is determined solely by its current xp.
         '''
         return xp_loader.level_at_xp(self, current_xp)
     

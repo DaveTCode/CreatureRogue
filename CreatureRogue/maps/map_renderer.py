@@ -30,7 +30,7 @@ class MapRenderer():
         
     def render(self, player):
         self._centre_map_on_player(player)
-        self._render_map(player.map)
+        self._render_map(player.map_data)
         self._render_player(player)
 
     def _centre_map_on_player(self, player):

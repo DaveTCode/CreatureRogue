@@ -1,10 +1,16 @@
-import random
+'''
+    Script used to test the battle state functionality. Allows the user to pick
+    a pair of creatures and then uses the game loop to fight them.
+
+    Will probably crash when the battle concludes because the rest of the game
+    will not be set up at that point.
+'''
+
 from CreatureRogue.game import Game
 from CreatureRogue.models import GameData, BattleData, Creature, Move, BattleCreature
 from CreatureRogue.battle_state import BattleState
 from CreatureRogue.battle_ai import RandomMoveAi
-import CreatureRogue.settings
-import CreatureRogue.libtcodpy as libtcod
+import CreatureRogue.settings as settings
 import CreatureRogue.creature_creator as creature_creator
 
 if __name__ == "__main__":

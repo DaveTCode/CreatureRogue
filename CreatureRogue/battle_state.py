@@ -45,8 +45,7 @@ class BattleState():
                     first_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
                     second_move = (move, battle_data.player_creature, battle_data.defending_creature())
                 else:
-                    r = random.randint(0, 1)
-                    if r == 0:
+                    if random.randint(0, 1) == 0:
                         first_move = (move, battle_data.player_creature, battle_data.defending_creature())
                         second_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
                     else:
@@ -68,9 +67,28 @@ class BattleState():
                         #
                         # We do need to break out though so that the fainted 
                         # creature can't have it's turn.
+                        if defender.creature.fainted:
+                            self._creature_fainted(aggressor, defender)
+
                         if aggressor.creature.fainted or defender.creature.fainted:
                             self.end_battle = True
                             break
+
+    def _creature_fainted(self, aggressor, defender):
+        '''
+            Called when a creature faints during battle. Used to add experience 
+            to the winner and check for level ups.
+        '''
+        xp_given = defender.creature.xp_given(1, False)
+
+        old_level = aggressor.creature.level
+        messages = aggressor.creature.add_xp(self.game.static_game_data.xp_lookup, xp_given)
+
+        for message in messages:
+            self.messages.append(message)
+
+        if old_level != aggressor.creature.level:
+            pass # TODO: Need to decide how to tell the game it needs to render a level up.
 
     def render(self):
         '''
