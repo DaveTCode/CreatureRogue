@@ -1,8 +1,11 @@
+'''
+    The db layer module is used to load information from the static database
+    data into a static data object. Acts as an ORM.
+'''
 import sys
 import sqlite3
-from data import Type, Species, TypeChart, StaticGameData, MoveData, Stat, Color, GrowthRate, MoveTarget, Location, LocationArea, Region, Encounter
-import data
-import settings
+import CreatureRogue.data as data
+import CreatureRogue.settings as settings
 
 class Loader():
     def __init__(self, db_file):
@@ -41,22 +44,22 @@ class Loader():
             regions = self._load_regions(conn)
             locations = self._load_locations(conn, regions)
             location_areas = self._load_location_areas(conn, locations, species)
-        except sqlite3.Error as e:
-            print "An error occurred: ", e.args[0]
+        except sqlite3.Error as err:
+            print "An error occurred: ", err.args[0]
             sys.exit(1)
         finally:
             if conn:
                 conn.close()
             
-        return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas)
+        return data.StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas)
 
     def _load_stats(self, conn):
         stats = {}
         cur = conn.cursor()
-        cur.execute('SELECT id, name FROM stats INNER JOIN stat_names ON stats.id = stat_names.stat_id WHERE local_language_id=' + str(settings.LOCAL_LANGUAGE_ID))
+        cur.execute('SELECT id, name FROM stats INNER JOIN stat_names ON stats.id = stat_names.stat_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, name in cur.fetchall():
-            stats[id] = Stat(name)
+        for stat_id, name in cur.fetchall():
+            stats[stat_id] = data.Stat(name)
             
         return stats
         
@@ -65,8 +68,8 @@ class Loader():
         cur = conn.cursor()
         cur.execute('SELECT id, name, red, green, blue FROM pokemon_colors INNER JOIN pokemon_color_names ON pokemon_colors.id = pokemon_color_names.pokemon_color_id WHERE local_language_id=' + str(settings.LOCAL_LANGUAGE_ID))
         
-        for id, name, red, green, blue in cur.fetchall():
-            colors[id] = Color(name, red, green, blue)
+        for color_id, name, red, green, blue in cur.fetchall():
+            colors[color_id] = data.Color(name, red, green, blue)
             
         return colors
         
@@ -75,8 +78,8 @@ class Loader():
         cur = conn.cursor()
         cur.execute('SELECT id, identifier FROM growth_rates')
         
-        for id, name in cur.fetchall():
-            growth_rates[id] = GrowthRate(name)
+        for gr_id, name in cur.fetchall():
+            growth_rates[gr_id] = data.GrowthRate(name)
             
         return growth_rates
         
@@ -95,18 +98,18 @@ class Loader():
         cur = conn.cursor()
         cur.execute('SELECT id, identifier, name, description FROM move_targets INNER JOIN move_target_prose ON id = move_target_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, identifier, name, description in cur.fetchall():
-            targets[id] = MoveTarget(identifier, name, description)
+        for mt_id, identifier, name, description in cur.fetchall():
+            targets[mt_id] = data.MoveTarget(identifier, name, description)
             
         return targets
     
     def _load_types(self, conn):
         types = {}
         cur = conn.cursor()
-        cur.execute('SELECT types.id, name FROM types INNER JOIN type_names ON type_id = types.id WHERE local_language_id=' + str(settings.LOCAL_LANGUAGE_ID))
+        cur.execute('SELECT types.id, name FROM types INNER JOIN type_names ON type_id = types.id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, name in cur.fetchall():
-            types[id] = Type(name)
+        for type_id, name in cur.fetchall():
+            types[type_id] = data.Type(name)
             
         return types
     
@@ -124,14 +127,14 @@ class Loader():
                 
             chart[damage_type][target_type] = int(damage_factor)
             
-        return TypeChart(chart)
+        return data.TypeChart(chart)
     
     def _load_moves(self, conn, types, stats, move_targets):
         moves = {}
         cur = conn.cursor()
         cur.execute('SELECT * FROM move_data')
         
-        for id, name, pp, type_id, power, damage_class_id, accuracy, min_hits, max_hits, target_id in cur.fetchall():
+        for move_id, name, pp, type_id, power, damage_class_id, accuracy, min_hits, max_hits, target_id in cur.fetchall():
             if damage_class_id == 2: # Physical
                 attack_stat = stats[2]
                 defense_stat = stats[3]
@@ -146,13 +149,13 @@ class Loader():
             evasion_stat = stats[8]
             
             stat_cur = conn.cursor()
-            stat_cur.execute('SELECT stat_id, change FROM move_meta_stat_changes WHERE move_id = ' + str(id))
+            stat_cur.execute('SELECT stat_id, change FROM move_meta_stat_changes WHERE move_id = {0}'.format(move_id))
             
             stat_effects = {stats[stat]: 0 for stat in stats}
             for stat_id, change in stat_cur.fetchall():
                 stat_effects[stats[stat_id]] = change
                 
-            moves[id] = MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects, attack_stat, defense_stat, accuracy_stat, evasion_stat, move_targets[target_id])
+            moves[move_id] = data.MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects, attack_stat, defense_stat, accuracy_stat, evasion_stat, move_targets[target_id])
             
         return moves
 
@@ -174,11 +177,11 @@ class Loader():
             
             moves_cur = conn.cursor()
             moves_cur.execute('SELECT move_id, level FROM pokemon_moves WHERE pokemon_move_method_id=1 AND pokemon_id={0} AND version_group_id = {1}'.format(creature_id, settings.VERSION_GROUP_ID))
-            level_moves = {n:[] for n in range(1,101)}
+            level_moves = {n:[] for n in range(1, 101)}
             for move_id, level in moves_cur.fetchall():
                 level_moves[level].append(moves[move_id])
                 
-            species[species_id] = Species(pokedex_number, name, height, weight, species_types, species_stats, base_exp, growth_rates[growth_rate_id], name[0:1], colors[color_id], level_moves, flavor_text, genus)
+            species[species_id] = data.Species(pokedex_number, name, height, weight, species_types, species_stats, base_exp, growth_rates[growth_rate_id], name[0:1], colors[color_id], level_moves, flavor_text, genus)
             
         return species
         
@@ -187,8 +190,8 @@ class Loader():
         cur = conn.cursor()
         cur.execute('SELECT id, identifier, name FROM regions INNER JOIN region_names ON regions.id = region_names.region_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, identifier, name in cur.fetchall():
-            regions[id] = Region(identifier, name)
+        for region_id, identifier, name in cur.fetchall():
+            regions[region_id] = data.Region(identifier, name)
             
         return regions
         
@@ -197,8 +200,8 @@ class Loader():
         cur = conn.cursor()
         cur.execute('SELECT id, identifier, name, region_id FROM locations INNER JOIN location_names ON locations.id = location_names.location_id WHERE local_language_id={0} AND NOT region_id IS NULL'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, identifier, name, region_id in cur.fetchall():
-            locations[id] = Location(identifier, name, regions[region_id])
+        for location_id, identifier, name, region_id in cur.fetchall():
+            locations[location_id] = data.Location(identifier, name, regions[region_id])
             
         return locations
         
@@ -207,9 +210,9 @@ class Loader():
         cur = conn.cursor()
         cur.execute('SELECT location_areas.id, location_areas.identifier, location_area_prose.name, location_areas.location_id FROM location_areas INNER JOIN location_area_prose ON location_areas.id = location_area_prose.location_area_id WHERE NOT location_areas.location_id IS NULL AND local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for id, identifier, name, location_id in cur.fetchall():
+        for area_id, identifier, name, location_id in cur.fetchall():
             rate_cur = conn.cursor()
-            rate_cur.execute('SELECT encounter_method_id, rate FROM location_area_encounter_rates WHERE version_id = (SELECT MAX(version_id) FROM location_area_encounter_rates WHERE location_area_id = {0}) AND location_area_id = {0}'.format(id))
+            rate_cur.execute('SELECT encounter_method_id, rate FROM location_area_encounter_rates WHERE version_id = (SELECT MAX(version_id) FROM location_area_encounter_rates WHERE location_area_id = {0}) AND location_area_id = {0}'.format(area_id))
 
             walk_encounter_rate = 0
             for method_id, rate in rate_cur.fetchall():
@@ -217,13 +220,13 @@ class Loader():
                     walk_encounter_rate = rate
 
             enc_cur = conn.cursor()
-            enc_cur.execute('SELECT species_id, MIN(min_level), MAX(max_level), MAX(rarity), encounter_method_id FROM encounters INNER JOIN pokemon on pokemon_id = pokemon.id INNER JOIN encounter_slots ON encounter_slots.id = encounters.encounter_slot_id WHERE location_area_id = {0} GROUP BY pokemon_id, encounter_method_id'.format(id))
+            enc_cur.execute('SELECT species_id, MIN(min_level), MAX(max_level), MAX(rarity), encounter_method_id FROM encounters INNER JOIN pokemon on pokemon_id = pokemon.id INNER JOIN encounter_slots ON encounter_slots.id = encounters.encounter_slot_id WHERE location_area_id = {0} GROUP BY pokemon_id, encounter_method_id'.format(area_id))
 
             walk_encs = []
             for species_id, min_level, max_level, rarity, method_id in enc_cur.fetchall():
                 if method_id == 1:
-                    walk_encs.append(Encounter(species[species_id], min_level, max_level, rarity))
+                    walk_encs.append(data.Encounter(species[species_id], min_level, max_level, rarity))
 
-            location_areas[id] = LocationArea(identifier, name, locations[location_id], walk_encs, walk_encounter_rate)
+            location_areas[area_id] = data.LocationArea(identifier, name, locations[location_id], walk_encs, walk_encounter_rate)
             
         return location_areas

@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import CreatureRogue.libtcodpy as libtcod
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50

@@ -1,16 +1,16 @@
-import libtcodpy as libtcod
 import random
-import settings
-from game import Game
-from pokedex_renderer import PokedexRenderer
-from pokedex_state import PokedexState
-from models import Player
+
+import CreatureRogue.settings as settings
+from CreatureRogue.game import Game
+from CreatureRogue.pokedex_renderer import PokedexRenderer
+from CreatureRogue.pokedex_state import PokedexState
+from CreatureRogue.models import Player
 
 def gen_full_pokedex(static_game_data):
     return { static_game_data.species[id].pokedex_number: (2, static_game_data.species[id]) for id in static_game_data.species }
 
 def gen_rand_pokedex(static_game_data):
-    return { static_game_data.species[id].pokedex_number: (random.randint(0,2), static_game_data.species[id]) for id in static_game_data.species }
+    return { static_game_data.species[id].pokedex_number: (random.randint(0, 2), static_game_data.species[id]) for id in static_game_data.species }
 
 if __name__ == "__main__":
     game = Game(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, settings.TITLE, settings.FONT)

@@ -1,7 +1,7 @@
 import collections
-import data
-import libtcodpy as libtcod
 import random
+import CreatureRogue.data as data
+import CreatureRogue.libtcodpy as libtcod
 
 class BattleState():
 

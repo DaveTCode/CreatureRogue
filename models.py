@@ -1,10 +1,9 @@
 from __future__ import division
-from maps.map_renderer import *
-import data
 import math
 import random
-import sys
-import collections
+
+import CreatureRogue.maps.map_renderer as map_renderer
+import CreatureRogue.data as data
 
 class BattleCreature():
     stat_adjust_factors = {-6: 1/4, -5: 2/7, -4: 1/3, -3: 2/5, -2: 1/2, -1: 2/3, 
@@ -85,13 +84,11 @@ class Creature():
             This corresponds to the number of experience points gained for 
             defeating this creature.
         '''
-        xp = self.species.base_xp_yield * winner_modifier * self.level / (7 * number_winners)
-        if self.trainer != None:
-            xp = xp * 1.5
-        if winner_traded:
-            xp = xp * 1.5
+        xp_given = self.species.base_xp_yield * winner_modifier * self.level / (7 * number_winners)
+        if self.trainer != None or winner_traded:
+            xp_given *= 1.5
         
-        return int(xp)
+        return int(xp_given)
 
     def in_battle_name(self):
         '''
@@ -105,11 +102,11 @@ class Creature():
         
 class Player():
 
-    def __init__(self, name, static_game_data, map, x, y):
+    def __init__(self, name, static_game_data, map_data, x, y):
         self.name = name
         self.creatures = []
         self.pokedex = { static_game_data.species[id].pokedex_number: (0, static_game_data.species[id]) for id in static_game_data.species }
-        self.map = map
+        self.map_data = map_data
         self.coords = (x, y)
         self.steps_in_long_grass_since_encounter = 0
         self.static_game_data = static_game_data
@@ -131,7 +128,7 @@ class Player():
 
     def _can_traverse(self, cell):
         # TODO - Only really check that the cell is always travesable at the moment
-        return cell.base_cell.cell_passable_type == EMPTY_CELL
+        return cell.base_cell.cell_passable_type == map_renderer.EMPTY_CELL
 
     def _causes_encounter(self):
         location_area = self.get_location_area()
@@ -152,11 +149,11 @@ class Player():
 
             Returns (whether moved, whether caused a wild encounter)
         '''
-        if self._can_traverse(self.map.tiles[y][x]):
+        if self._can_traverse(self.map_data.tiles[y][x]):
             self.coords = (x, y)
             causes_encounter = False
 
-            if self.get_cell().base_cell == LONG_GRASS:
+            if self.get_cell().base_cell == map_renderer.LONG_GRASS:
                 self.steps_in_long_grass_since_encounter += 1
 
                 causes_encounter = self._causes_encounter()
@@ -168,7 +165,7 @@ class Player():
             return False, None
 
     def get_cell(self):
-        return self.map.tiles[self.coords[1]][self.coords[0]]
+        return self.map_data.tiles[self.coords[1]][self.coords[0]]
         
 class GameData():
         
@@ -272,8 +269,8 @@ class Move():
         critical_modifier = 2 if random.uniform(0, 100) < 6.25 else 1 # TODO: Incomplete - should use items and check whether this is a high critical move etc
         same_type_attack_bonus = 1.5 if self.move_data.type in attacking_creature.creature.species.types else 1
         type_modifier = 1
-        for type in defending_creature.creature.species.types:
-            type_modifier = type_modifier * type_chart.damage_modifier(self.move_data.type, type) / 100
+        for defending_type in defending_creature.creature.species.types:
+            type_modifier = type_modifier * type_chart.damage_modifier(self.move_data.type, defending_type) / 100
             
         modifier = same_type_attack_bonus * type_modifier * critical_modifier # TODO: Incomplete - Ignoring weather effects and other bits
         

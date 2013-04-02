@@ -1,13 +1,11 @@
 import argparse
 
-from maps.map_renderer import MapRenderer
-import maps.kanto as kanto
-from models import Map, Player, Creature, BattleCreature, Move
-from game import Game
-from map_state import MapState
-import settings
-import libtcodpy as libtcod
-import creature_creator
+import CreatureRogue.maps.kanto as kanto
+from CreatureRogue.models import Map, Player, Creature, Move
+from CreatureRogue.game import Game
+from CreatureRogue.map_state import MapState
+import CreatureRogue.settings as settings
+import CreatureRogue.creature_creator as creature_creator
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

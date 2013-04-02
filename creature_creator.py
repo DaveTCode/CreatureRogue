@@ -1,10 +1,24 @@
-import random
-from models import Creature, Move
+'''
+    When creating wild creatures their available moves and stats are able to 
+    be calculated deterministically.
 
-def random_stat_values(stats, min, max):
-    return {stats[stat]: random.randint(min, max) for stat in stats}
+    This module provides a single interface for doing that using 
+    create_wild_creature.
+'''
+import random
+from CreatureRogue.models import Creature, Move
+
+def random_stat_values(stats, min_val, max_val):
+    '''
+        Used to return a set of random values between min, max for
+        all available stats.
+    '''
+    return {stats[stat]: random.randint(min_val, max_val) for stat in stats}
     
 def zero_stat_values(stats):
+    '''
+        Used to return a set of zero values for all stats.
+    '''
     return {stats[stat]: 0 for stat in stats}
 
 def create_wild_creature(static_game_data, species, level):
@@ -13,7 +27,7 @@ def create_wild_creature(static_game_data, species, level):
         deterministic. The only randomization is in the individual individual
         values as these determine any variation from the species base.
     '''
-    moves = map(lambda m: Move(m), species.move_data_at_level(level))
+    moves = [Move(move) for move in species.move_data_at_level(level)]
 
     return Creature(species, 
                     level, 

@@ -1,6 +1,9 @@
+'''
+    The static data which constitutes the game is loaded into objects stored 
+    in this module.
+'''
 from __future__ import division
 import random
-import math
 
 HP_STAT = 1
 ATTACK_STAT = 2
@@ -18,7 +21,7 @@ def load_location_area_rects(rects_file_name):
     rects = LocationAreaRectCollection()
     with open(rects_file_name) as rects_file:
         for line in rects_file:
-            location_area_id, x1, y1, x2, y2 = map(int, line.strip().split(','))
+            location_area_id, x1, y1, x2, y2 = [int(part) for part in line.strip().split(',')]
             rects.add_location_area_rect(LocationAreaRect(location_area_id, x1, y1, x2, y2))
 
     return rects
@@ -53,9 +56,22 @@ class LocationAreaRectCollection():
         self.by_id = {}
 
     def add_location_area_rect(self, rect):
+        '''
+            Adds a new location rectangle to the object, will overwrite any 
+            existing that uses the same location area id.
+        '''
         self.by_id[rect.location_area_id] = rect
 
     def get_location_area_by_position(self, x, y):
+        '''
+            Given x,y map coordinates, this function returns the location 
+            area which covers those.
+
+            Note, that there is currently nothing policing location area
+            overlaps so this will return the first such area.
+
+            If no location area covers these coordinates then returns None.
+        '''
         for location_area_id, rect in self.by_id.iteritems():
             if x >= rect.x1 and x <= rect.x2 and y >= rect.y1 and y <= rect.y2:
                 return location_area_id
@@ -100,11 +116,11 @@ class GrowthRate():
         return self.name
         
 class XpLookup():
-    def __init__(self, map):
-        self.map = map
+    def __init__(self, xp_map):
+        self.xp_map = xp_map
         
-    def level_at_xp(species, xp):
-        level_xps = self.map[species.growth_rate]
+    def level_at_xp(self, species, xp):
+        level_xps = self.xp_map[species.growth_rate]
         
         prev_xp = 0
         for level_xp in level_xps:
@@ -112,6 +128,8 @@ class XpLookup():
                 return level_xp[0]
             
             prev_xp = level_xp[1]
+
+        return 0
         
 class Species():
     
@@ -168,7 +186,7 @@ class Species():
             The level of a species is determined solely by its current xp so
             we don't store the data directly.
         '''
-        return xp_lookup.level_at_xp(self, current_xp)
+        return xp_loader.level_at_xp(self, current_xp)
     
     def __str__(self):
         return self.name
@@ -198,15 +216,14 @@ class TypeChart():
             return 1
             
     def __str__(self):
-        s = ""
+        type_chart_str = ""
     
         for attacking_type in self.chart:
-            s = s + str(attacking_type) + " - "
-            for defending_type in self.chart[attacking_type]:
-                s = s + "(" + str(defending_type) + ":" + str(self.chart[attacking_type][defending_type]) + "),  "
-                
-            s = s + "\n"
-        return s
+            type_chart_str = str(attacking_type) + " - "
+
+            type_chart_str += ",".join(["({0}:{1}), ".format(defending_type, self.chart[attacking_type][defending_type]) for defending_type in self.chart[attacking_type]]) + "\n"
+        
+        return type_chart_str
         
 class MoveTarget():
     
@@ -282,15 +299,18 @@ class LocationArea():
         
     def get_encounter(self):
         '''
+            Select between all of the available encounters in the location area.
 
+            This is a weighted random selection and can return None if there were
+            no encounters available.
         '''
-        total_rarity = reduce(lambda x,y: x + y.rarity, self.walk_encounters, 0)
-        r = random.randint(0, total_rarity if total_rarity == 0 else total_rarity - 1)
+        total_rarity = reduce(lambda x, y: x + y.rarity, self.walk_encounters, 0)
+        rand = random.randint(0, total_rarity if total_rarity == 0 else total_rarity - 1)
 
         total = 0
         for encounter in self.walk_encounters:
             total += encounter.rarity
-            if total > r:
+            if total > rand:
                 return encounter
 
         return None

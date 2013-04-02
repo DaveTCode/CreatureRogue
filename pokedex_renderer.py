@@ -1,6 +1,6 @@
 from __future__ import division
-import libtcodpy as libtcod
-import settings
+import CreatureRogue.libtcodpy as libtcod
+import CreatureRogue.settings as settings
 
 class PokedexRenderer():
     
@@ -102,7 +102,15 @@ class PokedexRenderer():
             libtcod.console_print(self.console, 23, 20, 'Weight: ????.? lbs.')
             
     def calculate_position_of_pokedex_number(self, pokedex_number, left_most_column):
+        '''
+            Given a number in the pokedex this backtracks to find the x, y
+            coordinates in the output.
+        '''
         return pokedex_number // PokedexRenderer.column_height - left_most_column, pokedex_number % PokedexRenderer.column_height
         
     def calculate_pokedex_number_of_position(self, column, row):
+        '''
+            Given x, y coordinates in the output table this returns the 
+            pokedex number of the creature to be found there.
+        '''
         return column * PokedexRenderer.column_height + row + 1

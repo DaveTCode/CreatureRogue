@@ -1,6 +1,6 @@
 from __future__ import division
-import libtcodpy as libtcod
-import settings
+import CreatureRogue.libtcodpy as libtcod
+import CreatureRogue.settings as settings
 
 class MapCell():
 

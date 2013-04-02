@@ -1,19 +1,26 @@
+'''
+    The game module contains the main game loop as well as any code which
+    doesn't yet have a sensible home.
+
+    Correct access is via calling init, load_static_data then game_loop
+'''
+
 from __future__ import division
 import random
 import sys
-import libtcodpy as libtcod
-import data
-import db_layer
-import settings
-from models import GameData, Player, Creature, BattleData, BattleCreature
-from battle_renderer import BattleRenderer
-from maps.map_renderer import MapRenderer
-from pokedex_renderer import PokedexRenderer
-from map_state import MapState
-from battle_state import BattleState
-from pokedex_state import PokedexState
-import creature_creator
-from battle_ai import RandomMoveAi
+import CreatureRogue.libtcodpy as libtcod
+import CreatureRogue.data as data
+import CreatureRogue.db_layer as db_layer
+import CreatureRogue.settings as settings
+from CreatureRogue.models import GameData, BattleData, BattleCreature
+from CreatureRogue.battle_renderer import BattleRenderer
+from CreatureRogue.maps.map_renderer import MapRenderer
+from CreatureRogue.pokedex_renderer import PokedexRenderer
+from CreatureRogue.map_state import MapState
+from CreatureRogue.battle_state import BattleState
+from CreatureRogue.pokedex_state import PokedexState
+import CreatureRogue.creature_creator as creature_creator
+from CreatureRogue.battle_ai import RandomMoveAi
 
 class Game():
     
@@ -23,6 +30,13 @@ class Game():
         self.title = title
         self.font = font
         self.static_game_data = None
+        
+        self.console = None
+        self.state = None
+        self.game_data = None
+        self.battle_renderer = None
+        self.map_renderer = None
+        self.pokedex_renderer = None
 
     def load_static_data(self):
         '''

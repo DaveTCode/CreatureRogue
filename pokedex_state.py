@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import CreatureRogue.libtcodpy as libtcod
 
 class PokedexState():
 

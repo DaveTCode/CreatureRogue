@@ -1,8 +1,7 @@
 from __future__ import division
-import data
-import random
-import settings
-import libtcodpy as libtcod
+import CreatureRogue.data as data
+import CreatureRogue.settings as settings
+import CreatureRogue.libtcodpy as libtcod
 
 class BattleRenderer():
     '''

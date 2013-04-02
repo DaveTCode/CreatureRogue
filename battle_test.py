@@ -1,11 +1,11 @@
 import random
-from game import Game
-from models import GameData, BattleData, Creature, Move, BattleCreature
-from battle_state import BattleState
-from battle_ai import RandomMoveAi
-import settings
-import libtcodpy as libtcod
-import creature_creator
+from CreatureRogue.game import Game
+from CreatureRogue.models import GameData, BattleData, Creature, Move, BattleCreature
+from CreatureRogue.battle_state import BattleState
+from CreatureRogue.battle_ai import RandomMoveAi
+import CreatureRogue.settings
+import CreatureRogue.libtcodpy as libtcod
+import CreatureRogue.creature_creator as creature_creator
 
 if __name__ == "__main__":
     game = Game(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, settings.TITLE, settings.FONT)
