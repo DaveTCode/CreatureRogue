@@ -9,9 +9,9 @@ class PokedexRenderer():
     column_height = settings.SCREEN_HEIGHT - header_height - 2
     width = settings.SCREEN_WIDTH
     
-    def __init__(self, game, console):
+    def __init__(self, game):
         self.game = game
-        self.console = console
+        self.console = libtcod.console_new(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
         
         self.max_rows = self.column_height - 1
         self.max_columns = len(self.game.static_game_data.species) // self.column_height
@@ -24,6 +24,7 @@ class PokedexRenderer():
             was originally set on the class. Doesn't blit back onto the main
             console as this is the job of the caller.
         '''
+        libtcod.console_clear(self.console)
         self._render_lines()
         
         self._render_selection(selected_row, selected_column, left_most_column)
@@ -35,6 +36,8 @@ class PokedexRenderer():
             
             if status > 0:
                 self._render_details_box(species, status)
+
+        return self.console
         
     def _render_lines(self):
         '''
@@ -85,21 +88,21 @@ class PokedexRenderer():
         libtcod.console_set_default_foreground(self.console, settings.POKEDEX_LINE_COLOR)
         libtcod.console_print_frame(self.console, 19, 15, 43, 16) # TODO: Generalise to widths
         
-        libtcod.console_print(self.console, 23, 16, 'No. {0.pokedex_number:0=3d}  {0.name}'.format(species))
+        libtcod.console_print(self.console, 23, 16, u"No. {0.pokedex_number:0=3d}  {0.name}".format(species))
         
         
         if status == 2:
-            libtcod.console_print(self.console, 23, 17, '  {0.genus} Pokemon'.format(species))
-            libtcod.console_print(self.console, 23, 18, 'Type(s): {0}'.format(', '.join(str(t) for t in species.types)))
-            libtcod.console_print(self.console, 23, 19, 'Height: {0}'.format(species.imperial_height_str()))
-            libtcod.console_print(self.console, 23, 20, 'Weight: {0}'.format(species.imperial_weight_str()))
+            libtcod.console_print(self.console, 23, 17, u"  {0.genus} Pokemon".format(species))
+            libtcod.console_print(self.console, 23, 18, u"Type(s): {0}".format(', '.join(str(t) for t in species.types)))
+            libtcod.console_print(self.console, 23, 19, "Height: {0}".format(species.imperial_height_str()))
+            libtcod.console_print(self.console, 23, 20, "Weight: {0}".format(species.imperial_weight_str()))
             
             libtcod.console_print_rect(self.console, 20, 22, 41, 14, species.flavor_text)
         elif status == 1:
-            libtcod.console_print(self.console, 23, 17, '  ????? Pokemon'.format(species))
-            libtcod.console_print(self.console, 23, 18, 'Type(s): ?????')
-            libtcod.console_print(self.console, 23, 19, 'Height: ??\'??"')
-            libtcod.console_print(self.console, 23, 20, 'Weight: ????.? lbs.')
+            libtcod.console_print(self.console, 23, 17, "  ????? Pokemon".format(species))
+            libtcod.console_print(self.console, 23, 18, "Type(s): ?????")
+            libtcod.console_print(self.console, 23, 19, "Height: ??'??\"")
+            libtcod.console_print(self.console, 23, 20, "Weight: ????.? lbs.")
             
     def calculate_position_of_pokedex_number(self, pokedex_number, left_most_column):
         '''

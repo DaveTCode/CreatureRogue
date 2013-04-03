@@ -1,3 +1,10 @@
+'''
+    The battle state is the main state that the game is in when the player is
+    in a battle.
+
+    It is responsible for rendering and input processing.
+'''
+
 import collections
 import random
 import CreatureRogue.data as data
@@ -5,12 +12,14 @@ import CreatureRogue.libtcodpy as libtcod
 
 class BattleState():
 
-    def __init__(self, game, game_data, renderer):
+    def __init__(self, game, game_data, renderer, level_up_renderer):
         self.renderer = renderer
+        self.level_up_renderer = level_up_renderer
         self.game_data = game_data
         self.game = game
         self.messages = collections.deque()
         self.end_battle = False
+        self.display_level_up = None
 
     def handle_input(self, key):
         '''
@@ -22,11 +31,9 @@ class BattleState():
         if len(self.messages) > 0:
             if key.vk == libtcod.KEY_SPACE or key.vk == libtcod.KEY_ENTER:
                 self.messages.popleft()
-
-                # The battle will only be closed when there are no messages 
-                # left on the queue.
-                if len(self.messages) == 0 and self.end_battle:
-                    self.game.end_wild_battle()
+        elif self.display_level_up:
+            if key.vk == libtcod.KEY_SPACE or key.vk == libtcod.KEY_ENTER:
+                self.display_level_up = None
         else:
             move = None
             for key_code, index in [(libtcod.KEY_1, 0), (libtcod.KEY_2, 1), (libtcod.KEY_3, 2), (libtcod.KEY_4, 3)]:
@@ -88,11 +95,21 @@ class BattleState():
             self.messages.append(message)
 
         if old_level != aggressor.creature.level:
-            pass # TODO: Need to decide how to tell the game it needs to render a level up.
+            self.display_level_up = (aggressor, old_level)
 
     def render(self):
         '''
             Render the current state of the battle. Called as many times as 
             required by the game loop.
         '''
-        self.renderer.render(self.game_data.battle_data, self.messages)
+        if len(self.messages) == 0 and self.display_level_up == None and self.end_battle:
+            self.game.end_wild_battle()
+
+        console = self.renderer.render(self.game_data.battle_data, self.messages)
+
+        if len(self.messages) == 0 and self.display_level_up != None:
+            sub_console = self.level_up_renderer.render(self.display_level_up[0].creature, self.display_level_up[1])
+
+            libtcod.console_blit(sub_console, 0, 0, 0, 0, console, 0, 0)
+
+        return console

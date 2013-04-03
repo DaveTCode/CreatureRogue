@@ -56,10 +56,10 @@ class Loader():
     def _load_stats(self, conn):
         stats = {}
         cur = conn.cursor()
-        cur.execute('SELECT id, name FROM stats INNER JOIN stat_names ON stats.id = stat_names.stat_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
+        cur.execute('SELECT id, name, short_name FROM stats INNER JOIN stat_names ON stats.id = stat_names.stat_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
         
-        for stat_id, name in cur.fetchall():
-            stats[stat_id] = data.Stat(name)
+        for stat_id, name, short_name in cur.fetchall():
+            stats[stat_id] = data.Stat(name, short_name)
             
         return stats
         

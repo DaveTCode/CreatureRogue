@@ -40,5 +40,5 @@ if __name__ == "__main__":
                                        wild_creature=wild_creature)
     
     game.game_data = game_data
-    game.state = BattleState(game, game.game_data, game.battle_renderer)
+    game.state = BattleState(game, game.game_data, game.battle_renderer, game.level_up_renderer)
     game.game_loop()

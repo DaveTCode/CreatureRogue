@@ -13,12 +13,14 @@ import CreatureRogue.data as data
 import CreatureRogue.db_layer as db_layer
 import CreatureRogue.settings as settings
 from CreatureRogue.models import GameData, BattleData, BattleCreature
-from CreatureRogue.battle_renderer import BattleRenderer
+from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer
 from CreatureRogue.maps.map_renderer import MapRenderer
 from CreatureRogue.pokedex_renderer import PokedexRenderer
+from CreatureRogue.game_menu_renderer import GameMenuRenderer
 from CreatureRogue.map_state import MapState
 from CreatureRogue.battle_state import BattleState
 from CreatureRogue.pokedex_state import PokedexState
+from CreatureRogue.game_menu_state import InGameMenuState
 import CreatureRogue.creature_creator as creature_creator
 from CreatureRogue.battle_ai import RandomMoveAi
 
@@ -37,6 +39,8 @@ class Game():
         self.battle_renderer = None
         self.map_renderer = None
         self.pokedex_renderer = None
+        self.level_up_renderer = None
+        self.game_menu_renderer = None
 
     def load_static_data(self):
         '''
@@ -63,9 +67,11 @@ class Game():
 
         self.game_data = GameData()
 
-        self.battle_renderer = BattleRenderer(self, self.console)
-        self.map_renderer = MapRenderer(self, self.console)
-        self.pokedex_renderer = PokedexRenderer(self, self.console)
+        self.battle_renderer = BattleRenderer(self)
+        self.map_renderer = MapRenderer(self)
+        self.pokedex_renderer = PokedexRenderer(self)
+        self.level_up_renderer = LevelUpRenderer(self)
+        self.game_menu_renderer = GameMenuRenderer(self)
         
         self.state = MapState(self, self.game_data, self.map_renderer)
     
@@ -78,14 +84,16 @@ class Game():
             libtcod.console_set_default_foreground(self.console, libtcod.white)
             libtcod.console_print_frame(self.console, 0, 0, self.screen_width, self.screen_height)
             
-            self.state.render()
+            output_console = self.state.render()
 
-            libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+            libtcod.console_blit(output_console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
             libtcod.console_flush()
 
             key = libtcod.console_check_for_keypress()
             if key and key.vk != libtcod.KEY_NONE:
                 self.state.handle_input(key)
+
+        self.end_game()
 
     ###########################################################################
     # Below here there are function which transition between game states. This
@@ -119,4 +127,13 @@ class Game():
         self.state = PokedexState(self, self.game_data, self.pokedex_renderer)
 
     def close_pokedex(self):
+        self.state = InGameMenuState(self, self.game_data, self.map_renderer, self.game_menu_renderer)
+
+    def open_menu(self):
+        self.state = InGameMenuState(self, self.game_data, self.map_renderer, self.game_menu_renderer)
+
+    def close_menu(self):
         self.state = MapState(self, self.game_data, self.map_renderer)
+
+    def end_game(self):
+        sys.exit(0)

@@ -21,7 +21,9 @@ class MapState():
             Handles a single key stroke when the player is traversing the map.
         '''
         x_delta, y_delta = 0, 0
-        if key.vk == libtcod.KEY_LEFT:
+        if key.vk == libtcod.KEY_ESCAPE:
+            self.game.open_menu()
+        elif key.vk == libtcod.KEY_LEFT:
             x_delta = -1
         elif key.vk == libtcod.KEY_RIGHT:
             x_delta = 1
@@ -34,7 +36,7 @@ class MapState():
             new_y, new_x = y_delta + self.game_data.player.coords[1], x_delta + self.game_data.player.coords[0]
             
             try:
-                next_cell = self.game_data.player.map.tiles[new_y][new_x]
+                next_cell = self.game_data.player.map_data.tiles[new_y][new_x]
                 
                 moved, caused_wild_encounter = self.game_data.player.move_to_cell(new_x, new_y)
 
@@ -45,7 +47,6 @@ class MapState():
 
     def render(self):
         '''
-            Handles rendering whilst in this state can call off to multiple renderers 
-            depending on sub states.
+            Handles rendering whilst in this state
         '''
-        self.map_renderer.render(self.game_data.player)
+        return self.map_renderer.render(self.game_data.player)

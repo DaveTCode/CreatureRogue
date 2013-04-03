@@ -1,7 +1,55 @@
+'''
+    Module contains all renderers which are used in battle
+'''
 from __future__ import division
 import CreatureRogue.data as data
 import CreatureRogue.settings as settings
 import CreatureRogue.libtcodpy as libtcod
+
+class LevelUpRenderer():
+    '''
+        The level up renderer is used for rendering an overlay on top of the
+        battle renderer indicating stat changes on level up.
+
+        Whilst it's not technically an independent renderer it can still be 
+        used as one if required.
+    '''
+
+    width = 35
+    height = 13
+    
+    def __init__(self, game):
+        self.game = game
+        self.console = libtcod.console_new(LevelUpRenderer.width, LevelUpRenderer.height)
+
+    def render(self, creature, prev_level):
+        '''
+            Returns a full console that can be blitted onto something else
+            anywhere the calling code chooses.
+        '''
+        libtcod.console_clear(self.console)
+        libtcod.console_set_default_background(self.console, settings.LEVEL_UP_BG_COLOR)
+        self._render_lines()
+        self._render_summary(creature, prev_level)
+        self._render_stats(creature, prev_level)
+
+        return self.console
+
+    def _render_lines(self):
+        libtcod.console_print_frame(self.console, 1, 1, LevelUpRenderer.width - 2, LevelUpRenderer.height - 2)
+
+    def _render_summary(self, creature, prev_level):
+        summary_str = "Level {0} -> {1}".format(prev_level, creature.level)
+        libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
+        libtcod.console_print(self.console, 5, 3, summary_str)
+
+    def _render_stats(self, creature, prev_level):
+        libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
+
+        for idx, stat in enumerate([stat for stat in creature.stats if stat.short_name != None and stat.short_name != ""]):
+            stat_str = "{0:7s}: {1:3d} -> {2:3d}".format(stat.short_name, creature.max_stat(stat, level=prev_level), creature.max_stat(stat))
+
+            libtcod.console_print(self.console, 5, 4 + idx, stat_str)
 
 class BattleRenderer():
     '''
@@ -9,9 +57,9 @@ class BattleRenderer():
         
         It renders the entire of the screen.
     '''
-    def __init__(self, game, console):
+    def __init__(self, game):
         self.game = game
-        self.console = console
+        self.console = libtcod.console_new(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
         
     def render(self, battle_data, messages):
         '''
@@ -28,6 +76,8 @@ class BattleRenderer():
         self._render_blank_message_box(40, 34, 40, 16)
         if len(messages):
             self._render_message(messages[0], 40, 38, 40, 12)
+
+        return self.console
         
     def _render_lines(self):
         '''
@@ -44,7 +94,7 @@ class BattleRenderer():
         '''
         libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
         libtcod.console_print(self.console, 3, 5, creature.nickname[:10])
-        libtcod.console_print(self.console, 24, 5, "LV." + str(creature.level))
+        libtcod.console_print(self.console, 24, 5, "LV.{0}".format(creature.level))
         
         self._render_health_bar(creature, 28, 3, 7)
 
@@ -54,7 +104,7 @@ class BattleRenderer():
         '''
         libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
         libtcod.console_print(self.console, 49, 23, creature.nickname[:10])
-        libtcod.console_print(self.console, 60, 23, "LV." + str(creature.level))
+        libtcod.console_print(self.console, 60, 23, "LV.{0}".format(creature.level))
         
         self._render_health_bar(creature, 28, 49, 25)
         self._render_health_values(creature, 70, 27)
@@ -89,10 +139,10 @@ class BattleRenderer():
         '''
         hp_stat = self.game.static_game_data.stat(data.HP_STAT)
         current = creature.current_stat(hp_stat)
-        max = creature.max_stat(hp_stat)
+        max_hp = creature.max_stat(hp_stat)
         
         libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
-        libtcod.console_print(self.console, x, y, str(current) + "/" + str(max))
+        libtcod.console_print(self.console, x, y, "{0}/{1}".format(current, max_hp))
     
     def _render_moves(self, creature, x, y):
         ''' 
@@ -103,10 +153,10 @@ class BattleRenderer():
             if row < len(creature.moves):
                 move = creature.moves[row]
                 
-                libtcod.console_print(self.console, x, y + row, str(row + 1) + ". ")
+                libtcod.console_print(self.console, x, y + row, "{0}. ".format(row + 1))
                 libtcod.console_print(self.console, x + 3, y + row, move.move_data.name)
                 libtcod.console_print(self.console, x + 15, y + row, move.move_data.type.name)
-                libtcod.console_print(self.console, x + 27, y + row, "(" + str(move.pp) + "/" + str(move.move_data.max_pp) + ")")
+                libtcod.console_print(self.console, x + 27, y + row, "({0}/{1})".format(move.pp, move.move_data.max_pp))
            
     def _render_blank_message_box(self, x, y, width, height):
         '''

@@ -3,7 +3,7 @@ import CreatureRogue.libtcodpy as libtcod
 class PokedexState():
 
     def __init__(self, game, game_data, pokedex_renderer):
-        self.game = game_data
+        self.game = game
         self.game_data = game_data
         self.pokedex_renderer = pokedex_renderer
 
@@ -83,14 +83,16 @@ class PokedexState():
                 self.shift_row(1)
             elif key.vk == libtcod.KEY_ENTER:
                 self.display_selected()
+            elif key.vk == libtcod.KEY_ESCAPE:
+                self.game.close_pokedex()
 
     def render(self):
         '''
             Passes control off to the pokedex renderer to display the current 
             pokedex state.
         '''
-        self.pokedex_renderer.render(self.game_data.player.pokedex, 
-                                     self.viewing_species, 
-                                     self.selected_row, 
-                                     self.selected_column, 
-                                     self.left_most_column)
+        return self.pokedex_renderer.render(self.game_data.player.pokedex, 
+                                            self.viewing_species, 
+                                            self.selected_row, 
+                                            self.selected_column, 
+                                            self.left_most_column)

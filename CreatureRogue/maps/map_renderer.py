@@ -23,15 +23,18 @@ class BaseMapCell():
 
 class MapRenderer():
     
-    def __init__(self, game, console):
+    def __init__(self, game):
         self.game = game
-        self.console = console
+        self.console = libtcod.console_new(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
         self.start_x = self.start_y = 0
         
     def render(self, player):
+        libtcod.console_clear(self.console)
         self._centre_map_on_player(player)
         self._render_map(player.map_data)
         self._render_player(player)
+
+        return self.console
 
     def _centre_map_on_player(self, player):
         x, y = player.coords
