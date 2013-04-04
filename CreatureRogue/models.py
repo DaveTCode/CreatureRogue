@@ -11,6 +11,7 @@ class BattleCreature():
                            1: 1.5, 2: 2.0, 3: 2.5, 4: 3.0, 5: 3.5, 6: 4.0}
 
     def __init__(self, creature, static_game_data):
+        self.static_game_data = static_game_data
         self.creature = creature
         self.stat_adjusts = {stat: 0 for stat in self.creature.stats}
         
@@ -37,6 +38,20 @@ class BattleCreature():
             These factors are fixed and are capped at 1/4 to 4.
         '''
         return self.creature.stats[stat] * BattleCreature.stat_adjust_factors[self.stat_adjusts[stat]]
+
+    def modified_catch_rate(self, pokeball):
+        '''
+            Calculates the modified catch rate of a creature. This is based on
+            a variety of factors including the status of the creature, the ball
+            used and the current hit points.
+
+            It is calculated in BattleCreature rather than Creature because it
+            is only applicable during a battle.
+        '''
+        # TODO - Add status effects
+        hp_stat = self.static_game_data.stats[data.HP_STAT]
+        triple_max_hp = 3 * self.creature.max_stat(hp_stat)
+        return (triple_max_hp - 2 * self.stat_value(hp_stat)) * self.creature.catch_rate * pokeball.catch_rate / triple_max_hp
 
 class Creature():
     
@@ -123,7 +138,7 @@ class Creature():
             return u"{0}'s {1}".format(self.trainer.name, self.nickname)
         else:
             return u"Wild {0}".format(self.nickname)
-        
+
 class Player():
 
     def __init__(self, name, static_game_data, map_data, x, y):

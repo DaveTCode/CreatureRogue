@@ -7,7 +7,7 @@
 '''
 
 from CreatureRogue.game import Game
-from CreatureRogue.models import GameData, BattleData, Creature, Move, BattleCreature
+from CreatureRogue.models import GameData, BattleData, Creature, Move, BattleCreature, Player
 from CreatureRogue.battle_state import BattleState
 from CreatureRogue.battle_ai import RandomMoveAi
 import CreatureRogue.settings as settings
@@ -38,7 +38,8 @@ if __name__ == "__main__":
                                        BattleCreature(Creature(attacking_species, attacking_level, None, None, creature_creator.random_stat_values(game.static_game_data.stats, 1, 15), creature_creator.zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1), game.static_game_data),
                                        RandomMoveAi(wild_creature),
                                        wild_creature=wild_creature)
-    
+    game_data.player = Player("Test", game.static_game_data, None, 0, 0)
+    game_data.player.pokeballs[game.static_game_data.pokeballs[1]] = 3
     game.game_data = game_data
-    game.state = BattleState(game, game.game_data, game.battle_renderer, game.level_up_renderer)
+    game.state = BattleState(game, game.game_data, game.battle_renderer, game.level_up_renderer, game.catch_graphic_renderer)
     game.game_loop()

@@ -20,6 +20,7 @@ FOREGROUND_COLOR = libtcod.white
 LINE_COLOR = libtcod.white
 LEVEL_UP_BG_COLOR = libtcod.Color(50, 50, 50)
 MENU_BG_COLOR = libtcod.Color(50, 50, 50)
+CATCH_GRAPHIC_BG_COLOR = libtcod.Color(50, 50, 50)
 BATTLE_TEXT_COLOR = libtcod.white
 GOOD_HEALTH_COLOR = libtcod.Color(0, 255, 0)
 HALF_HEALTH_COLOR = libtcod.Color(255, 255, 0)

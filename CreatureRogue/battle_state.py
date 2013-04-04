@@ -11,15 +11,55 @@ import CreatureRogue.data as data
 import CreatureRogue.libtcodpy as libtcod
 
 class BattleState():
+    '''
+        The main state that the game is in when the player is in a battle.
 
-    def __init__(self, game, game_data, renderer, level_up_renderer):
+        Handles input and rendering.
+    '''
+
+    def __init__(self, game, game_data, renderer, level_up_renderer, catch_graphic_renderer):
         self.renderer = renderer
         self.level_up_renderer = level_up_renderer
+        self.catch_graphic_renderer = catch_graphic_renderer
         self.game_data = game_data
         self.game = game
         self.messages = collections.deque()
         self.end_battle = False
         self.display_level_up = None
+        self.selecting_pokeball = False
+        self.catching_with_pokeball = None
+
+    def render(self):
+        '''
+            Render the current state of the battle. Called as many times as 
+            required by the game loop.
+        '''
+        console = self.renderer.render(self.game_data.battle_data, self.messages, self.selecting_pokeball)
+
+        if len(self.messages) == 0 and self.display_level_up != None:
+            sub_console = self.level_up_renderer.render(self.display_level_up[0].creature, self.display_level_up[1])
+
+            libtcod.console_blit(sub_console, 0, 0, 0, 0, console, 0, 0)
+
+        # If we're in the process of catching a creature then there is an 
+        # extra step which renders the catch graphics on top of the screen.
+        if self.catching_with_pokeball:
+            sub_console = self.catch_graphic_renderer.render(self.catching_with_pokeball, 100)
+
+            libtcod.console_blit(sub_console, 
+                                 0, 0, 0, 0,
+                                 console,
+                                 libtcod.console_get_width(console) // 2 - libtcod.console_get_width(sub_console) // 2,
+                                 libtcod.console_get_height(console) // 2 - libtcod.console_get_height(sub_console) // 2)
+
+
+        # The check to see whether to end the battle is done once in the 
+        # render function so that we can guarantee that it will get called
+        # within a 30fps time frame.
+        if len(self.messages) == 0 and self.display_level_up == None and self.end_battle:
+            self.game.end_wild_battle()
+
+        return console
 
     def handle_input(self, key):
         '''
@@ -34,52 +74,86 @@ class BattleState():
         elif self.display_level_up:
             if key.vk == libtcod.KEY_SPACE or key.vk == libtcod.KEY_ENTER:
                 self.display_level_up = None
+        elif self.selecting_pokeball:
+            self._selecting_pokeball_input(key)
+        elif self.catching_with_pokeball:
+            pass # Key presses won't do anything at this point.
         else:
-            move = None
-            for key_code, index in [(libtcod.KEY_1, 0), (libtcod.KEY_2, 1), (libtcod.KEY_3, 2), (libtcod.KEY_4, 3)]:
-                if key.vk == key_code:
-                    if len(battle_data.player_creature.creature.moves) > index:
-                        move = battle_data.player_creature.creature.moves[index]
+            if key.vk == libtcod.KEY_CHAR:
+                if key.c == ord('c') and len(self.game_data.player.available_pokeballs()) >= 0:
+                    self.selecting_pokeball = True
+                elif key.c == ord('f'):
+                    pass
+            else:
+                move = None
+                for key_code, index in [(libtcod.KEY_1, 0), (libtcod.KEY_2, 1), (libtcod.KEY_3, 2), (libtcod.KEY_4, 3)]:
+                    if key.vk == key_code:
+                        if len(battle_data.player_creature.creature.moves) > index:
+                            move = battle_data.player_creature.creature.moves[index]
 
-            if move != None:
-                computer_move = battle_data.computer_move()
-                speed_stat = self.game.static_game_data.stats[data.SPEED_STAT]
+                if move != None:
+                    self._handle_move_select(move)
+                
+    def _selecting_pokeball_input(self, key):
+        '''
+            Input handler when the sub state is selecting a pokeball.
+        '''
+        if key.vk == libtcod.KEY_ESCAPE:
+            self.selecting_pokeball = False
+        elif key.vk == libtcod.KEY_CHAR:
+            for pokeball in self.game_data.player.available_pokeballs():
+                if key.c == ord(pokeball.display_char) or key.c == ord(pokeball.display_char.upper()):
+                    self.selecting_pokeball = False
+                    self.catching_with_pokeball = pokeball
+                    break
 
-                if battle_data.player_creature.stat_value(speed_stat) > battle_data.defending_creature().stat_value(speed_stat):
-                    first_move = (move, battle_data.player_creature, battle_data.defending_creature())
-                    second_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
-                elif battle_data.player_creature.stat_value(speed_stat) < battle_data.defending_creature().stat_value(speed_stat):
-                    first_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
-                    second_move = (move, battle_data.player_creature, battle_data.defending_creature())
-                else:
-                    if random.randint(0, 1) == 0:
-                        first_move = (move, battle_data.player_creature, battle_data.defending_creature())
-                        second_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
-                    else:
-                        first_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
-                        second_move = (move, battle_data.player_creature, battle_data.defending_creature())
+    def _handle_move_select(self, move):
+        '''
+            Given that the player has selected a move to perform this function 
+            is called to allow the computer to select a move and then actually 
+            perform the moves in the correct order.
 
-                for move, aggressor, defender in [first_move, second_move]:
-                    # The move can actually be None if there were no valid 
-                    # moves to select from.
-                    if move:
-                        messages = move.act(aggressor, defender, self.game.static_game_data)
-                        
-                        for message in messages:
-                            self.messages.append(message)
+            It may exit early if a creature faints.
+        '''
+        battle_data = self.game_data.battle_data
+        computer_move = battle_data.computer_move()
+        speed_stat = self.game.static_game_data.stats[data.SPEED_STAT]
 
-                        # Check the state of the creatures, we don't end the battle 
-                        # immediately because we still want to process any 
-                        # remaining messages.
-                        #
-                        # We do need to break out though so that the fainted 
-                        # creature can't have it's turn.
-                        if defender.creature.fainted:
-                            self._creature_fainted(aggressor, defender)
+        if battle_data.player_creature.stat_value(speed_stat) > battle_data.defending_creature().stat_value(speed_stat):
+            first_move = (move, battle_data.player_creature, battle_data.defending_creature())
+            second_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
+        elif battle_data.player_creature.stat_value(speed_stat) < battle_data.defending_creature().stat_value(speed_stat):
+            first_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
+            second_move = (move, battle_data.player_creature, battle_data.defending_creature())
+        else:
+            if random.randint(0, 1) == 0:
+                first_move = (move, battle_data.player_creature, battle_data.defending_creature())
+                second_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
+            else:
+                first_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
+                second_move = (move, battle_data.player_creature, battle_data.defending_creature())
 
-                        if aggressor.creature.fainted or defender.creature.fainted:
-                            self.end_battle = True
-                            break
+        for move, aggressor, defender in [first_move, second_move]:
+            # The move can actually be None if there were no valid 
+            # moves to select from.
+            if move:
+                messages = move.act(aggressor, defender, self.game.static_game_data)
+                
+                for message in messages:
+                    self.messages.append(message)
+
+                # Check the state of the creatures, we don't end the battle 
+                # immediately because we still want to process any 
+                # remaining messages.
+                #
+                # We do need to break out though so that the fainted 
+                # creature can't have it's turn.
+                if defender.creature.fainted:
+                    self._creature_fainted(aggressor, defender)
+
+                if aggressor.creature.fainted or defender.creature.fainted:
+                    self.end_battle = True
+                    break
 
     def _creature_fainted(self, aggressor, defender):
         '''
@@ -96,23 +170,3 @@ class BattleState():
 
         if old_level != aggressor.creature.level:
             self.display_level_up = (aggressor, old_level)
-
-    def render(self):
-        '''
-            Render the current state of the battle. Called as many times as 
-            required by the game loop.
-        '''
-        console = self.renderer.render(self.game_data.battle_data, self.messages)
-
-        if len(self.messages) == 0 and self.display_level_up != None:
-            sub_console = self.level_up_renderer.render(self.display_level_up[0].creature, self.display_level_up[1])
-
-            libtcod.console_blit(sub_console, 0, 0, 0, 0, console, 0, 0)
-
-        # The check to see whether to end the battle is done once in the 
-        # render function so that we can guarantee that it will get called
-        # within a 30fps time frame.
-        if len(self.messages) == 0 and self.display_level_up == None and self.end_battle:
-            self.game.end_wild_battle()
-
-        return console

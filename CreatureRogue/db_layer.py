@@ -99,10 +99,10 @@ class Loader():
     def _load_pokeballs(self, conn):
         pokeballs = {}
         cur = conn.cursor()
-        cur.execute('SELECT id, name, catch_rate, top_color, bottom_color FROM pokeballs')
+        cur.execute('SELECT id, name, catch_rate, top_color, bottom_color, display_char FROM pokeballs')
 
-        for pokeball_id, name, catch_rate, top_color, bottom_color in cur.fetchall():
-            pokeballs[pokeball_id] = data.Pokeball(pokeball_id, name, catch_rate, top_color, bottom_color)
+        for pokeball_id, name, catch_rate, top_color, bottom_color, display_char in cur.fetchall():
+            pokeballs[pokeball_id] = data.Pokeball(pokeball_id, name, catch_rate, top_color, bottom_color, display_char)
 
         return pokeballs
         

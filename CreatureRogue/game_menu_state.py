@@ -35,7 +35,6 @@ class InGameMenuState():
         elif key.vk == libtcod.KEY_CHAR and key.c == ord('p'):
             self.game.load_pokedex()
 
-
     def render(self):
         '''
             Combine the map view and the menu view by blitting one onto the 

@@ -13,7 +13,7 @@ import CreatureRogue.data as data
 import CreatureRogue.db_layer as db_layer
 import CreatureRogue.settings as settings
 from CreatureRogue.models import GameData, BattleData, BattleCreature
-from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer
+from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer
 from CreatureRogue.maps.map_renderer import MapRenderer
 from CreatureRogue.pokedex_renderer import PokedexRenderer
 from CreatureRogue.game_menu_renderer import GameMenuRenderer
@@ -41,6 +41,7 @@ class Game():
         self.pokedex_renderer = None
         self.level_up_renderer = None
         self.game_menu_renderer = None
+        self.catch_graphic_renderer = None
 
     def load_static_data(self):
         '''
@@ -72,6 +73,7 @@ class Game():
         self.pokedex_renderer = PokedexRenderer(self)
         self.level_up_renderer = LevelUpRenderer(self)
         self.game_menu_renderer = GameMenuRenderer(self)
+        self.catch_graphic_renderer = CatchGraphicRenderer(self)
         
         self.state = MapState(self, self.game_data, self.map_renderer)
     
@@ -120,7 +122,7 @@ class Game():
                                                     RandomMoveAi(BattleCreature(wild_creature, self.static_game_data)),
                                                     wild_creature=BattleCreature(wild_creature, self.static_game_data))
 
-            self.state = BattleState(self, self.game_data, self.battle_renderer, self.level_up_renderer)
+            self.state = BattleState(self, self.game_data, self.battle_renderer, self.level_up_renderer, self.catch_graphic_renderer)
 
     def end_wild_battle(self):
         self.game_data.battle_data = None

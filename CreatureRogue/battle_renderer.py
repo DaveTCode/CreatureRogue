@@ -2,9 +2,63 @@
     Module contains all renderers which are used in battle
 '''
 from __future__ import division
+import random
 import CreatureRogue.data as data
 import CreatureRogue.settings as settings
 import CreatureRogue.libtcodpy as libtcod
+
+class CatchGraphicRenderer():
+    '''
+    '''
+    graphic = [[(' ', None), (' ', None), (' ', None), ('_', libtcod.black), ('_', libtcod.black), (' ', None), (' ', None), (' ', None)],
+               [(' ', None), (' ', None), ('/', libtcod.black), ('_', "upper"), ('_', "upper"), ('\\', libtcod.black), (' ', None), (' ', None)],
+               [(' ', None), ('/', libtcod.black), ('_', "upper"), ('_', "upper"), ('_', "upper"), ('_', "upper"), ('\\', libtcod.black), (' ', None)],
+               [('|', libtcod.black), ('_', libtcod.black), ('_', libtcod.black), ('/', libtcod.white), ('\\', libtcod.white), ('_', libtcod.black), ('_', libtcod.black), ('|', libtcod.black)],
+               [('|', libtcod.black), ('_', libtcod.black), ('_', libtcod.black), ('\\', libtcod.white), ('/', libtcod.white), ('_', libtcod.black), ('_', libtcod.black), ('|', libtcod.black)],
+               [(' ', None), ('\\', libtcod.black), ('_', "lower"), ('_', "lower"), ('_', "lower"), ('_', "lower"), ('/', libtcod.black), (' ', None)],
+               [(' ', None), (' ', None), ('\\', libtcod.black), ('_', "lower"), ('_', "lower"), ('/', libtcod.black), (' ', None), (' ', None)],
+               [(' ', None), (' ', None), (' ', None), ('_', libtcod.black), ('_', libtcod.black), (' ', None), (' ', None), (' ', None)]]
+
+    width = 12
+    height = 12
+    max_shake_x = 2
+    min_shake_x = -2
+    max_shake_y = 2
+    min_shake_y = -2
+
+    def __init__(self, game):
+        self.game = game
+        self.console = libtcod.console_new(CatchGraphicRenderer.width, CatchGraphicRenderer.height)
+
+    def render(self, pokeball, percent_complete):
+        '''
+        '''
+        rows_complete = int(len(CatchGraphicRenderer.graphic) * (percent_complete / 100))
+        shake_x = random.randint(CatchGraphicRenderer.min_shake_x, CatchGraphicRenderer.max_shake_x)
+        shake_y = random.randint(CatchGraphicRenderer.min_shake_y, CatchGraphicRenderer.max_shake_y)
+
+        libtcod.console_clear(self.console)
+        libtcod.console_set_default_background(self.console, settings.CATCH_GRAPHIC_BG_COLOR)
+        libtcod.console_set_default_foreground(self.console, settings.LINE_COLOR)
+        libtcod.console_print_frame(self.console, 0, 0, CatchGraphicRenderer.width, CatchGraphicRenderer.height)
+
+        for y, row in enumerate(CatchGraphicRenderer.graphic):
+            for x, cell in enumerate(row):
+                if cell[0] != '':
+                    if len(CatchGraphicRenderer.graphic) - y <= rows_complete:
+                        if cell[1] == "upper":
+                            color = pokeball.top_color
+                        elif cell[1] == "lower":
+                            color = pokeball.bottom_color
+                        else:
+                            color = cell[1]
+                    else:
+                        color = libtcod.gray
+
+                    libtcod.console_set_default_foreground(self.console, color)
+                    libtcod.console_put_char(self.console, shake_x + x + 2, shake_y + y + 2, cell[0])
+
+        return self.console
 
 class LevelUpRenderer():
     '''
@@ -36,14 +90,23 @@ class LevelUpRenderer():
         return self.console
 
     def _render_lines(self):
+        '''
+            Renders the border.
+        '''
         libtcod.console_print_frame(self.console, 1, 1, LevelUpRenderer.width - 2, LevelUpRenderer.height - 2)
 
     def _render_summary(self, creature, prev_level):
+        '''
+            Render the summary line at the top of the console.
+        '''
         summary_str = "Level {0} -> {1}".format(prev_level, creature.level)
         libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
         libtcod.console_print(self.console, 5, 3, summary_str)
 
     def _render_stats(self, creature, prev_level):
+        '''
+            Render the statistics lines one by one.
+        '''
         libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
 
         for idx, stat in enumerate([stat for stat in creature.stats if stat.short_name != None and stat.short_name != ""]):
@@ -81,7 +144,7 @@ class BattleRenderer():
         self.game = game
         self.console = libtcod.console_new(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
         
-    def render(self, battle_data, messages):
+    def render(self, battle_data, messages, selecting_pokeball):
         '''
             The external interface to this class. Call this to render the
             given battle data object.
@@ -98,20 +161,23 @@ class BattleRenderer():
                                       BattleRenderer.attacking_creature_y, 
                                       include_health_values=True)
         
-        self._render_options(battle_data.player_creature.creature, 
-                             x=BattleRenderer.left_padding, 
-                             y=BattleRenderer.top_section_height + 2)
-        
-        self._render_blank_message_box(x=BattleRenderer.option_area_width, 
-                                       y=BattleRenderer.top_section_height, 
-                                       width=BattleRenderer.message_area_width, 
-                                       height=BattleRenderer.bottom_section_height)
-        if len(messages):
-            self._render_message(message=messages[0], 
-                                 x=BattleRenderer.option_area_width, 
-                                 y=BattleRenderer.top_section_height + 4, 
-                                 width=BattleRenderer.message_area_width, 
-                                 height=BattleRenderer.message_height)
+        if selecting_pokeball:
+            self._render_pokeball_select(self.game.game_data.player.available_pokeballs(),
+                                         x=BattleRenderer.left_padding, 
+                                         y=BattleRenderer.top_section_height + 2)
+        else:
+            self._render_options(battle_data.player_creature.creature, 
+                                 x=BattleRenderer.left_padding, 
+                                 y=BattleRenderer.top_section_height + 2)
+            
+            self._render_blank_message_box(x=BattleRenderer.option_area_width, 
+                                           y=BattleRenderer.top_section_height, 
+                                           width=BattleRenderer.message_area_width, 
+                                           height=BattleRenderer.bottom_section_height)
+            if len(messages):
+                self._render_message(message=messages[0], 
+                                     x=BattleRenderer.option_area_width, 
+                                     y=BattleRenderer.top_section_height + 4)
 
         return self.console
         
@@ -187,8 +253,19 @@ class BattleRenderer():
                                                                          move.move_data.max_pp))
 
         for option in BattleRenderer.options:
-            actual_row = settings.SCREEN_HEIGHT + option["row"] - 1
-            libtcod.console_print(self.console, x, actual_row, "{0}. {1}".format(option["char"], option["desc"]))
+            display = True
+
+            #
+            # Special case code for capture, disable it if the player has no 
+            # pokeballs remaining. Probably generalise when obvious what other
+            # options there will be.
+            #
+            if option["desc"] == "Capture" and len(self.game.game_data.player.available_pokeballs()) <= 0:
+                display = False
+
+            if display:
+                actual_row = settings.SCREEN_HEIGHT + option["row"] - 1
+                libtcod.console_print(self.console, x, actual_row, "{0}. {1}".format(option["char"], option["desc"]))
            
     def _render_blank_message_box(self, x, y, width, height):
         '''
@@ -196,9 +273,17 @@ class BattleRenderer():
         '''
         libtcod.console_print_frame(self.console, x, y, width, height)
            
-    def _render_message(self, message, x, y, width, height):
+    def _render_message(self, message, x, y):
         '''
             Utility function to render a message on top of the screen at the 
             given point.
         '''
         libtcod.console_print(self.console, x + 1, y + 1, message)
+
+    def _render_pokeball_select(self, pokeballs, x, y):
+        '''
+            Render the list of available pokeball types along with the key
+            press required to select them.
+        '''
+        for row, pokeball in enumerate(pokeballs.keys()):
+            libtcod.console_print(self.console, x, y + row + 1, "{0}. {1:20s}{2}".format(pokeball.display_char, pokeball.name + " Ball", pokeballs[pokeball]))
