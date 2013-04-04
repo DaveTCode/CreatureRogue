@@ -55,8 +55,28 @@ class BattleRenderer():
     '''
         The battle renderer is used to display a battle on the screen.
         
-        It renders the entire of the screen.
+        It returns a console which is sized at the entire of the screen.
     '''
+
+    options = [{"row": -2, "char": "C", "desc": "Capture"},
+               {"row": -1, "char": "F", "desc": "Flee"}]
+    bottom_section_height = 16
+    top_section_height = settings.SCREEN_HEIGHT - bottom_section_height
+    option_area_width = 40
+    message_area_width = settings.SCREEN_WIDTH - option_area_width
+    message_height = 12
+    left_padding = 2
+    top_padding = 2
+
+    creature_details_width = 30
+    creature_details_height_w_hp = 8
+    creature_details_height_no_hp = 6
+
+    defending_creature_x = 2
+    defending_creature_y = 4
+    attacking_creature_x = settings.SCREEN_WIDTH - creature_details_width - 2
+    attacking_creature_y = top_section_height - creature_details_height_w_hp - 4
+
     def __init__(self, game):
         self.game = game
         self.console = libtcod.console_new(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
@@ -66,16 +86,32 @@ class BattleRenderer():
             The external interface to this class. Call this to render the
             given battle data object.
         '''
+        libtcod.console_clear(self.console)
         self._render_lines()
         
-        self._render_defending_creature_details(battle_data.defending_creature().creature)
-        self._render_attacking_creature_details(battle_data.player_creature.creature)
+        self._render_creature_details(battle_data.defending_creature().creature, 
+                                      BattleRenderer.defending_creature_x, 
+                                      BattleRenderer.defending_creature_y, 
+                                      include_health_values=False)
+        self._render_creature_details(battle_data.player_creature.creature, 
+                                      BattleRenderer.attacking_creature_x, 
+                                      BattleRenderer.attacking_creature_y, 
+                                      include_health_values=True)
         
-        self._render_moves(battle_data.player_creature.creature, 2, 36)
+        self._render_options(battle_data.player_creature.creature, 
+                             x=BattleRenderer.left_padding, 
+                             y=BattleRenderer.top_section_height + 2)
         
-        self._render_blank_message_box(40, 34, 40, 16)
+        self._render_blank_message_box(x=BattleRenderer.option_area_width, 
+                                       y=BattleRenderer.top_section_height, 
+                                       width=BattleRenderer.message_area_width, 
+                                       height=BattleRenderer.bottom_section_height)
         if len(messages):
-            self._render_message(messages[0], 40, 38, 40, 12)
+            self._render_message(message=messages[0], 
+                                 x=BattleRenderer.option_area_width, 
+                                 y=BattleRenderer.top_section_height + 4, 
+                                 width=BattleRenderer.message_area_width, 
+                                 height=BattleRenderer.message_height)
 
         return self.console
         
@@ -84,30 +120,22 @@ class BattleRenderer():
             Renders the lines which separate sections of the screen.
         '''
         libtcod.console_set_default_foreground(self.console, settings.LINE_COLOR)
-        libtcod.console_print_frame(self.console, 2, 4, 30, 6)
-        libtcod.console_print_frame(self.console, 48, 22, 30, 8)
-        libtcod.console_hline(self.console, 0, 34, 80)
+        libtcod.console_hline(self.console, 0, BattleRenderer.top_section_height, settings.SCREEN_WIDTH)
 
-    def _render_defending_creature_details(self, creature):
+    def _render_creature_details(self, creature, x, y, include_health_values=False):
         '''
             Renders the creature box for the defending creature.
         '''
-        libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
-        libtcod.console_print(self.console, 3, 5, creature.nickname[:10])
-        libtcod.console_print(self.console, 24, 5, "LV.{0}".format(creature.level))
-        
-        self._render_health_bar(creature, 28, 3, 7)
+        height = BattleRenderer.creature_details_height_w_hp if include_health_values else BattleRenderer.creature_details_height_no_hp
 
-    def _render_attacking_creature_details(self, creature):
-        '''
-            Renders the creature box for the attacking creature.
-        '''
         libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
-        libtcod.console_print(self.console, 49, 23, creature.nickname[:10])
-        libtcod.console_print(self.console, 60, 23, "LV.{0}".format(creature.level))
+        libtcod.console_print_frame(self.console, x, y, BattleRenderer.creature_details_width, height)
+        libtcod.console_print(self.console, x + 1, y + 1, creature.nickname[:10])
+        libtcod.console_print(self.console, x + BattleRenderer.creature_details_width - 6, y + 1, "LV.{0}".format(creature.level))
         
-        self._render_health_bar(creature, 28, 49, 25)
-        self._render_health_values(creature, 70, 27)
+        self._render_health_bar(creature, BattleRenderer.creature_details_width - 2, x + 1, y + 3)
+        if include_health_values:
+            self._render_health_values(creature, x + BattleRenderer.creature_details_width - 8, y + 5)
             
     def _render_health_bar(self, creature, max_length, x, y):
         '''
@@ -143,20 +171,24 @@ class BattleRenderer():
         
         libtcod.console_set_default_foreground(self.console, settings.BATTLE_TEXT_COLOR)
         libtcod.console_print(self.console, x, y, "{0}/{1}".format(current, max_hp))
-    
-    def _render_moves(self, creature, x, y):
-        ''' 
-            Render the available moves for the player creature starting at
-            the given x,y coordinates.
+
+    def _render_options(self, creature, x, y):
         '''
-        for row in range(4):
-            if row < len(creature.moves):
-                move = creature.moves[row]
-                
-                libtcod.console_print(self.console, x, y + row, "{0}. ".format(row + 1))
-                libtcod.console_print(self.console, x + 3, y + row, move.move_data.name)
-                libtcod.console_print(self.console, x + 15, y + row, move.move_data.type.name)
-                libtcod.console_print(self.console, x + 27, y + row, "({0}/{1})".format(move.pp, move.move_data.max_pp))
+            Renders all moves and additional options such as "Flee", "Capture".
+
+            These are defined in the class level variable "options"
+        '''
+        for row, move in enumerate(creature.moves):
+            libtcod.console_print(self.console, x, y + row, 
+                                  "{0}. {1:15s}{2:>12s}  {3}/{4}".format(row + 1, 
+                                                                         move.move_data.name, 
+                                                                         move.move_data.type.name, 
+                                                                         move.pp, 
+                                                                         move.move_data.max_pp))
+
+        for option in BattleRenderer.options:
+            actual_row = settings.SCREEN_HEIGHT + option["row"] - 1
+            libtcod.console_print(self.console, x, actual_row, "{0}. {1}".format(option["char"], option["desc"]))
            
     def _render_blank_message_box(self, x, y, width, height):
         '''

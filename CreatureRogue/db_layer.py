@@ -36,6 +36,9 @@ class Loader():
             move_targets = self._load_move_targets(conn)
             moves = self._load_moves(conn, types, stats, move_targets)
             
+            # Pokeballs
+            pokeballs = self._load_pokeballs(conn)
+
             # Species
             colors = self._load_colors(conn)
             species = self._load_species(conn, types, colors, stats, growth_rates, moves)
@@ -51,7 +54,7 @@ class Loader():
             if conn:
                 conn.close()
             
-        return data.StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup)
+        return data.StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs)
 
     def _load_stats(self, conn):
         stats = {}
@@ -92,6 +95,16 @@ class Loader():
             xp_lookup[growth_rates[growth_rate_id]][level] = xp
             
         return data.XpLookup(xp_lookup)
+
+    def _load_pokeballs(self, conn):
+        pokeballs = {}
+        cur = conn.cursor()
+        cur.execute('SELECT id, name, catch_rate, top_color, bottom_color FROM pokeballs')
+
+        for pokeball_id, name, catch_rate, top_color, bottom_color in cur.fetchall():
+            pokeballs[pokeball_id] = data.Pokeball(pokeball_id, name, catch_rate, top_color, bottom_color)
+
+        return pokeballs
         
     def _load_move_targets(self, conn):
         targets = {}

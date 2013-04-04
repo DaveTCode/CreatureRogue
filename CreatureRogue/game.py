@@ -98,7 +98,9 @@ class Game():
     ###########################################################################
     # Below here there are function which transition between game states. This
     # will inevitably move somewhere else at some point so I'm separating it 
-    # out
+    # out.
+    #
+    # In fact it will probably turn into a state machine.
     ###########################################################################
 
     def start_wild_battle(self):
@@ -111,13 +113,14 @@ class Game():
 
             level = random.randint(encounter.min_level, encounter.max_level)
             wild_creature = creature_creator.create_wild_creature(self.static_game_data, encounter.species, level)
+            self.game_data.player.encounter_creature(wild_creature)
 
             self.game_data.battle_data = BattleData(self.game_data, 
                                                     BattleCreature(self.game_data.player.creatures[0], self.static_game_data),
                                                     RandomMoveAi(BattleCreature(wild_creature, self.static_game_data)),
                                                     wild_creature=BattleCreature(wild_creature, self.static_game_data))
 
-            self.state = BattleState(self, self.game_data, self.battle_renderer)
+            self.state = BattleState(self, self.game_data, self.battle_renderer, self.level_up_renderer)
 
     def end_wild_battle(self):
         self.game_data.battle_data = None

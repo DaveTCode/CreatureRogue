@@ -129,12 +129,19 @@ class Player():
     def __init__(self, name, static_game_data, map_data, x, y):
         self.name = name
         self.creatures = []
-        self.pokedex = { static_game_data.species[id].pokedex_number: (0, static_game_data.species[id]) for id in static_game_data.species }
+        self.pokedex = { static_game_data.species[species_id].pokedex_number: (0, static_game_data.species[species_id]) for species_id in static_game_data.species }
         self.map_data = map_data
         self.coords = (x, y)
         self.steps_in_long_grass_since_encounter = 0
         self.static_game_data = static_game_data
+        self.pokeballs = { static_game_data.pokeballs[pokeball_id]: 0 for pokeball_id in static_game_data.pokeballs }
         
+    def available_pokeballs(self):
+        '''
+            Checks whether the player has any available pokeballs.
+        '''
+        return { pokeball: self.pokeballs[pokeball] for pokeball in self.pokeballs if self.pokeballs[pokeball] > 0 }
+
     def get_location_area(self):
         '''
             The location area of a player is determined by the x, y coordinates 
@@ -143,6 +150,7 @@ class Player():
         x, y = self.coords
         location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x, y)
 
+        print location_area_id
         if location_area_id != None:
             location_area = self.static_game_data.location_areas[location_area_id]
 
@@ -151,10 +159,26 @@ class Player():
         return None
 
     def _can_traverse(self, cell):
+        '''
+            Depending on the current player state they may or may not be able 
+            to traverse any given cell. This check is made every time the 
+            player attempts to move onto a new cell.
+
+            Returns true if the player is allowed to travel on that cell and
+            false otherwise.
+        '''
         # TODO - Only really check that the cell is always travesable at the moment
         return cell.base_cell.cell_passable_type == map_renderer.EMPTY_CELL
 
     def _causes_encounter(self):
+        '''
+            Calculation used to determine whether a player causes an encounter 
+            with movement.
+
+            It is called each time the player steps on a square that could 
+            cause an encounter and returns true if an encounter should be 
+            generated and false otherwise.
+        '''
         location_area = self.get_location_area()
         encounter_rate = min(100, location_area.walk_encounter_rate)
 
@@ -186,10 +210,21 @@ class Player():
 
             return True, causes_encounter
         else:
-            return False, None
+            return False, False
 
     def get_cell(self):
+        '''
+            Returns the exact cell that the player is currently on.
+        '''
         return self.map_data.tiles[self.coords[1]][self.coords[0]]
+
+    def encounter_creature(self, creature):
+        '''
+            Called whenever a creature is encountered (even it it isn't new).
+
+            Is responsible for updating the pokedex.
+        '''
+        self.pokedex[creature.species.pokedex_number] = (1, creature.species)
         
 class GameData():
         
@@ -219,6 +254,11 @@ class Move():
         self.pp = self.move_data.max_pp
         
     def act(self, attacking_creature, defending_creature, static_game_data):
+        '''
+            Perform the move on the defending creature. 
+
+            Will return a list of messages indicating what has happened.
+        '''
         messages = []
     
         if self.pp <= 0:
@@ -275,9 +315,16 @@ class Move():
         return messages
                 
     def _hit_calculation(self, attacking_creature, defending_creature):
-        p = self.move_data.base_accuracy / 100 * (attacking_creature.stat_value(self.move_data.accuracy_stat) / defending_creature.stat_value(self.move_data.evasion_stat))
+        '''
+            Determines whether the current move will hit the defending 
+            creature. This is based on a random check.
+        '''
+        if self.move_data.base_accuracy:
+            return random.random() < (self.move_data.base_accuracy / 100 * 
+                                      (attacking_creature.stat_value(self.move_data.accuracy_stat) / 
+                                       defending_creature.stat_value(self.move_data.evasion_stat)))
         
-        return random.random() < p
+        return False
     
     def _damage_calculation(self, attacking_creature, defending_creature, type_chart):
         '''

@@ -102,14 +102,17 @@ class BattleState():
             Render the current state of the battle. Called as many times as 
             required by the game loop.
         '''
-        if len(self.messages) == 0 and self.display_level_up == None and self.end_battle:
-            self.game.end_wild_battle()
-
         console = self.renderer.render(self.game_data.battle_data, self.messages)
 
         if len(self.messages) == 0 and self.display_level_up != None:
             sub_console = self.level_up_renderer.render(self.display_level_up[0].creature, self.display_level_up[1])
 
             libtcod.console_blit(sub_console, 0, 0, 0, 0, console, 0, 0)
+
+        # The check to see whether to end the battle is done once in the 
+        # render function so that we can guarantee that it will get called
+        # within a 30fps time frame.
+        if len(self.messages) == 0 and self.display_level_up == None and self.end_battle:
+            self.game.end_wild_battle()
 
         return console

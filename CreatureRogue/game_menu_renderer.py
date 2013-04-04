@@ -6,7 +6,7 @@ import CreatureRogue.settings as settings
 
 class GameMenuRenderer():
     
-    width = 40
+    width = 30
     height = settings.SCREEN_HEIGHT
 
     def __init__(self, game):
