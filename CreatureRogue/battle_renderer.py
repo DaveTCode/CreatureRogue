@@ -9,6 +9,8 @@ import CreatureRogue.libtcodpy as libtcod
 
 class CatchGraphicRenderer():
     '''
+        Independent renderer used to draw a pokeball onto the screen when 
+        attempting to catch a creature.
     '''
     graphic = [[(' ', None), (' ', None), (' ', None), ('_', libtcod.black), ('_', libtcod.black), (' ', None), (' ', None), (' ', None)],
                [(' ', None), (' ', None), ('/', libtcod.black), ('_', "upper"), ('_', "upper"), ('\\', libtcod.black), (' ', None), (' ', None)],
@@ -21,21 +23,30 @@ class CatchGraphicRenderer():
 
     width = 12
     height = 12
-    max_shake_x = 2
-    min_shake_x = -2
-    max_shake_y = 2
-    min_shake_y = -2
+    max_shake_x = 1
+    min_shake_x = -1
+    max_shake_y = 1
+    min_shake_y = -1
 
     def __init__(self, game):
         self.game = game
         self.console = libtcod.console_new(CatchGraphicRenderer.width, CatchGraphicRenderer.height)
+        self.shake_x = 0
+        self.shake_y = 0
+
+    def shake(self):
+        '''
+            Call to update the amount by which the ball has moved from it's
+            starting position.
+        '''
+        self.shake_x = random.randint(CatchGraphicRenderer.min_shake_x, CatchGraphicRenderer.max_shake_x)
+        self.shake_y = random.randint(CatchGraphicRenderer.min_shake_y, CatchGraphicRenderer.max_shake_y)
 
     def render(self, pokeball, percent_complete):
         '''
+            Render the area and return the full console
         '''
         rows_complete = int(len(CatchGraphicRenderer.graphic) * (percent_complete / 100))
-        shake_x = random.randint(CatchGraphicRenderer.min_shake_x, CatchGraphicRenderer.max_shake_x)
-        shake_y = random.randint(CatchGraphicRenderer.min_shake_y, CatchGraphicRenderer.max_shake_y)
 
         libtcod.console_clear(self.console)
         libtcod.console_set_default_background(self.console, settings.CATCH_GRAPHIC_BG_COLOR)
@@ -56,7 +67,7 @@ class CatchGraphicRenderer():
                         color = libtcod.gray
 
                     libtcod.console_set_default_foreground(self.console, color)
-                    libtcod.console_put_char(self.console, shake_x + x + 2, shake_y + y + 2, cell[0])
+                    libtcod.console_put_char(self.console, self.shake_x + x + 2, self.shake_y + y + 2, cell[0])
 
         return self.console
 

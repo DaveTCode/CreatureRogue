@@ -138,7 +138,7 @@ class XpLookup():
         
 class Species():
     
-    def __init__(self, pokedex_number, name, height, weight, types, base_stats, base_xp_yield, growth_rate, display_character, display_color, level_moves, flavor_text, genus):
+    def __init__(self, pokedex_number, name, height, weight, types, base_stats, base_xp_yield, growth_rate, display_character, display_color, level_moves, flavor_text, genus, capture_rate):
         self.pokedex_number = pokedex_number
         self.name = name
         self.height = height
@@ -152,6 +152,7 @@ class Species():
         self.level_moves = level_moves
         self.flavor_text = flavor_text
         self.genus = genus
+        self.capture_rate = capture_rate
         
     def imperial_weight_str(self):
         '''

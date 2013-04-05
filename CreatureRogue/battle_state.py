@@ -4,11 +4,29 @@
 
     It is responsible for rendering and input processing.
 '''
-
+from __future__ import division
 import collections
 import random
 import CreatureRogue.data as data
 import CreatureRogue.libtcodpy as libtcod
+
+def num_catch_checks_passed(creature, pokeball, num_shakes):
+    '''
+        Catching a creature is based on a catch rate (modified from the 
+        creatures base catch rate), the ball used and a set of random
+        checks.
+
+        This function determines how many random checks are passed.
+    '''
+    a = creature.modified_catch_rate(pokeball)
+    b = 65535 * (a / 255) ** (1/4)
+
+    for i in range(num_shakes):
+        if random.randint(0, 65535) > b:
+            return i
+
+    return num_shakes
+
 
 class BattleState():
     '''
@@ -16,6 +34,9 @@ class BattleState():
 
         Handles input and rendering.
     '''
+
+    number_catch_checks = 4
+    time_between_shake_checks_ms = 200
 
     def __init__(self, game, game_data, renderer, level_up_renderer, catch_graphic_renderer):
         self.renderer = renderer
@@ -28,6 +49,8 @@ class BattleState():
         self.display_level_up = None
         self.selecting_pokeball = False
         self.catching_with_pokeball = None
+        self.num_checks_passed = 0
+        self.last_shake_time_ms = 0
 
     def render(self):
         '''
@@ -44,6 +67,10 @@ class BattleState():
         # If we're in the process of catching a creature then there is an 
         # extra step which renders the catch graphics on top of the screen.
         if self.catching_with_pokeball:
+            if self.last_shake_time_ms + BattleState.time_between_shake_checks_ms < libtcod.sys_elapsed_milli():
+                self.catch_graphic_renderer.shake()
+                self.last_shake_time_ms = libtcod.sys_elapsed_milli()
+
             sub_console = self.catch_graphic_renderer.render(self.catching_with_pokeball, 100)
 
             libtcod.console_blit(sub_console, 
@@ -105,6 +132,10 @@ class BattleState():
                 if key.c == ord(pokeball.display_char) or key.c == ord(pokeball.display_char.upper()):
                     self.selecting_pokeball = False
                     self.catching_with_pokeball = pokeball
+                    self.last_shake_time_ms = 0
+                    self.num_checks_passed = num_catch_checks_passed(self.game_data.battle_data.defending_creature(), 
+                                                                     pokeball, 
+                                                                     BattleState.number_catch_checks)
                     break
 
     def _handle_move_select(self, move):

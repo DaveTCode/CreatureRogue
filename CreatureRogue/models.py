@@ -51,7 +51,7 @@ class BattleCreature():
         # TODO - Add status effects
         hp_stat = self.static_game_data.stats[data.HP_STAT]
         triple_max_hp = 3 * self.creature.max_stat(hp_stat)
-        return (triple_max_hp - 2 * self.stat_value(hp_stat)) * self.creature.catch_rate * pokeball.catch_rate / triple_max_hp
+        return (triple_max_hp - 2 * self.stat_value(hp_stat)) * self.creature.species.capture_rate * pokeball.catch_rate / triple_max_hp
 
 class Creature():
     
@@ -165,7 +165,6 @@ class Player():
         x, y = self.coords
         location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x, y)
 
-        print location_area_id
         if location_area_id != None:
             location_area = self.static_game_data.location_areas[location_area_id]
 
