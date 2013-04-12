@@ -27,6 +27,21 @@ def num_catch_checks_passed(creature, pokeball, num_shakes):
 
     return num_shakes
 
+def get_catch_message(percent_complete, creature):
+    '''
+        Used to generate the display message when we try to catch a creature.
+    '''
+    if percent_complete <= 25:
+        return "Not even close!"
+    elif percent_complete <= 50:
+        return "Well, that could have gone worse"
+    elif percent_complete <= 70:
+        return "I'll totally get it next time!"
+    elif percent_complete < 100:
+        return "Damn...so close!"
+    else:
+        return "Gotcha! {0} was caught".format(creature.creature.in_battle_name())
+
 
 class BattleState():
     '''
@@ -36,7 +51,7 @@ class BattleState():
     '''
 
     number_catch_checks = 4
-    time_between_shake_checks_ms = 200
+    ms_per_percent_complete = 50
 
     def __init__(self, game, game_data, renderer, level_up_renderer, catch_graphic_renderer):
         self.renderer = renderer
@@ -49,8 +64,8 @@ class BattleState():
         self.display_level_up = None
         self.selecting_pokeball = False
         self.catching_with_pokeball = None
-        self.num_checks_passed = 0
-        self.last_shake_time_ms = 0
+        self.percent_of_creature_caught = 0
+        self.time_started_catching_ms = 0
 
     def render(self):
         '''
@@ -67,11 +82,13 @@ class BattleState():
         # If we're in the process of catching a creature then there is an 
         # extra step which renders the catch graphics on top of the screen.
         if self.catching_with_pokeball:
-            if self.last_shake_time_ms + BattleState.time_between_shake_checks_ms < libtcod.sys_elapsed_milli():
-                self.catch_graphic_renderer.shake()
-                self.last_shake_time_ms = libtcod.sys_elapsed_milli()
+            percent_to_display = min((libtcod.sys_elapsed_milli() - self.time_started_catching_ms) / BattleState.ms_per_percent_complete, 
+                                     self.percent_of_creature_caught)
+            message = None
+            if percent_to_display == self.percent_of_creature_caught:
+                message = get_catch_message(self.percent_of_creature_caught, self.game_data.battle_data.defending_creature())
 
-            sub_console = self.catch_graphic_renderer.render(self.catching_with_pokeball, 100)
+            sub_console = self.catch_graphic_renderer.render(self.catching_with_pokeball, percent_to_display, message)
 
             libtcod.console_blit(sub_console, 
                                  0, 0, 0, 0,
@@ -132,10 +149,12 @@ class BattleState():
                 if key.c == ord(pokeball.display_char) or key.c == ord(pokeball.display_char.upper()):
                     self.selecting_pokeball = False
                     self.catching_with_pokeball = pokeball
-                    self.last_shake_time_ms = 0
-                    self.num_checks_passed = num_catch_checks_passed(self.game_data.battle_data.defending_creature(), 
-                                                                     pokeball, 
-                                                                     BattleState.number_catch_checks)
+                    self.time_started_catching_ms = libtcod.sys_elapsed_milli()
+                    num_checks_passed = num_catch_checks_passed(self.game_data.battle_data.defending_creature(), 
+                                                                pokeball, 
+                                                                BattleState.number_catch_checks)
+
+                    self.percent_of_creature_caught = (100 * num_checks_passed) // BattleState.number_catch_checks
                     break
 
     def _handle_move_select(self, move):

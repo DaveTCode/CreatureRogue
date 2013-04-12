@@ -2,7 +2,6 @@
     Module contains all renderers which are used in battle
 '''
 from __future__ import division
-import random
 import CreatureRogue.data as data
 import CreatureRogue.settings as settings
 import CreatureRogue.libtcodpy as libtcod
@@ -21,28 +20,16 @@ class CatchGraphicRenderer():
                [(' ', None), (' ', None), ('\\', libtcod.black), ('_', "lower"), ('_', "lower"), ('/', libtcod.black), (' ', None), (' ', None)],
                [(' ', None), (' ', None), (' ', None), ('_', libtcod.black), ('_', libtcod.black), (' ', None), (' ', None), (' ', None)]]
 
-    width = 12
-    height = 12
-    max_shake_x = 1
-    min_shake_x = -1
-    max_shake_y = 1
-    min_shake_y = -1
+    width = 30
+    height = 20
 
     def __init__(self, game):
         self.game = game
         self.console = libtcod.console_new(CatchGraphicRenderer.width, CatchGraphicRenderer.height)
-        self.shake_x = 0
-        self.shake_y = 0
+        self.x_offset = (CatchGraphicRenderer.width - len(CatchGraphicRenderer.graphic[0])) // 2
+        self.y_offset = (CatchGraphicRenderer.height - len(CatchGraphicRenderer.graphic)) // 2
 
-    def shake(self):
-        '''
-            Call to update the amount by which the ball has moved from it's
-            starting position.
-        '''
-        self.shake_x = random.randint(CatchGraphicRenderer.min_shake_x, CatchGraphicRenderer.max_shake_x)
-        self.shake_y = random.randint(CatchGraphicRenderer.min_shake_y, CatchGraphicRenderer.max_shake_y)
-
-    def render(self, pokeball, percent_complete):
+    def render(self, pokeball, percent_complete, message):
         '''
             Render the area and return the full console
         '''
@@ -67,7 +54,10 @@ class CatchGraphicRenderer():
                         color = libtcod.gray
 
                     libtcod.console_set_default_foreground(self.console, color)
-                    libtcod.console_put_char(self.console, self.shake_x + x + 2, self.shake_y + y + 2, cell[0])
+                    libtcod.console_put_char(self.console, x + self.x_offset, y + self.y_offset, cell[0])
+
+        if message:
+            libtcod.console_print_rect(self.console, 1, CatchGraphicRenderer.height - 3, CatchGraphicRenderer.width - 2, 2, message)
 
         return self.console
 
