@@ -28,5 +28,6 @@ if __name__ == "__main__":
     attacking_moves = [Move(move_data) for move_data in attacking_species.move_data_at_level(attacking_level)]
 
     game.game_data.player.creatures.append(Creature(attacking_species, attacking_level, None, None, creature_creator.random_stat_values(game.static_game_data.stats, 1, 15), creature_creator.zero_stat_values(game.static_game_data.stats), False, attacking_moves, 1))
+    game.game_data.player.pokeballs[game.game_data.player.pokeballs.keys()[0]] = 100
 
     game.game_loop()
