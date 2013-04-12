@@ -57,7 +57,10 @@ class CatchGraphicRenderer():
                     libtcod.console_put_char(self.console, x + self.x_offset, y + self.y_offset, cell[0])
 
         if message:
-            libtcod.console_print_rect(self.console, 1, CatchGraphicRenderer.height - 3, CatchGraphicRenderer.width - 2, 2, message)
+            libtcod.console_print_rect_ex(self.console, 
+                                          CatchGraphicRenderer.width // 2, CatchGraphicRenderer.height - 3, 
+                                          CatchGraphicRenderer.width - 2, 2, 
+                                          libtcod.BKGND_NONE, libtcod.CENTER, message)
 
         return self.console
 
