@@ -124,6 +124,11 @@ class Game():
 
             self.state = BattleState(self, self.game_data, self.battle_renderer, self.level_up_renderer, self.catch_graphic_renderer)
 
+    def catch_creature(self, creature):
+        self.game_data.player.catch_creature(creature)
+        self.game_data.battle_data = None
+        self.state = MapState(self, self.game_data, self.map_renderer)
+
     def end_wild_battle(self):
         self.game_data.battle_data = None
         self.state = MapState(self, self.game_data, self.map_renderer)

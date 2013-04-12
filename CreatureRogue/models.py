@@ -157,6 +157,12 @@ class Player():
         '''
         return { pokeball: self.pokeballs[pokeball] for pokeball in self.pokeballs if self.pokeballs[pokeball] > 0 }
 
+    def use_pokeball(self, pokeball):
+        '''
+            Called when the player uses up a pokeball.
+        '''
+        self.pokeballs[pokeball] = max(0, self.pokeballs[pokeball] - 1)
+
     def get_location_area(self):
         '''
             The location area of a player is determined by the x, y coordinates 
@@ -239,6 +245,14 @@ class Player():
             Is responsible for updating the pokedex.
         '''
         self.pokedex[creature.species.pokedex_number] = (1, creature.species)
+
+    def catch_creature(self, creature):
+        '''
+            Called whenever a creature is caught in the wild.
+
+            Is responsible for updating the pokedex.
+        '''
+        self.pokedex[creature.species.pokedex_number] = (2, creature.species)
         
 class GameData():
         

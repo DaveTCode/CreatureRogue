@@ -67,6 +67,17 @@ class BattleState():
         self.percent_of_creature_caught = 0
         self.time_started_catching_ms = 0
 
+    def _percent_of_catch_to_display(self):
+        '''
+            Given that we are currently attempting to catch a creature this 
+            function returns how far through the catch process we are.
+
+            The return value comes as a percent and is maxed at the percent
+            caught of the creature (as first calculated).
+        '''
+        return min((libtcod.sys_elapsed_milli() - self.time_started_catching_ms) / BattleState.ms_per_percent_complete, 
+                   self.percent_of_creature_caught)
+
     def render(self):
         '''
             Render the current state of the battle. Called as many times as 
@@ -82,8 +93,7 @@ class BattleState():
         # If we're in the process of catching a creature then there is an 
         # extra step which renders the catch graphics on top of the screen.
         if self.catching_with_pokeball:
-            percent_to_display = min((libtcod.sys_elapsed_milli() - self.time_started_catching_ms) / BattleState.ms_per_percent_complete, 
-                                     self.percent_of_creature_caught)
+            percent_to_display = self._percent_of_catch_to_display()
             message = None
             if percent_to_display == self.percent_of_creature_caught:
                 message = get_catch_message(self.percent_of_creature_caught, self.game_data.battle_data.defending_creature())
@@ -121,10 +131,12 @@ class BattleState():
         elif self.selecting_pokeball:
             self._selecting_pokeball_input(key)
         elif self.catching_with_pokeball:
-            pass # Key presses won't do anything at this point.
+            if self._percent_of_catch_to_display() == self.percent_of_creature_caught:
+                if key.vk == libtcod.KEY_SPACE or key.vk == libtcod.KEY_ENTER:
+                    self._handle_catch_end()
         else:
             if key.vk == libtcod.KEY_CHAR:
-                if key.c == ord('c') and len(self.game_data.player.available_pokeballs()) >= 0:
+                if key.c == ord('c') and len(self.game_data.player.available_pokeballs()) > 0:
                     self.selecting_pokeball = True
                 elif key.c == ord('f'):
                     pass
@@ -146,7 +158,7 @@ class BattleState():
             self.selecting_pokeball = False
         elif key.vk == libtcod.KEY_CHAR:
             for pokeball in self.game_data.player.available_pokeballs():
-                if key.c == ord(pokeball.display_char) or key.c == ord(pokeball.display_char.upper()):
+                if key.c == ord(pokeball.display_char) or key.c == ord(pokeball.display_char.lower()):
                     self.selecting_pokeball = False
                     self.catching_with_pokeball = pokeball
                     self.time_started_catching_ms = libtcod.sys_elapsed_milli()
@@ -155,6 +167,7 @@ class BattleState():
                                                                 BattleState.number_catch_checks)
 
                     self.percent_of_creature_caught = (100 * num_checks_passed) // BattleState.number_catch_checks
+                    self.game_data.player.use_pokeball(pokeball)
                     break
 
     def _handle_move_select(self, move):
@@ -220,3 +233,17 @@ class BattleState():
 
         if old_level != aggressor.creature.level:
             self.display_level_up = (aggressor, old_level)
+
+    def _handle_catch_end(self):
+        '''
+            Called when the catch process completes, either because the 
+            creature was caught or because it escaped.
+
+            May switch out of the battle state.
+        '''
+        if self.percent_of_creature_caught == 100:
+            self.game.catch_creature(self.game_data.battle_data.defending_creature().creature)
+        else:
+            self.catching_with_pokeball = None
+            self.percent_of_creature_caught = 0
+            self.time_started_catching_ms = 0
