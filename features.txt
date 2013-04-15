@@ -1,3 +1,7 @@
-- Status Effects
-- Concept of a party of pokemon
+- Status Effects (*)
+- Concept of a party of creatures
 - Enemy trainers (with party)
+- - Enemy trainer AI (different levels)
+- Different transport methods
+- Better characters for display (*)
+- Evolving creatures (*)
