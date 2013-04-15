@@ -5,7 +5,7 @@
 import sys
 import sqlite3
 import CreatureRogue.libtcodpy as libtcod
-import CreatureRogue.data as data
+import CreatureRogue.data.data as data
 import CreatureRogue.settings as settings
 
 class Loader():

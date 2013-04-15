@@ -2,7 +2,7 @@
     Module contains all renderers which are used in battle
 '''
 from __future__ import division
-import CreatureRogue.data as data
+import CreatureRogue.data.data as data
 import CreatureRogue.settings as settings
 import CreatureRogue.libtcodpy as libtcod
 

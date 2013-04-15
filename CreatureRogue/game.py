@@ -9,8 +9,8 @@ from __future__ import division
 import random
 import sys
 import CreatureRogue.libtcodpy as libtcod
-import CreatureRogue.data as data
-import CreatureRogue.db_layer as db_layer
+import CreatureRogue.data.data as data
+import CreatureRogue.data.db_layer as db_layer
 import CreatureRogue.settings as settings
 from CreatureRogue.models import GameData, BattleData, BattleCreature
 from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer

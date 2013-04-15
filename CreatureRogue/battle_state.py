@@ -7,7 +7,7 @@
 from __future__ import division
 import collections
 import random
-import CreatureRogue.data as data
+import CreatureRogue.data.data as data
 import CreatureRogue.libtcodpy as libtcod
 
 def num_catch_checks_passed(creature, pokeball, num_shakes):

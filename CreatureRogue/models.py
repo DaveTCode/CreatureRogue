@@ -3,7 +3,7 @@ import math
 import random
 
 import CreatureRogue.maps.map_renderer as map_renderer
-import CreatureRogue.data as data
+import CreatureRogue.data.data as data
 
 class BattleCreature():
     stat_adjust_factors = {-6: 1/4, -5: 2/7, -4: 1/3, -3: 2/5, -2: 1/2, -1: 2/3, 
