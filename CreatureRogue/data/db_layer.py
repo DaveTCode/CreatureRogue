@@ -32,10 +32,13 @@ class Loader():
             
             # Stats
             stats = self._load_stats(conn)
+
+            # Ailments
+            ailments = self._load_ailments(conn)
             
             # Moves
             move_targets = self._load_move_targets(conn)
-            moves = self._load_moves(conn, types, stats, move_targets)
+            moves = self._load_moves(conn, types, stats, move_targets, ailments)
             
             # Pokeballs
             pokeballs = self._load_pokeballs(conn)
@@ -55,7 +58,17 @@ class Loader():
             if conn:
                 conn.close()
             
-        return data.StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs)
+        return data.StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs, ailments)
+
+    def _load_ailments(self, conn):
+        ailments = {}
+        cur = conn.cursor()
+        cur.execute('SELECT id, name FROM move_meta_ailments INNER JOIN move_meta_ailment_names ON move_meta_ailments.id = move_meta_ailment_names.move_meta_ailment_id WHERE local_language_id={0}'.format(settings.LOCAL_LANGUAGE_ID))
+
+        for ailment_id, name in cur.fetchall():
+            ailments[ailment_id] = data.Ailment(ailment_id, name)
+
+        return ailments
 
     def _load_stats(self, conn):
         stats = {}
@@ -146,12 +159,12 @@ class Loader():
             
         return data.TypeChart(chart)
     
-    def _load_moves(self, conn, types, stats, move_targets):
+    def _load_moves(self, conn, types, stats, move_targets, ailments):
         moves = {}
         cur = conn.cursor()
         cur.execute('SELECT * FROM move_data')
         
-        for move_id, name, pp, type_id, power, damage_class_id, accuracy, min_hits, max_hits, target_id in cur.fetchall():
+        for move_id, name, pp, type_id, power, damage_class_id, accuracy, min_hits, max_hits, target_id, ailment_id in cur.fetchall():
             if damage_class_id == 2: # Physical
                 attack_stat = stats[2]
                 defense_stat = stats[3]
@@ -172,7 +185,7 @@ class Loader():
             for stat_id, change in stat_cur.fetchall():
                 stat_effects[stats[stat_id]] = change
                 
-            moves[move_id] = data.MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects, attack_stat, defense_stat, accuracy_stat, evasion_stat, move_targets[target_id])
+            moves[move_id] = data.MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects, attack_stat, defense_stat, accuracy_stat, evasion_stat, move_targets[target_id], ailments[ailment_id])
             
         return moves
 

@@ -27,7 +27,7 @@ def load_location_area_rects(rects_file_name):
     return rects
 
 class StaticGameData():
-    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs):
+    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs, ailments):
         self.species = species
         self.types = types
         self.type_chart = type_chart
@@ -41,6 +41,7 @@ class StaticGameData():
         self.location_areas = location_areas
         self.xp_lookup = xp_lookup
         self.pokeballs = pokeballs
+        self.ailments = ailments
         
     def stat(self, stat):
         return self.stats[stat]
@@ -346,3 +347,12 @@ class Pokeball():
 
     def __str__(self):
         return "{0}. {1}".format(self.display_char, self.name)
+
+class Ailment():
+
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+    def __str__(self):
+        return self.name

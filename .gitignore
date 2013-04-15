@@ -36,3 +36,6 @@ nosetests.xml
 
 tiles/
 tiles/*
+
+*.sublime-project
+*.sublime-workspace
