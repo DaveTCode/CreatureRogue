@@ -1,0 +1,3 @@
+- Status Effects
+- Concept of a party of pokemon
+- Enemy trainers (with party)
