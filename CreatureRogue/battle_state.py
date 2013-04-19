@@ -9,39 +9,7 @@ import collections
 import random
 import CreatureRogue.data.data as data
 import CreatureRogue.libtcodpy as libtcod
-
-def num_catch_checks_passed(creature, pokeball, num_shakes):
-    '''
-        Catching a creature is based on a catch rate (modified from the 
-        creatures base catch rate), the ball used and a set of random
-        checks.
-
-        This function determines how many random checks are passed.
-    '''
-    a = creature.modified_catch_rate(pokeball)
-    b = 65535 * (a / 255) ** (1/4)
-
-    for i in range(num_shakes):
-        if random.randint(0, 65535) > b:
-            return i
-
-    return num_shakes
-
-def get_catch_message(percent_complete, creature):
-    '''
-        Used to generate the display message when we try to catch a creature.
-    '''
-    if percent_complete <= 25:
-        return "Not even close!"
-    elif percent_complete <= 50:
-        return "Well, that could have gone worse"
-    elif percent_complete <= 70:
-        return "I'll totally get it next time!"
-    elif percent_complete < 100:
-        return "Damn...so close!"
-    else:
-        return "Gotcha! {0} was caught".format(creature.creature.in_battle_name())
-
+import CreatureRogue.battle_calculations as battle_calculations
 
 class BattleState():
     '''
@@ -200,7 +168,7 @@ class BattleState():
             # The move can actually be None if there were no valid 
             # moves to select from.
             if move:
-                messages = move.act(aggressor, defender, self.game.static_game_data)
+                messages = battle_calculations.act(move, aggressor, defender, self.game.static_game_data)
                 
                 for message in messages:
                     self.messages.append(message)
