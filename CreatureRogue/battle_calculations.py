@@ -1,3 +1,7 @@
+'''
+    All calculations done during a battle are stored in this file. This is
+    essentially all of the game logic for battles.
+'''
 from __future__ import division
 
 def perform_move(move, attacking_creature, defending_creature, static_game_data):
