@@ -12,7 +12,9 @@ import CreatureRogue.libtcodpy as libtcod
 import CreatureRogue.data.data as data
 import CreatureRogue.data.db_layer as db_layer
 import CreatureRogue.settings as settings
-from CreatureRogue.models import GameData, BattleData, BattleCreature
+from CreatureRogue.models.game_data import GameData
+from CreatureRogue.models.battle_data import BattleData
+from CreatureRogue.models.battle_creature import BattleCreature
 from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer
 from CreatureRogue.maps.map_renderer import MapRenderer
 from CreatureRogue.pokedex_renderer import PokedexRenderer

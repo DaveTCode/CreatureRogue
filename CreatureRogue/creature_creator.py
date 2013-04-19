@@ -6,7 +6,8 @@
     create_wild_creature.
 '''
 import random
-from CreatureRogue.models import Creature, Move
+from CreatureRogue.models.creature import Creature
+from CreatureRogue.models.move import Move
 
 def random_stat_values(stats, min_val, max_val):
     '''

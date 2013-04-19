@@ -1,7 +1,10 @@
 import argparse
 
 import CreatureRogue.maps.kanto as kanto
-from CreatureRogue.models import Map, Player, Creature, Move
+from CreatureRogue.models.map import Map
+from CreatureRogue.models.player import Player
+from CreatureRogue.models.creature import Creature
+from CreatureRogue.models.move import Move
 from CreatureRogue.game import Game
 from CreatureRogue.map_state import MapState
 import CreatureRogue.settings as settings

@@ -1,3 +1,6 @@
+'''
+    Handles rendering jobs when the game is in the "View pokedex" state.
+'''
 from __future__ import division
 import CreatureRogue.libtcodpy as libtcod
 import CreatureRogue.settings as settings

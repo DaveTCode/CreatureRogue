@@ -1,3 +1,6 @@
+'''
+    Responsible for rendering a map of tiles onto the screen in ascii.
+'''
 from __future__ import division
 import CreatureRogue.libtcodpy as libtcod
 import CreatureRogue.settings as settings

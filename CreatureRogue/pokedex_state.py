@@ -1,3 +1,9 @@
+'''
+    The main game state when the player is viewing the pokedex.
+
+    Handles input and rendering and allows the player to return to the main
+    game state.
+'''
 import CreatureRogue.libtcodpy as libtcod
 
 class PokedexState():

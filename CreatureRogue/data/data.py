@@ -240,7 +240,7 @@ class MoveTarget():
         
 class MoveData():
     
-    def __init__(self, name, max_pp, type, base_attack, base_accuracy, min_hits, max_hits, stat_changes, attack_stat, defence_stat, accuracy_stat, evasion_stat, target):
+    def __init__(self, name, max_pp, type, base_attack, base_accuracy, min_hits, max_hits, stat_changes, attack_stat, defence_stat, accuracy_stat, evasion_stat, target, ailment):
         self.name = name
         self.max_pp = max_pp
         self.type = type
@@ -254,6 +254,7 @@ class MoveData():
         self.max_hits = max_hits
         self.stat_changes = stat_changes
         self.target = target
+        self.ailment = ailment
     
     def damage_move(self):
         '''
