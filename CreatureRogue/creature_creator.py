@@ -38,4 +38,4 @@ def create_wild_creature(static_game_data, species, level):
                     zero_stat_values(static_game_data.stats), 
                     False, 
                     moves,
-                    1) # DAT - xp here is wrong
+                    static_game_data.xp_lookup.xp_at_level(species, level))

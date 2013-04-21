@@ -19,6 +19,7 @@ class Creature():
         self.stats = {stat: self.max_stat(stat) for stat in species.base_stats}
         self.current_xp = current_xp
         self.fainted = False
+        self.ailments = []
         
     def adjust_stat(self, stat, delta):
         '''

@@ -136,6 +136,13 @@ class XpLookup():
                 return level
 
         return 0
+
+    def xp_at_level(self, species, level):
+        '''
+            This is the minimum XP required to achieve a certain level for the 
+            given species.
+        '''
+        return self.xp_map[species.growth_rate][level]
         
 class Species():
     
