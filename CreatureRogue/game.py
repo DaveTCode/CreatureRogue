@@ -5,26 +5,27 @@
     Correct access is via calling init, load_static_data then game_loop
 """
 
-from __future__ import division
 import random
 import sys
+
 import tcod as libtcod
+
+import CreatureRogue.creature_creator as creature_creator
 import CreatureRogue.data.data as data
 import CreatureRogue.data.db_layer as db_layer
 import CreatureRogue.settings as settings
-from CreatureRogue.models.game_data import GameData
-from CreatureRogue.models.battle_data import BattleData
-from CreatureRogue.models.battle_creature import BattleCreature
-from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer
-from CreatureRogue.maps.map_renderer import MapRenderer
-from CreatureRogue.pokedex_renderer import PokedexRenderer
-from CreatureRogue.game_menu_renderer import GameMenuRenderer
-from CreatureRogue.map_state import MapState
-from CreatureRogue.battle_state import BattleState
-from CreatureRogue.pokedex_state import PokedexState
-from CreatureRogue.game_menu_state import InGameMenuState
-import CreatureRogue.creature_creator as creature_creator
 from CreatureRogue.battle_ai import RandomMoveAi
+from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer
+from CreatureRogue.battle_state import BattleState
+from CreatureRogue.game_menu_renderer import GameMenuRenderer
+from CreatureRogue.game_menu_state import InGameMenuState
+from CreatureRogue.map_state import MapState
+from CreatureRogue.maps.map_renderer import MapRenderer
+from CreatureRogue.models.battle_creature import BattleCreature
+from CreatureRogue.models.battle_data import BattleData
+from CreatureRogue.models.game_data import GameData
+from CreatureRogue.pokedex_renderer import PokedexRenderer
+from CreatureRogue.pokedex_state import PokedexState
 
 
 class Game:
@@ -63,13 +64,14 @@ class Game:
             print("You must load the static game data before calling init")
             sys.exit(1)
             
-        libtcod.console_set_custom_font(self.font, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
-        libtcod.console_init_root(self.screen_width, self.screen_height, self.title, False)
-        libtcod.sys_set_fps(settings.FPS_LIMIT)
+        libtcod.console.set_custom_font(fontFile=self.font, flags=libtcod.FONT_LAYOUT_ASCII_INROW)  # TODO: Should this be libtcod.set_font? What's the difference?
+        libtcod.console.init_root(w=self.screen_width, h=self.screen_height, title=self.title, fullscreen=False)
+        libtcod.sys.set_fps(settings.FPS_LIMIT)
 
-        self.console = libtcod.console_new(self.screen_width, self.screen_height)
+        self.console = libtcod.console.new(w=self.screen_width, h=self.screen_height)
 
         self.game_data = GameData()
+        # TODO: Need to set up the player object here or it will be none in the game data.
 
         self.battle_renderer = BattleRenderer(self)
         self.map_renderer = MapRenderer(self)
@@ -85,16 +87,16 @@ class Game:
             The game loop runs until the user closes the window manually. All 
             game logic and rendering is done here.
         """
-        while not libtcod.console_is_window_closed():
-            libtcod.console_set_default_foreground(self.console, libtcod.white)
-            libtcod.console_print_frame(self.console, 0, 0, self.screen_width, self.screen_height)
+        while not libtcod.console.is_window_closed():
+            libtcod.console.set_default_foreground(self.console, libtcod.white)
+            libtcod.console.print_frame(self.console, 0, 0, self.screen_width, self.screen_height)
             
             output_console = self.state.render()
 
-            libtcod.console_blit(output_console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
-            libtcod.console_flush()
+            libtcod.console.blit(output_console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+            libtcod.console.flush()
 
-            key = libtcod.console_check_for_keypress()
+            key = libtcod.console.check_for_keypress()
             if key and key.vk != libtcod.KEY_NONE:
                 self.state.handle_input(key)
 
