@@ -23,8 +23,8 @@ if __name__ == "__main__":
     game.game_data.player = Player("Test Player", game.static_game_data, Map(kanto.name, kanto.tiles), args.x, args.y)
     game.state = MapState(game, game.game_data, game.map_renderer)
 
-    attacking_id = int(raw_input("Enter the pokedex number of the player creature: "))
-    attacking_level = int(raw_input("Enter the level of the player creature: "))
+    attacking_id = int(input("Enter the pokedex number of the player creature: "))
+    attacking_level = int(input("Enter the level of the player creature: "))
     attacking_species = game.static_game_data.species[attacking_id]
     print("You've selected a: Lv." + str(attacking_level) + " " + str(attacking_species))
 
