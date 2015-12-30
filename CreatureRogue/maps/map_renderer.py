@@ -5,34 +5,34 @@ from __future__ import division
 import tcod as libtcod
 import CreatureRogue.settings as settings
 
-class MapCell():
 
+class MapCell:
     def __init__(self, base_cell):
         self.base_cell = base_cell
-    
+
     def color(self):
         return self.base_cell.display_color
-        
+
     def char(self):
         return self.base_cell.display_char
 
-class BaseMapCell():
 
+class BaseMapCell:
     def __init__(self, identifier, display_char, display_color, cell_passable_type):
         self.identifier = identifier
         self.display_char = display_char
         self.display_color = display_color
         self.cell_passable_type = cell_passable_type
 
-class MapRenderer():
-    
+
+class MapRenderer:
     def __init__(self, game):
         self.game = game
-        self.console = libtcod.console_new(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
+        self.console = libtcod.console.new(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
         self.start_x = self.start_y = 0
-        
+
     def render(self, player):
-        libtcod.console_clear(self.console)
+        libtcod.console.clear(self.console)
         self._centre_map_on_player(player)
         self._render_map(player.map_data)
         self._render_player(player)
@@ -43,21 +43,22 @@ class MapRenderer():
         x, y = player.coords
         self.start_x = x - settings.SCREEN_WIDTH // 2
         self.start_y = y - settings.SCREEN_HEIGHT // 2
-        
+
     def _render_player(self, player):
-        x,y = player.coords
-    
-        libtcod.console_set_default_foreground(self.console, settings.PLAYER_COLOR)
-        libtcod.console_put_char(self.console, x - self.start_x, y - self.start_y, '@')
-    
+        x, y = player.coords
+
+        libtcod.console.set_default_foreground(self.console, settings.PLAYER_COLOR)
+        libtcod.console.put_char(self.console, x - self.start_x, y - self.start_y, '@')
+
     def _render_map(self, map):
         for y in range(self.start_y, self.start_y + settings.SCREEN_HEIGHT):
             for x in range(self.start_x, self.start_x + settings.SCREEN_WIDTH):
-                if y >= 0 and y < len(map.tiles) and x >= 0 and x < len(map.tiles[y]):
+                if len(map.tiles) > y >= 0 and len(map.tiles[y]) > x >= 0:
                     cell = map.tiles[y][x]
-                
-                    libtcod.console_set_default_foreground(self.console, cell.color())
-                    libtcod.console_put_char(self.console, x - self.start_x, y - self.start_y, cell.char())
+
+                    libtcod.console.set_default_foreground(self.console, cell.color())
+                    libtcod.console.put_char(self.console, x - self.start_x, y - self.start_y, cell.char())
+
 
 # Passable cell types
 BLOCK_CELL = 0

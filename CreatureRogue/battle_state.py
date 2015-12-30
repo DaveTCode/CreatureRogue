@@ -57,7 +57,7 @@ class BattleState:
         if len(self.messages) == 0 and self.display_level_up is not None:
             sub_console = self.level_up_renderer.render(self.display_level_up[0].creature, self.display_level_up[1])
 
-            libtcod.console_blit(sub_console, 0, 0, 0, 0, console, 0, 0)
+            libtcod.console.blit(sub_console, 0, 0, 0, 0, console, 0, 0)
 
         # If we're in the process of catching a creature then there is an 
         # extra step which renders the catch graphics on top of the screen.
@@ -69,11 +69,11 @@ class BattleState:
 
             sub_console = self.catch_graphic_renderer.render(self.catching_with_pokeball, percent_to_display, message)
 
-            libtcod.console_blit(sub_console, 
+            libtcod.console.blit(sub_console,
                                  0, 0, 0, 0,
                                  console,
-                                 libtcod.console_get_width(console) // 2 - libtcod.console_get_width(sub_console) // 2,
-                                 libtcod.console_get_height(console) // 2 - libtcod.console_get_height(sub_console) // 2)
+                                 libtcod.console.get_width(console) // 2 - libtcod.console.get_width(sub_console) // 2,
+                                 libtcod.console.get_height(console) // 2 - libtcod.console.get_height(sub_console) // 2)
 
         # The check to see whether to end the battle is done once in the 
         # render function so that we can guarantee that it will get called
