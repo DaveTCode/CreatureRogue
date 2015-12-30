@@ -1,7 +1,7 @@
-'''
+"""
     The static data which constitutes the game is loaded into objects stored 
     in this module.
-'''
+"""
 from __future__ import division
 import random
 
@@ -15,9 +15,9 @@ ACCURACY_STAT = 7
 EVASION_STAT = 8
 
 def load_location_area_rects(rects_file_name):
-    '''
+    """
         Will probably move this elsewhere at some point.
-    '''
+    """
     rects = LocationAreaRectCollection()
     with open(rects_file_name) as rects_file:
         for line in rects_file:
@@ -47,26 +47,26 @@ class StaticGameData():
         return self.stats[stat]
         
 class LocationAreaRectCollection():
-    '''
+    """
         This exists as a separate collection so that we could speed up 
         searching by location using better data structures if required.
 
         To facilitate this all access must be through accessor functions
         not to data directly.
-    '''
+    """
 
     def __init__(self):
         self.by_id = {}
 
     def add_location_area_rect(self, rect):
-        '''
+        """
             Adds a new location rectangle to the object, will overwrite any 
             existing that uses the same location area id.
-        '''
+        """
         self.by_id[rect.location_area_id] = rect
 
     def get_location_area_by_position(self, x, y):
-        '''
+        """
             Given x,y map coordinates, this function returns the location 
             area which covers those.
 
@@ -74,7 +74,7 @@ class LocationAreaRectCollection():
             overlaps so this will return the first such area.
 
             If no location area covers these coordinates then returns None.
-        '''
+        """
         for location_area_id, rect in self.by_id.iteritems():
             if x >= rect.x1 and x <= rect.x2 and y >= rect.y1 and y <= rect.y2:
                 return location_area_id
@@ -124,11 +124,11 @@ class XpLookup():
         self.xp_map = xp_map
         
     def level_at_xp(self, species, xp):
-        '''
+        """
             The level that a creature is when it has exactly xp amount of 
             experience is determined by the species growth rate and some static
             data which is checked here.
-        '''
+        """
         level_xps = self.xp_map[species.growth_rate]
         
         for level, level_xp in level_xps.iteritems():
@@ -138,10 +138,10 @@ class XpLookup():
         return 0
 
     def xp_at_level(self, species, level):
-        '''
+        """
             This is the minimum XP required to achieve a certain level for the 
             given species.
-        '''
+        """
         return self.xp_map[species.growth_rate][level]
         
 class Species():
@@ -163,29 +163,29 @@ class Species():
         self.capture_rate = capture_rate
         
     def imperial_weight_str(self):
-        '''
+        """
             Weight is stored in 1/10kg so this function is used to convert to
             an appropriate imperial viewing string of lbs.
-        '''
+        """
         return '{0:.1f} lbs.'.format(self.weight / 10 * 2.20462)
         
     def imperial_height_str(self):
-        '''
+        """
             Height is stored in 1/10m in the database so this function is used
             to convert into an imperial display format of feet and inches.
-        '''
+        """
         feet = self.height / 10 * 3.2808399
         inches = (feet % 1) * 12
         
         return '{0}\'{1:0=2d}"'.format(int(feet), int(round(inches)))
         
     def move_data_at_level(self, level):
-        '''
+        """
             When a wild creature is encountered, it's move set is the most 
             recent 4 moves that it would have learnt from leveling up.
             
             This function calculates that set of moves (may be less than 4).
-        '''
+        """
         moves = []
         for i in range(level, 0, -1):
             moves = moves + self.level_moves[i]
@@ -196,9 +196,9 @@ class Species():
         return moves[:4]
         
     def level(self, xp_loader, current_xp):
-        '''
+        """
             The level of a species is determined solely by its current xp.
-        '''
+        """
         return xp_loader.level_at_xp(self, current_xp)
     
     def __str__(self):
@@ -218,11 +218,11 @@ class TypeChart():
         self.chart = chart
         
     def damage_modifier(self, attacking_type, defending_type):
-        '''
+        """
             The type chart hold information on how attacks of all types affect
             creatures of all types. This function allows us to query that 
             information.
-        '''
+        """
         if attacking_type in self.chart and defending_type in self.chart[attacking_type]:
             return self.chart[attacking_type][defending_type]
         else:
@@ -264,16 +264,16 @@ class MoveData():
         self.ailment = ailment
     
     def damage_move(self):
-        '''
+        """
             Determines whether a move affects the targets health.
-        '''
+        """
         return not self.attack_stat == None
         
     def stat_change_move(self):
-        '''
+        """
             Determines whether a move affects the targets stats. This is 
             independent of whether it affects their health.
-        '''
+        """
         for stat in self.stat_changes:
             if self.stat_changes[stat] != 0:
                 return True
@@ -312,12 +312,12 @@ class LocationArea():
         self.walk_encounter_rate = walk_encounter_rate
         
     def get_encounter(self):
-        '''
+        """
             Select between all of the available encounters in the location area.
 
             This is a weighted random selection and can return None if there were
             no encounters available.
-        '''
+        """
         total_rarity = reduce(lambda x, y: x + y.rarity, self.walk_encounters, 0)
         rand = random.randint(0, total_rarity if total_rarity == 0 else total_rarity - 1)
 

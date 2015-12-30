@@ -1,6 +1,6 @@
-'''
+"""
     A move is a single action that a creature can take during a battle.
-'''
+"""
 from __future__ import division
 import random
 from CreatureRogue.data import data

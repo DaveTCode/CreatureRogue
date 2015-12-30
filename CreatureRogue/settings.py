@@ -1,8 +1,8 @@
-'''
-	Configurable settings for the application.
-'''
+"""
+Configurable settings for the application.
+"""
 
-import CreatureRogue.libtcodpy as libtcod
+import tcod as libtcod
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
@@ -32,8 +32,8 @@ POKEDEX_KNOWN_COLOR = libtcod.Color(0, 255, 0)
 POKEDEX_LINE_COLOR = libtcod.white
 PLAYER_COLOR = libtcod.yellow
 
-LOCAL_LANGUAGE_ID = 9 # English
-VERSION_GROUP_ID = 6 # Emerald
-POKEDEX_ID = 1 # Entire national dex
-VERSION_ID = 7 # Flavor text version. Set this to 1 for original 151 pokemon.
-LOCATION_GENERATION_ID = 4 # Can be 4 or 5 (Gen 4 or 5 apparently)
+LOCAL_LANGUAGE_ID = 9  # English
+VERSION_GROUP_ID = 6  # Emerald
+POKEDEX_ID = 1  # Entire national dex
+VERSION_ID = 7  # Flavor text version. Set this to 1 for original 151 pokemon.
+LOCATION_GENERATION_ID = 4  # Can be 4 or 5 (Gen 4 or 5 apparently)

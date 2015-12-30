@@ -1,13 +1,14 @@
-'''
+"""
     The map state is the state that is used when the player is traversing the
     world map.
 
     All states are responsible for rendering and input handling.
-'''
+"""
 
-import CreatureRogue.libtcodpy as libtcod
+import tcod as libtcod
 
-class MapState():
+
+class MapState:
 
     def __init__(self, game, game_data, map_renderer):
         self.game = game
@@ -17,9 +18,9 @@ class MapState():
         self.top_right = 0
 
     def handle_input(self, key):
-        '''
+        """
             Handles a single key stroke when the player is traversing the map.
-        '''
+        """
         x_delta, y_delta = 0, 0
         if key.vk == libtcod.KEY_ESCAPE:
             self.game.open_menu()
@@ -46,7 +47,7 @@ class MapState():
                 pass
 
     def render(self):
-        '''
+        """
             Handles rendering whilst in this state
-        '''
+        """
         return self.map_renderer.render(self.game_data.player)

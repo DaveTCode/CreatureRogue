@@ -1,16 +1,17 @@
-'''
+"""
     All calculations done during a battle are stored in this file. This is
     essentially all of the game logic for battles.
-'''
-from __future__ import division
+"""
+import random
+
 
 def perform_move(move, attacking_creature, defending_creature, static_game_data):
-    '''
+    """
         Performs the move by the attacking creature on the defending_creature.
 
         This can change both the attacking creature, the defending creature and
         cause messages to be returned.
-    '''
+    """
     messages = []
     
     if move.pp <= 0:
@@ -53,10 +54,10 @@ def perform_move(move, attacking_creature, defending_creature, static_game_data)
     return messages
 
 def hit_calculation(move, attacking_creature, defending_creature):
-        '''
+        """
             Determines whether the move will hit the defending creature.
             This is based on a random check.
-        '''
+        """
         if move.move_data.base_accuracy:
             return random.random() < (move.move_data.base_accuracy / 100 * 
                                       (attacking_creature.stat_value(move.move_data.accuracy_stat) / 
@@ -65,17 +66,17 @@ def hit_calculation(move, attacking_creature, defending_creature):
         return False
 
 def damage_calculation(move, attacking_creature, defending_creature, type_chart):
-    '''
+    """
         To calculate the damage that a move does we need to know which
         creature is performing the move and which is defending it.
         
         The return value for this is the hitpoint delta.
-    '''
+    """
     attack_stat_value = attacking_creature.stat_value(move.move_data.attack_stat)
     defence_stat_value = defending_creature.stat_value(move.move_data.defence_stat)
     
     # Modifiers
-    critical_modifier = 2 if random.uniform(0, 100) < 6.25 else 1 # TODO: Incomplete - should use items and check whether this is a high critical move etc
+    critical_modifier = 2 if random.uniform(0, 100) < 6.25 else 1  # TODO: Incomplete - should use items and check whether this is a high critical move etc
     same_type_attack_bonus = 1.5 if move.move_data.type in attacking_creature.creature.species.types else 1
     type_modifier = 1
     for defending_type in defending_creature.creature.species.types:
@@ -96,13 +97,13 @@ def damage_calculation(move, attacking_creature, defending_creature, type_chart)
     return messages, int((((2 * attacking_creature.creature.level + 10) / 250) * (attack_stat_value / defence_stat_value) * self.move_data.base_attack + 2) * modifier)
 
 def num_catch_checks_passed(creature, pokeball, num_shakes):
-    '''
+    """
         Catching a creature is based on a catch rate (modified from the 
         creatures base catch rate), the ball used and a set of random
         checks.
 
         This function determines how many random checks are passed.
-    '''
+    """
     a = creature.modified_catch_rate(pokeball)
     b = 65535 * (a / 255) ** (1/4)
 
@@ -113,9 +114,9 @@ def num_catch_checks_passed(creature, pokeball, num_shakes):
     return num_shakes
 
 def get_catch_message(percent_complete, creature):
-    '''
+    """
         Used to generate the display message when we try to catch a creature.
-    '''
+    """
     if percent_complete <= 25:
         return "Not even close!"
     elif percent_complete <= 50:
@@ -128,9 +129,9 @@ def get_catch_message(percent_complete, creature):
         return "Gotcha! {0} was caught".format(creature.creature.in_battle_name())
 
 def get_stat_change_message(move, target, stat_change):
-    '''
+    """
         Creates the message which is displayed when a creatures stats change.
-    '''
+    """
     if adjust_amount == 0 and move.move_data.stat_changes[stat] != 0 and not move.move_data.damage_move():
         direction = 'higher' if move.move_data.stat_changes[stat] > 0 else 'lower'
         return u"{0}'s {1} won't go any {2}!".format(target.creature.in_battle_name(), stat.name, direction)

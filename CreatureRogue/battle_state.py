@@ -1,22 +1,23 @@
-'''
+"""
     The battle state is the main state that the game is in when the player is
     in a battle.
 
     It is responsible for rendering and input processing.
-'''
-from __future__ import division
+"""
 import collections
 import random
-import CreatureRogue.data.data as data
-import CreatureRogue.libtcodpy as libtcod
-import CreatureRogue.battle_calculations as battle_calculations
 
-class BattleState():
-    '''
+import CreatureRogue.battle_calculations as battle_calculations
+import CreatureRogue.data.data as data
+import tcod as libtcod
+
+
+class BattleState:
+    """
         The main state that the game is in when the player is in a battle.
 
         Handles input and rendering.
-    '''
+    """
 
     number_catch_checks = 4
     ms_per_percent_complete = 50
@@ -36,24 +37,24 @@ class BattleState():
         self.time_started_catching_ms = 0
 
     def _percent_of_catch_to_display(self):
-        '''
+        """
             Given that we are currently attempting to catch a creature this 
             function returns how far through the catch process we are.
 
             The return value comes as a percent and is maxed at the percent
             caught of the creature (as first calculated).
-        '''
+        """
         return min((libtcod.sys_elapsed_milli() - self.time_started_catching_ms) / BattleState.ms_per_percent_complete, 
                    self.percent_of_creature_caught)
 
     def render(self):
-        '''
+        """
             Render the current state of the battle. Called as many times as 
             required by the game loop.
-        '''
+        """
         console = self.renderer.render(self.game_data.battle_data, self.messages, self.selecting_pokeball)
 
-        if len(self.messages) == 0 and self.display_level_up != None:
+        if len(self.messages) == 0 and self.display_level_up is not None:
             sub_console = self.level_up_renderer.render(self.display_level_up[0].creature, self.display_level_up[1])
 
             libtcod.console_blit(sub_console, 0, 0, 0, 0, console, 0, 0)
@@ -74,7 +75,6 @@ class BattleState():
                                  libtcod.console_get_width(console) // 2 - libtcod.console_get_width(sub_console) // 2,
                                  libtcod.console_get_height(console) // 2 - libtcod.console_get_height(sub_console) // 2)
 
-
         # The check to see whether to end the battle is done once in the 
         # render function so that we can guarantee that it will get called
         # within a 30fps time frame.
@@ -84,10 +84,10 @@ class BattleState():
         return console
 
     def handle_input(self, key):
-        '''
+        """
             Handle key input when in the battle state. Takes a single key at a 
             time but is only called when there is a key press.
-        '''
+        """
         battle_data = self.game_data.battle_data
 
         if len(self.messages) > 0:
@@ -119,9 +119,9 @@ class BattleState():
                     self._handle_move_select(move)
                 
     def _selecting_pokeball_input(self, key):
-        '''
+        """
             Input handler when the sub state is selecting a pokeball.
-        '''
+        """
         if key.vk == libtcod.KEY_ESCAPE:
             self.selecting_pokeball = False
         elif key.vk == libtcod.KEY_CHAR:
@@ -139,13 +139,13 @@ class BattleState():
                     break
 
     def _handle_move_select(self, move):
-        '''
+        """
             Given that the player has selected a move to perform this function 
             is called to allow the computer to select a move and then actually 
             perform the moves in the correct order.
 
             It may exit early if a creature faints.
-        '''
+        """
         battle_data = self.game_data.battle_data
         computer_move = battle_data.computer_move()
         speed_stat = self.game.static_game_data.stats[data.SPEED_STAT]
@@ -187,10 +187,10 @@ class BattleState():
                     break
 
     def _creature_fainted(self, aggressor, defender):
-        '''
+        """
             Called when a creature faints during battle. Used to add experience 
             to the winner and check for level ups.
-        '''
+        """
         xp_given = defender.creature.xp_given(1, False)
 
         old_level = aggressor.creature.level
@@ -203,12 +203,12 @@ class BattleState():
             self.display_level_up = (aggressor, old_level)
 
     def _handle_catch_end(self):
-        '''
+        """
             Called when the catch process completes, either because the 
             creature was caught or because it escaped.
 
             May switch out of the battle state.
-        '''
+        """
         if self.percent_of_creature_caught == 100:
             self.game.catch_creature(self.game_data.battle_data.defending_creature().creature)
         else:

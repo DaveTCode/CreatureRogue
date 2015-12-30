@@ -1,10 +1,10 @@
-'''
+"""
     Used to test the game pokedex state. Allows a user to view a random 
     pokedex. 
 
     Will crash on exiting the pokedex as the game will not have been 
     set up (this is intentional).
-'''
+"""
 import random
 
 import CreatureRogue.settings as settings
