@@ -39,3 +39,5 @@ tiles/*
 
 *.sublime-project
 *.sublime-workspace
+
+venv
