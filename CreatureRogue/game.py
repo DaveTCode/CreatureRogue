@@ -11,8 +11,8 @@ import sys
 import tcod as libtcod
 
 import CreatureRogue.creature_creator as creature_creator
-import CreatureRogue.data.data as data
-import CreatureRogue.data.db_layer as db_layer
+import CreatureRogue.data_layer.data as data
+import CreatureRogue.data_layer.db_layer as db_layer
 import CreatureRogue.settings as settings
 from CreatureRogue.battle_ai import RandomMoveAi
 from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer

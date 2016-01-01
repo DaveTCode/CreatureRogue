@@ -5,7 +5,7 @@
 import sqlite3
 import sys
 
-import CreatureRogue.data.data as data
+import CreatureRogue.data_layer.data as data
 import tcod as libtcod
 import CreatureRogue.settings as settings
 

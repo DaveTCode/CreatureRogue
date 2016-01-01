@@ -8,7 +8,7 @@ import collections
 import random
 
 import CreatureRogue.battle_calculations as battle_calculations
-import CreatureRogue.data.data as data
+import CreatureRogue.data_layer.data as data
 import tcod as libtcod
 
 

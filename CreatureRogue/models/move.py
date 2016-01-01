@@ -3,7 +3,7 @@
 """
 from __future__ import division
 import random
-from CreatureRogue.data import data
+from CreatureRogue.data_layer import data
 
 class Move():
     def __init__(self, move_data):

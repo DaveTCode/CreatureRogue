@@ -3,7 +3,7 @@
 """
 import tcod as libtcod
 
-import CreatureRogue.data.data as data
+import CreatureRogue.data_layer.data as data
 import CreatureRogue.settings as settings
 
 
