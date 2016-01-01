@@ -3,6 +3,7 @@
 """
 
 import tcod as libtcod
+
 import CreatureRogue.settings as settings
 
 
