@@ -1,6 +1,17 @@
+from typing import Optional, Mapping
+
+from data_layer.ailment import Ailment
+from data_layer.move_target import MoveTarget
+from data_layer.stat import Stat
+from data_layer.type import Type
+
+
 class MoveData:
 
-    def __init__(self, name, max_pp, type, base_attack, base_accuracy, min_hits, max_hits, stat_changes, attack_stat, defence_stat, accuracy_stat, evasion_stat, target, ailment):
+    def __init__(self, name: str, max_pp: int, type: Type, base_attack: int, base_accuracy: int,
+                 min_hits: int, max_hits: int, stat_changes: Mapping[Stat, int],
+                 attack_stat: Optional[Stat], defence_stat: Optional[Stat], accuracy_stat: Optional[Stat], evasion_stat: Optional[Stat],
+                 target: MoveTarget, ailment: Optional[Ailment]):
         self.name = name
         self.max_pp = max_pp
         self.type = type
@@ -16,13 +27,13 @@ class MoveData:
         self.target = target
         self.ailment = ailment
 
-    def damage_move(self):
+    def damage_move(self) -> bool:
         """
             Determines whether a move affects the targets health.
         """
         return self.attack_stat is not None
 
-    def stat_change_move(self):
+    def stat_change_move(self) -> bool:
         """
             Determines whether a move affects the targets stats. This is
             independent of whether it affects their health.
