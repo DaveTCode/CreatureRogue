@@ -1,9 +1,9 @@
 from typing import Optional, Mapping
 
-from data_layer.ailment import Ailment
-from data_layer.move_target import MoveTarget
-from data_layer.stat import Stat
-from data_layer.type import Type
+from CreatureRogue.data_layer.ailment import Ailment
+from CreatureRogue.data_layer.move_target import MoveTarget
+from CreatureRogue.data_layer.stat import Stat
+from CreatureRogue.data_layer.type import Type
 
 
 class MoveData:
