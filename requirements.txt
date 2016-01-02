@@ -1,3 +1,5 @@
 libtcod-cffi
 tdl
+coverage
 nose2
+typing

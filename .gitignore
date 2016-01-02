@@ -41,3 +41,4 @@ tiles/*
 *.sublime-workspace
 
 venv
+cover
