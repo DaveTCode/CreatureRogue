@@ -8,5 +8,6 @@ install:
   - pip install -r requirements.txt
   - pip install coveralls
 # command to run tests
-script: nosetests -c=.noserc
+script:
+  - nosetests -v --with-coverage --cover-package=CreatureRogue
 after_success: coveralls
