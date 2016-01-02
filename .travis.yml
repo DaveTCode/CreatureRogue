@@ -6,7 +6,9 @@ install:
   - sudo apt-get update
   - sudo apt-get install libsdl1.2-dev
   - pip install -r requirements.txt
-  - pip install coveralls
+  - pip install python-coveralls
+  - pip install nose
+  - pip install coverage
 # command to run tests
 script:
   - nosetests -v --with-coverage --cover-package=CreatureRogue
