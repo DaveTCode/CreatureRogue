@@ -51,13 +51,15 @@ class Species:
 
             This function calculates that set of moves (may be less than 4).
 
-            :param level: The level at which we want a list of moves.
+            :param level: The level at which we want a list of moves. Must be > 0.
 
             :returns: A list of the first 4 moves that the species would have
             learnt by the level passed in.
         """
+        assert level > 0
+
         moves = []
-        for i in range(level, 0, -1):
+        for i in [l for l in range(level, 0, -1) if l in self.level_moves]:
             moves = moves + self.level_moves[i]
 
             if len(moves) >= 4:
