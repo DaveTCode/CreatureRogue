@@ -5,32 +5,32 @@
 import sqlite3
 import sys
 
-import CreatureRogue.data_layer.ailment
-import CreatureRogue.data_layer.color
-import CreatureRogue.data_layer.data as data
 import tcod as libtcod
 
-import CreatureRogue.data_layer.encounter
-import CreatureRogue.data_layer.growth_rate
-import CreatureRogue.data_layer.location
-import CreatureRogue.data_layer.location_area
-import CreatureRogue.data_layer.move_data
-import CreatureRogue.data_layer.move_target
-import CreatureRogue.data_layer.pokeball
-import CreatureRogue.data_layer.region
-import CreatureRogue.data_layer.species
-import CreatureRogue.data_layer.stat
-import CreatureRogue.data_layer.type
-import CreatureRogue.data_layer.type_chart
-import CreatureRogue.data_layer.xp_lookup
 import CreatureRogue.settings as settings
+from CreatureRogue.data_layer.ailment import Ailment
+from CreatureRogue.data_layer.color import Color
+from CreatureRogue.data_layer.data import StaticGameData, ACCURACY_STAT, EVASION_STAT
+from CreatureRogue.data_layer.encounter import Encounter
+from CreatureRogue.data_layer.growth_rate import GrowthRate
+from CreatureRogue.data_layer.location import Location
+from CreatureRogue.data_layer.location_area import LocationArea
+from CreatureRogue.data_layer.move_data import MoveData
+from CreatureRogue.data_layer.move_target import MoveTarget
+from CreatureRogue.data_layer.pokeball import Pokeball
+from CreatureRogue.data_layer.region import Region
+from CreatureRogue.data_layer.species import Species
+from CreatureRogue.data_layer.stat import Stat
+from CreatureRogue.data_layer.type import Type
+from CreatureRogue.data_layer.type_chart import TypeChart
+from CreatureRogue.data_layer.xp_lookup import XpLookup
 
 
 class Loader:
     def __init__(self, db_file):
         self.db_file = db_file
 
-    def load_static_data(self):
+    def load_static_data(self) -> StaticGameData:
         """
             Given a database file we want to load the entire of the static 
             data into the application so that it can be quickly accessed as 
@@ -76,8 +76,8 @@ class Loader:
             if conn:
                 conn.close()
 
-        return data.StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets,
-                                   regions, locations, location_areas, xp_lookup, pokeballs, ailments)
+        return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets,
+                              regions, locations, location_areas, xp_lookup, pokeballs, ailments)
 
     def _load_ailments(self, conn):
         ailments = {}
@@ -87,7 +87,7 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for ailment_id, name in cur.fetchall():
-            ailments[ailment_id] = CreatureRogue.data_layer.ailment.Ailment(ailment_id, name)
+            ailments[ailment_id] = Ailment(ailment_id, name)
 
         return ailments
 
@@ -99,7 +99,7 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for stat_id, name, short_name in cur.fetchall():
-            stats[stat_id] = CreatureRogue.data_layer.stat.Stat(name, short_name)
+            stats[stat_id] = Stat(name, short_name)
 
         return stats
 
@@ -111,7 +111,7 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for color_id, name, red, green, blue in cur.fetchall():
-            colors[color_id] = CreatureRogue.data_layer.color.Color(name, red, green, blue)
+            colors[color_id] = Color(name, red, green, blue)
 
         return colors
 
@@ -121,7 +121,7 @@ class Loader:
         cur.execute('SELECT id, identifier FROM growth_rates')
 
         for gr_id, name in cur.fetchall():
-            growth_rates[gr_id] = CreatureRogue.data_layer.growth_rate.GrowthRate(name)
+            growth_rates[gr_id] = GrowthRate(name)
 
         return growth_rates
 
@@ -133,7 +133,7 @@ class Loader:
         for growth_rate_id, level, xp in cur.fetchall():
             xp_lookup[growth_rates[growth_rate_id]][level] = xp
 
-        return CreatureRogue.data_layer.xp_lookup.XpLookup(xp_lookup)
+        return XpLookup(xp_lookup)
 
     def _load_pokeballs(self, conn):
         pokeballs = {}
@@ -144,8 +144,8 @@ class Loader:
             r_top, g_top, b_top = [int(a) for a in top_color.split(',')]
             r_bottom, g_bottom, b_bottom = [int(a) for a in bottom_color.split(',')]
 
-            pokeballs[pokeball_id] = CreatureRogue.data_layer.pokeball.Pokeball(pokeball_id, name, catch_rate, libtcod.Color(r_top, g_top, b_top),
-                                                                                libtcod.Color(r_bottom, g_bottom, b_bottom), display_char)
+            pokeballs[pokeball_id] = Pokeball(pokeball_id, name, catch_rate, libtcod.Color(r_top, g_top, b_top),
+                                              libtcod.Color(r_bottom, g_bottom, b_bottom), display_char)
 
         return pokeballs
 
@@ -157,7 +157,7 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for mt_id, identifier, name, description in cur.fetchall():
-            targets[mt_id] = CreatureRogue.data_layer.move_target.MoveTarget(identifier, name, description)
+            targets[mt_id] = MoveTarget(identifier, name, description)
 
         return targets
 
@@ -169,7 +169,7 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for type_id, name in cur.fetchall():
-            types[type_id] = CreatureRogue.data_layer.type.Type(name)
+            types[type_id] = Type(name)
 
         return types
 
@@ -187,7 +187,7 @@ class Loader:
 
             chart[damage_type][target_type] = int(damage_factor)
 
-        return CreatureRogue.data_layer.type_chart.TypeChart(chart)
+        return TypeChart(chart)
 
     def _load_moves(self, conn, types, stats, move_targets, ailments):
         moves = {}
@@ -215,9 +215,9 @@ class Loader:
             for stat_id, change in stat_cur.fetchall():
                 stat_effects[stats[stat_id]] = change
 
-            moves[move_id] = CreatureRogue.data_layer.move_data.MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects,
-                                                                         attack_stat, defense_stat, accuracy_stat, evasion_stat,
-                                                                         move_targets[target_id], ailments[ailment_id])
+            moves[move_id] = MoveData(name, pp, types[type_id], power, accuracy, min_hits, max_hits, stat_effects,
+                                      attack_stat, defense_stat, accuracy_stat, evasion_stat,
+                                      move_targets[target_id], ailments[ailment_id])
 
         return moves
 
@@ -238,8 +238,8 @@ class Loader:
                 'SELECT stat_id, base_stat FROM pokemon_stats INNER JOIN stats ON stats.id = pokemon_stats.stat_id WHERE pokemon_id = {0}'.format(
                     creature_id))
             species_stats = {stats[row[0]]: row[1] for row in stats_cur}
-            species_stats[stats[data.EVASION_STAT]] = 1
-            species_stats[stats[data.ACCURACY_STAT]] = 1
+            species_stats[stats[EVASION_STAT]] = 1
+            species_stats[stats[ACCURACY_STAT]] = 1
 
             moves_cur = conn.cursor()
             moves_cur.execute(
@@ -249,9 +249,9 @@ class Loader:
             for move_id, level in moves_cur.fetchall():
                 level_moves[level].append(moves[move_id])
 
-            species[species_id] = CreatureRogue.data_layer.species.Species(pokedex_number, name, height, weight, species_types, species_stats,
-                                                                           base_exp, growth_rates[growth_rate_id], name[0:1], colors[color_id],
-                                                                           level_moves, flavor_text, genus, capture_rate)
+            species[species_id] = Species(pokedex_number, name, height, weight, species_types, species_stats,
+                                          base_exp, growth_rates[growth_rate_id], name[0:1], colors[color_id],  # TODO - What if the creature has no name?
+                                          level_moves, flavor_text, genus, capture_rate)
 
         return species
 
@@ -263,7 +263,7 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for region_id, identifier, name in cur.fetchall():
-            regions[region_id] = CreatureRogue.data_layer.region.Region(identifier, name)
+            regions[region_id] = Region(identifier, name)
 
         return regions
 
@@ -275,7 +275,7 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for location_id, identifier, name, region_id in cur.fetchall():
-            locations[location_id] = CreatureRogue.data_layer.location.Location(identifier, name, regions[region_id])
+            locations[location_id] = Location(identifier, name, regions[region_id])
 
         return locations
 
@@ -292,11 +292,6 @@ class Loader:
                 'SELECT encounter_method_id, rate FROM location_area_encounter_rates WHERE version_id = (SELECT MAX(version_id) FROM location_area_encounter_rates WHERE location_area_id = {0}) AND location_area_id = {0}'.format(
                     area_id))
 
-            walk_encounter_rate = 0
-            for method_id, rate in rate_cur.fetchall():
-                if method_id == 1:
-                    walk_encounter_rate = rate
-
             enc_cur = conn.cursor()
             enc_cur.execute(
                 'SELECT species_id, MIN(min_level), MAX(max_level), MAX(rarity), encounter_method_id FROM encounters INNER JOIN pokemon on pokemon_id = pokemon.id INNER JOIN encounter_slots ON encounter_slots.id = encounters.encounter_slot_id WHERE location_area_id = {0} GROUP BY pokemon_id, encounter_method_id'.format(
@@ -305,9 +300,8 @@ class Loader:
             walk_encs = []
             for species_id, min_level, max_level, rarity, method_id in enc_cur.fetchall():
                 if method_id == 1:
-                    walk_encs.append(
-                        CreatureRogue.data_layer.encounter.Encounter(species[species_id], min_level, max_level, rarity))
+                    walk_encs.append(Encounter(species[species_id], min_level, max_level, rarity))
 
-            location_areas[area_id] = CreatureRogue.data_layer.location_area.LocationArea(identifier, name, locations[location_id], walk_encs, walk_encounter_rate)
+            location_areas[area_id] = LocationArea(identifier, name, locations[location_id], walk_encs)
 
         return location_areas
