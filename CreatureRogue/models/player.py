@@ -55,7 +55,7 @@ class Player():
             Returns true if the player is allowed to travel on that cell and
             false otherwise.
         """
-        # TODO - Only really check that the cell is always travesable at the moment
+        # TODO - Only really check that the cell is always traversable at the moment
         return cell.base_cell.cell_passable_type == map_renderer.EMPTY_CELL
 
     def _causes_encounter(self):
