@@ -5,4 +5,6 @@
 
     This file provides definitions of the status effects in terms of what
     they effect on a creature.
+
+    TODO - Implement
 """
