@@ -12,4 +12,5 @@ install:
 # command to run tests
 script:
   - nosetests -v --with-coverage --cover-package=CreatureRogue
-after_success: coveralls
+after_success:
+  - coveralls
