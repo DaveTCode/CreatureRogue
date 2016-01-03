@@ -1,7 +1,3 @@
-"""
-    The static data which constitutes the game is loaded into objects stored 
-    in this module.
-"""
 from CreatureRogue.data_layer.location_area_rect import LocationAreaRect
 from CreatureRogue.data_layer.location_area_rect_collection import LocationAreaRectCollection
 
@@ -30,6 +26,14 @@ def load_location_area_rects(rects_file_name):
 
 
 class StaticGameData:
+    """
+    Static game data is loaded on start up and is a memory cache of the
+    database which contains creature species, moves etc.
+
+    It's really just a collection of the different objects to facilitate
+    passing it around the game and each object should be accessed directly
+    (static_data.*).
+    """
     def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs, ailments):
         self.species = species
         self.types = types
