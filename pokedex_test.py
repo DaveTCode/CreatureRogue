@@ -10,8 +10,8 @@ import random
 import CreatureRogue.settings as settings
 from CreatureRogue.game import Game
 from CreatureRogue.models.player import Player
-from CreatureRogue.pokedex_renderer import PokedexRenderer
-from CreatureRogue.pokedex_state import PokedexState
+from CreatureRogue.renderer.pokedex_renderer import PokedexRenderer
+from CreatureRogue.states.pokedex_state import PokedexState
 
 
 def gen_full_pokedex(static_game_data):

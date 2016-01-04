@@ -1,13 +1,13 @@
 import argparse
 
-from CreatureRogue.models.map import Map
-from CreatureRogue.models.player import Player
-from CreatureRogue.models.creature import Creature
-from CreatureRogue.models.move import Move
-from CreatureRogue.game import Game
-from CreatureRogue.map_state import MapState
-import CreatureRogue.settings as settings
 import CreatureRogue.creature_creator as creature_creator
+import CreatureRogue.settings as settings
+from CreatureRogue.game import Game
+from CreatureRogue.models.creature import Creature
+from CreatureRogue.models.map import Map
+from CreatureRogue.models.move import Move
+from CreatureRogue.models.player import Player
+from CreatureRogue.states.map_state import MapState
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

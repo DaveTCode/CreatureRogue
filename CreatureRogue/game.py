@@ -15,17 +15,18 @@ import CreatureRogue.data_layer.data as data
 import CreatureRogue.data_layer.db_layer as db_layer
 import CreatureRogue.settings as settings
 from CreatureRogue.battle_ai import RandomMoveAi
-from CreatureRogue.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer
-from CreatureRogue.battle_state import BattleState
-from CreatureRogue.game_menu_renderer import GameMenuRenderer
-from CreatureRogue.game_menu_state import InGameMenuState
-from CreatureRogue.map_state import MapState
 from CreatureRogue.maps.map_renderer import MapRenderer
 from CreatureRogue.models.battle_creature import BattleCreature
 from CreatureRogue.models.battle_data import BattleData
 from CreatureRogue.models.game_data import GameData
-from CreatureRogue.pokedex_renderer import PokedexRenderer
-from CreatureRogue.pokedex_state import PokedexState
+from CreatureRogue.renderer.console_renderer import ConsoleRenderer
+from CreatureRogue.renderer.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer
+from CreatureRogue.renderer.game_menu_renderer import GameMenuRenderer
+from CreatureRogue.renderer.pokedex_renderer import PokedexRenderer
+from CreatureRogue.states.battle_state import BattleState
+from CreatureRogue.states.game_menu_state import InGameMenuState
+from CreatureRogue.states.map_state import MapState
+from CreatureRogue.states.pokedex_state import PokedexState
 
 
 class Game:
@@ -36,8 +37,7 @@ class Game:
         self.title = title
         self.font = font
         self.static_game_data = None
-        
-        self.console = None
+
         self.state = None
         self.game_data = None
         self.battle_renderer = None
@@ -46,6 +46,7 @@ class Game:
         self.level_up_renderer = None
         self.game_menu_renderer = None
         self.catch_graphic_renderer = None
+        self.console = ConsoleRenderer.create_console(title=title, console_width=screen_width, console_height=screen_height, font_file=font, fps_limit=settings.FPS_LIMIT)
 
     def load_static_data(self):
         """
@@ -63,12 +64,6 @@ class Game:
         if self.static_game_data is None:
             print("You must load the static game data before calling init")
             sys.exit(1)
-            
-        libtcod.console.set_custom_font(fontFile=self.font, flags=libtcod.FONT_LAYOUT_ASCII_INROW)  # TODO: Should this be libtcod.set_font? What's the difference?
-        libtcod.console.init_root(w=self.screen_width, h=self.screen_height, title=self.title, fullscreen=False)
-        libtcod.sys.set_fps(settings.FPS_LIMIT)
-
-        self.console = libtcod.console.new(w=self.screen_width, h=self.screen_height)
 
         self.game_data = GameData()
         # TODO: Need to set up the player object here or it will be none in the game data.

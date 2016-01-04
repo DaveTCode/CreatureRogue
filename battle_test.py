@@ -5,17 +5,17 @@
     Will probably crash when the battle concludes because the rest of the game
     will not be set up at that point.
 """
+import CreatureRogue.creature_creator as creature_creator
+import CreatureRogue.settings as settings
+from CreatureRogue.battle_ai import RandomMoveAi
 from CreatureRogue.game import Game
-from CreatureRogue.models.game_data import GameData
+from CreatureRogue.models.battle_creature import BattleCreature
 from CreatureRogue.models.battle_data import BattleData
 from CreatureRogue.models.creature import Creature
+from CreatureRogue.models.game_data import GameData
 from CreatureRogue.models.move import Move
-from CreatureRogue.models.battle_creature import BattleCreature
 from CreatureRogue.models.player import Player
-from CreatureRogue.battle_state import BattleState
-from CreatureRogue.battle_ai import RandomMoveAi
-import CreatureRogue.settings as settings
-import CreatureRogue.creature_creator as creature_creator
+from CreatureRogue.states.battle_state import BattleState
 
 if __name__ == "__main__":
     game = Game(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, settings.TITLE, settings.FONT)

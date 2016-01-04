@@ -23,12 +23,12 @@ class CatchGraphicRenderer:
 
     width = 30
     height = 20
+    x_offset = width - len(graphic[0]) // 2
+    y_offset = height - len(graphic) // 2
 
     def __init__(self, game):
         self.game = game
         self.console = libtcod.console.new(CatchGraphicRenderer.width, CatchGraphicRenderer.height)
-        self.x_offset = (CatchGraphicRenderer.width - len(CatchGraphicRenderer.graphic[0])) // 2
-        self.y_offset = (CatchGraphicRenderer.height - len(CatchGraphicRenderer.graphic)) // 2
 
     def render(self, pokeball, percent_complete, message):
         """
@@ -218,9 +218,9 @@ class BattleRenderer:
         hp_stat = self.game.static_game_data.stat(data.HP_STAT)
         health_bars = int((creature.current_stat(hp_stat) / creature.max_stat(hp_stat)) * max_length)
         
-        if (health_bars > max_length / 2):
+        if health_bars > max_length / 2:
             color = settings.GOOD_HEALTH_COLOR
-        elif (health_bars > max_length / 4):
+        elif health_bars > max_length / 4:
             color = settings.HALF_HEALTH_COLOR
         else:
             color = settings.LOW_HEALTH_COLOR
