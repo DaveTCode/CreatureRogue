@@ -1,6 +1,5 @@
 import argparse
 
-import CreatureRogue.maps.kanto as kanto
 from CreatureRogue.models.map import Map
 from CreatureRogue.models.player import Player
 from CreatureRogue.models.creature import Creature
@@ -20,6 +19,7 @@ if __name__ == "__main__":
     game.load_static_data()
     game.init()
 
+    # TODO - Fix this now that the map data isn't loaded automatically
     game.game_data.player = Player("Test Player", game.static_game_data, Map(kanto.name, kanto.tiles), args.x, args.y)
     game.state = MapState(game, game.game_data, game.map_renderer)
 
