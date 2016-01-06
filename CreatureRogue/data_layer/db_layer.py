@@ -24,6 +24,7 @@ from CreatureRogue.data_layer.stat import Stat
 from CreatureRogue.data_layer.type import Type
 from CreatureRogue.data_layer.type_chart import TypeChart
 from CreatureRogue.data_layer.xp_lookup import XpLookup
+from CreatureRogue.data_layer.map_loader import MapDataTileType
 
 
 class Loader:
@@ -38,46 +39,45 @@ class Loader:
         """
         conn = None
         try:
-            conn = sqlite3.connect(self.db_file)
+            with sqlite3.connect(self.db_file) as conn:
+                # XP
+                growth_rates = self._load_growth_rates(conn)
+                xp_lookup = self._load_xp_lookup(conn, growth_rates)
 
-            # XP
-            growth_rates = self._load_growth_rates(conn)
-            xp_lookup = self._load_xp_lookup(conn, growth_rates)
+                # Types
+                types = self._load_types(conn)
+                type_chart = self._load_type_chart(conn, types)
 
-            # Types
-            types = self._load_types(conn)
-            type_chart = self._load_type_chart(conn, types)
+                # Stats
+                stats = self._load_stats(conn)
 
-            # Stats
-            stats = self._load_stats(conn)
+                # Ailments
+                ailments = self._load_ailments(conn)
 
-            # Ailments
-            ailments = self._load_ailments(conn)
+                # Moves
+                move_targets = self._load_move_targets(conn)
+                moves = self._load_moves(conn, types, stats, move_targets, ailments)
 
-            # Moves
-            move_targets = self._load_move_targets(conn)
-            moves = self._load_moves(conn, types, stats, move_targets, ailments)
+                # Pokeballs
+                pokeballs = self._load_pokeballs(conn)
 
-            # Pokeballs
-            pokeballs = self._load_pokeballs(conn)
+                # Species
+                colors = self._load_colors(conn)
+                species = self._load_species(conn, types, colors, stats, growth_rates, moves)
 
-            # Species
-            colors = self._load_colors(conn)
-            species = self._load_species(conn, types, colors, stats, growth_rates, moves)
+                # Regions/Areas
+                regions = self._load_regions(conn)
+                locations = self._load_locations(conn, regions)
+                location_areas = self._load_location_areas(conn, locations, species)
 
-            # Regions/Areas
-            regions = self._load_regions(conn)
-            locations = self._load_locations(conn, regions)
-            location_areas = self._load_location_areas(conn, locations, species)
+                # Map Data Tile Types
+                map_data_tile_types = self._load_map_data_tile_types(conn)
         except sqlite3.Error as err:
             print("An error occurred: ", err.args[0])  # TODO - Convert to logger
             sys.exit(1)
-        finally:
-            if conn:
-                conn.close()
 
         return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets,
-                              regions, locations, location_areas, xp_lookup, pokeballs, ailments)
+                              regions, locations, location_areas, xp_lookup, pokeballs, ailments, map_data_tile_types)
 
     def _load_ailments(self, conn):
         ailments = {}
@@ -263,7 +263,7 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for region_id, identifier, name in cur.fetchall():
-            regions[region_id] = Region(identifier, name)
+            regions[region_id] = Region(id=region_id, identifier=identifier, name=name)
 
         return regions
 
@@ -305,3 +305,12 @@ class Loader:
             location_areas[area_id] = LocationArea(identifier, name, locations[location_id], walk_encs)
 
         return location_areas
+
+    def _load_map_data_tile_types(self, conn):
+        tile_types = {}
+        cur = conn.cursor()
+        cur.execute("SELECT id, display_character, red, green, blue, traversable, name FROM region_map_data_cell_types")
+        for id, display_character, red, green, blue, traversable, name in cur.fetchall():
+            tile_types[id] = MapDataTileType(name=name, red=red, green=green, blue=blue, traversable=traversable, display_character=display_character)
+
+        return tile_types

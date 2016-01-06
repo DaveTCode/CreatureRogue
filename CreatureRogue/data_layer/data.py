@@ -1,7 +1,11 @@
+from typing import Sequence
+
 from CreatureRogue.data_layer.location_area_rect import LocationAreaRect
 from CreatureRogue.data_layer.location_area_rect_collection import LocationAreaRectCollection
+from CreatureRogue.data_layer.map_data_tile_type import MapDataTileType
 
 # TODO - Change to enum?
+
 HP_STAT = 1
 ATTACK_STAT = 2
 DEFENSE_STAT = 3
@@ -12,7 +16,7 @@ ACCURACY_STAT = 7
 EVASION_STAT = 8
 
 
-def load_location_area_rects(rects_file_name):
+def load_location_area_rects(rects_file_name: str):
     """
         TODO - Put somewhere sensible
     """
@@ -34,7 +38,7 @@ class StaticGameData:
     passing it around the game and each object should be accessed directly
     (static_data.*).
     """
-    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs, ailments):
+    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs, ailments, map_data_tile_types: Sequence[MapDataTileType]):
         self.species = species
         self.types = types
         self.type_chart = type_chart
@@ -49,6 +53,7 @@ class StaticGameData:
         self.xp_lookup = xp_lookup
         self.pokeballs = pokeballs
         self.ailments = ailments
+        self.map_data_tile_types = map_data_tile_types
         
     def stat(self, stat):
         return self.stats[stat]
