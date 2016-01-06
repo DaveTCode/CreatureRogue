@@ -15,18 +15,18 @@ import CreatureRogue.data_layer.data as data
 import CreatureRogue.data_layer.db_layer as db_layer
 import CreatureRogue.settings as settings
 from CreatureRogue.battle_ai import RandomMoveAi
-from CreatureRogue.maps.map_renderer import MapRenderer
 from CreatureRogue.models.battle_creature import BattleCreature
 from CreatureRogue.models.battle_data import BattleData
 from CreatureRogue.models.game_data import GameData
-from CreatureRogue.renderer.console_renderer import ConsoleRenderer
 from CreatureRogue.renderer.battle_renderer import BattleRenderer, LevelUpRenderer, CatchGraphicRenderer
+from CreatureRogue.renderer.console_renderer import ConsoleRenderer
 from CreatureRogue.renderer.game_menu_renderer import GameMenuRenderer
 from CreatureRogue.renderer.pokedex_renderer import PokedexRenderer
 from CreatureRogue.states.battle_state import BattleState
 from CreatureRogue.states.game_menu_state import InGameMenuState
 from CreatureRogue.states.map_state import MapState
 from CreatureRogue.states.pokedex_state import PokedexState
+from CreatureRogue.renderer.map_renderer import MapRenderer
 
 
 class Game:
@@ -69,7 +69,7 @@ class Game:
         # TODO: Need to set up the player object here or it will be none in the game data.
 
         self.battle_renderer = BattleRenderer(self)
-        self.map_renderer = MapRenderer(self)
+        self.map_renderer = MapRenderer()
         self.pokedex_renderer = PokedexRenderer(self)
         self.level_up_renderer = LevelUpRenderer(self)
         self.game_menu_renderer = GameMenuRenderer(self)

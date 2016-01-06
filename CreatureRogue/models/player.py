@@ -5,27 +5,33 @@
     It is only used for the human player and not for trainers.
 """
 import random
-from CreatureRogue.maps import map_renderer
 
-class Player():
+from CreatureRogue.data_layer.data import StaticGameData
+from CreatureRogue.data_layer.map_loader import MapData, MapDataTile
+from CreatureRogue.data_layer.pokeball import Pokeball
+from CreatureRogue.models.creature import Creature
+from CreatureRogue.renderer import map_renderer
 
-    def __init__(self, name, static_game_data, map_data, x, y):
+
+class Player:
+
+    def __init__(self, name: str, static_game_data: StaticGameData, map_data: MapData, x: int, y: int):
         self.name = name
         self.creatures = []
-        self.pokedex = { static_game_data.species[species_id].pokedex_number: (0, static_game_data.species[species_id]) for species_id in static_game_data.species }
+        self.pokedex = {static_game_data.species[species_id].pokedex_number: (0, static_game_data.species[species_id]) for species_id in static_game_data.species}
         self.map_data = map_data
         self.coords = (x, y)
         self.steps_in_long_grass_since_encounter = 0
         self.static_game_data = static_game_data
-        self.pokeballs = { static_game_data.pokeballs[pokeball_id]: 0 for pokeball_id in static_game_data.pokeballs }
+        self.pokeballs = {static_game_data.pokeballs[pokeball_id]: 0 for pokeball_id in static_game_data.pokeballs}
         
     def available_pokeballs(self):
         """
             Checks whether the player has any available pokeballs.
         """
-        return { pokeball: self.pokeballs[pokeball] for pokeball in self.pokeballs if self.pokeballs[pokeball] > 0 }
+        return {pokeball: self.pokeballs[pokeball] for pokeball in self.pokeballs if self.pokeballs[pokeball] > 0}
 
-    def use_pokeball(self, pokeball):
+    def use_pokeball(self, pokeball: Pokeball):
         """
             Called when the player uses up a pokeball.
         """
@@ -37,16 +43,14 @@ class Player():
             and the static game data.
         """
         x, y = self.coords
-        location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x, y)
+        location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x, y)  # TODO - No location_area_rects on static game data object.
 
-        if location_area_id != None:
-            location_area = self.static_game_data.location_areas[location_area_id]
-
-            return location_area
+        if location_area_id is not None:
+            return self.static_game_data.location_areas[location_area_id]
 
         return None
 
-    def _can_traverse(self, cell):
+    def _can_traverse(self, cell: MapDataTile):
         """
             Depending on the current player state they may or may not be able 
             to traverse any given cell. This check is made every time the 
@@ -56,7 +60,7 @@ class Player():
             false otherwise.
         """
         # TODO - Only really check that the cell is always traversable at the moment
-        return cell.base_cell.cell_passable_type == map_renderer.EMPTY_CELL
+        return cell.tile_type.traversable
 
     def _causes_encounter(self):
         """
@@ -79,7 +83,7 @@ class Player():
         else:
             return False
 
-    def move_to_cell(self, x, y):
+    def move_to_cell(self, x: int, y: int):
         """
             Move to the cell specified by x,y in the current map.
 
@@ -106,7 +110,7 @@ class Player():
         """
         return self.map_data.tiles[self.coords[1]][self.coords[0]]
 
-    def encounter_creature(self, creature):
+    def encounter_creature(self, creature: Creature):
         """
             Called whenever a creature is encountered (even it it isn't new).
 
@@ -114,7 +118,7 @@ class Player():
         """
         self.pokedex[creature.species.pokedex_number] = (1, creature.species)
 
-    def catch_creature(self, creature):
+    def catch_creature(self, creature: Creature):
         """
             Called whenever a creature is caught in the wild.
 
