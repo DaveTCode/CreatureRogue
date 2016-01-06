@@ -12,6 +12,8 @@
       <w>pokedex</w>
       <w>rects</w>
       <w>renderers</w>
+      <w>sqlite</w>
+      <w>traversable</w>
       <w>zigzagoon</w>
     </words>
   </dictionary>
