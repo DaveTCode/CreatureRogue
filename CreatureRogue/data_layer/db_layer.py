@@ -173,7 +173,7 @@ class Loader:
 
         return types
 
-    def _load_type_chart(self, conn, types):
+    def _load_type_chart(self, conn, types) -> TypeChart:
         chart = {}
         cur = conn.cursor()
         cur.execute('SELECT damage_type_id, target_type_id, damage_factor FROM type_efficacy')
