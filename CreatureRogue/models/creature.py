@@ -7,8 +7,7 @@ import math
 
 
 class Creature:
-    def __init__(self, species, level, nickname, trainer, individual_values, effort_values, was_traded, moves,
-                 current_xp):
+    def __init__(self, species, level, nickname, trainer, individual_values, effort_values, was_traded, moves, current_xp):
         self.species = species
         self.level = level
         self.nickname = nickname if nickname is not None else species.name
