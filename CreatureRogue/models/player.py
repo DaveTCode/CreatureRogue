@@ -14,17 +14,17 @@ from CreatureRogue.renderer import map_renderer
 
 
 class Player:
-
     def __init__(self, name: str, static_game_data: StaticGameData, map_data: MapData, x: int, y: int):
         self.name = name
         self.creatures = []
-        self.pokedex = {static_game_data.species[species_id].pokedex_number: (0, static_game_data.species[species_id]) for species_id in static_game_data.species}
+        self.pokedex = {static_game_data.species[species_id].pokedex_number: (0, static_game_data.species[species_id])
+                        for species_id in static_game_data.species}
         self.map_data = map_data
         self.coords = (x, y)
         self.steps_in_long_grass_since_encounter = 0
         self.static_game_data = static_game_data
         self.pokeballs = {static_game_data.pokeballs[pokeball_id]: 0 for pokeball_id in static_game_data.pokeballs}
-        
+
     def available_pokeballs(self):
         """
             Checks whether the player has any available pokeballs.
@@ -43,7 +43,8 @@ class Player:
             and the static game data.
         """
         x, y = self.coords
-        location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x, y)  # TODO - No location_area_rects on static game data object.
+        location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x,
+                                                                                                   y)  # TODO - No location_area_rects on static game data object.
 
         if location_area_id is not None:
             return self.static_game_data.location_areas[location_area_id]

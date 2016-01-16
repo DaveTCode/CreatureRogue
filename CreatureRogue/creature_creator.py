@@ -17,12 +17,14 @@ def random_stat_values(stats, min_val, max_val):
         all available stats.
     """
     return {stats[stat]: random.randint(min_val, max_val) for stat in stats}
-    
+
+
 def zero_stat_values(stats):
     """
         Used to return a set of zero values for all stats.
     """
     return {stats[stat]: 0 for stat in stats}
+
 
 def create_wild_creature(static_game_data, species, level):
     """
@@ -32,12 +34,12 @@ def create_wild_creature(static_game_data, species, level):
     """
     moves = [Move(move) for move in species.move_data_at_level(level)]
 
-    return Creature(species, 
-                    level, 
-                    None, 
-                    None, 
-                    random_stat_values(static_game_data.stats, 1, 15), 
-                    zero_stat_values(static_game_data.stats), 
-                    False, 
+    return Creature(species,
+                    level,
+                    None,
+                    None,
+                    random_stat_values(static_game_data.stats, 1, 15),
+                    zero_stat_values(static_game_data.stats),
+                    False,
                     moves,
                     static_game_data.xp_lookup.xp_at_level(species, level))

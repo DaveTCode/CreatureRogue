@@ -5,8 +5,8 @@
     It contains information on the participants.
 """
 
-class BattleData():
 
+class BattleData:
     def __init__(self, game_data, player_creature, computer_ai, trainer_creature=None, wild_creature=None):
         self.game_data = game_data
         self.player_creature = player_creature
@@ -21,7 +21,7 @@ class BattleData():
             This abstraction allows us to guarantee we always get the right 
             one.
         """
-        return self.trainer_creature if self.trainer_creature != None else self.wild_creature
+        return self.trainer_creature if self.trainer_creature is not None else self.wild_creature
 
     def computer_move(self):
         """

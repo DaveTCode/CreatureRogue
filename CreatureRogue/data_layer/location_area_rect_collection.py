@@ -1,4 +1,4 @@
-class LocationAreaRectCollection():
+class LocationAreaRectCollection:
     """
         This exists as a separate collection so that we could speed up
         searching by location using better data structures if required.

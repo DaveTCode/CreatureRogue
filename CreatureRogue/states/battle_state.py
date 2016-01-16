@@ -44,7 +44,7 @@ class BattleState:
             The return value comes as a percent and is maxed at the percent
             caught of the creature (as first calculated).
         """
-        return min((libtcod.sys_elapsed_milli() - self.time_started_catching_ms) / BattleState.ms_per_percent_complete, 
+        return min((libtcod.sys_elapsed_milli() - self.time_started_catching_ms) / BattleState.ms_per_percent_complete,
                    self.percent_of_creature_caught)
 
     def render(self):
@@ -65,7 +65,8 @@ class BattleState:
             percent_to_display = self._percent_of_catch_to_display()
             message = None
             if percent_to_display == self.percent_of_creature_caught:
-                message = get_catch_message(self.percent_of_creature_caught, self.game_data.battle_data.defending_creature())
+                message = get_catch_message(self.percent_of_creature_caught,
+                                            self.game_data.battle_data.defending_creature())
 
             sub_console = self.catch_graphic_renderer.render(self.catching_with_pokeball, percent_to_display, message)
 
@@ -73,12 +74,13 @@ class BattleState:
                                  0, 0, 0, 0,
                                  console,
                                  libtcod.console.get_width(console) // 2 - libtcod.console.get_width(sub_console) // 2,
-                                 libtcod.console.get_height(console) // 2 - libtcod.console.get_height(sub_console) // 2)
+                                 libtcod.console.get_height(console) // 2 - libtcod.console.get_height(
+                                     sub_console) // 2)
 
         # The check to see whether to end the battle is done once in the 
         # render function so that we can guarantee that it will get called
         # within a 30fps time frame.
-        if len(self.messages) == 0 and self.display_level_up == None and self.end_battle:
+        if len(self.messages) == 0 and self.display_level_up is None and self.end_battle:
             self.game.end_wild_battle()
 
         return console
@@ -115,9 +117,9 @@ class BattleState:
                         if len(battle_data.player_creature.creature.moves) > index:
                             move = battle_data.player_creature.creature.moves[index]
 
-                if move != None:
+                if move is not None:
                     self._handle_move_select(move)
-                
+
     def _selecting_pokeball_input(self, key):
         """
             Input handler when the sub state is selecting a pokeball.
@@ -130,8 +132,9 @@ class BattleState:
                     self.selecting_pokeball = False
                     self.catching_with_pokeball = pokeball
                     self.time_started_catching_ms = libtcod.sys_elapsed_milli()
-                    num_checks_passed = num_catch_checks_passed(self.game_data.battle_data.defending_creature(), 
-                                                                pokeball, 
+                    num_checks_passed = num_catch_checks_passed(self.game_data.battle_data.defending_creature(),
+                                                                # TODO - Function call to function that doesn't exist.
+                                                                pokeball,
                                                                 BattleState.number_catch_checks)
 
                     self.percent_of_creature_caught = (100 * num_checks_passed) // BattleState.number_catch_checks
@@ -153,7 +156,8 @@ class BattleState:
         if battle_data.player_creature.stat_value(speed_stat) > battle_data.defending_creature().stat_value(speed_stat):
             first_move = (move, battle_data.player_creature, battle_data.defending_creature())
             second_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
-        elif battle_data.player_creature.stat_value(speed_stat) < battle_data.defending_creature().stat_value(speed_stat):
+        elif battle_data.player_creature.stat_value(speed_stat) < battle_data.defending_creature().stat_value(
+                speed_stat):
             first_move = (computer_move, battle_data.defending_creature(), battle_data.player_creature)
             second_move = (move, battle_data.player_creature, battle_data.defending_creature())
         else:
@@ -169,7 +173,7 @@ class BattleState:
             # moves to select from.
             if move:
                 messages = battle_calculations.act(move, aggressor, defender, self.game.static_game_data)
-                
+
                 for message in messages:
                     self.messages.append(message)
 

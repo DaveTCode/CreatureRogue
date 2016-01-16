@@ -3,7 +3,7 @@ import tcod as libtcod
 
 class MapDataTileType:
 
-    def __init__(self, name: str, display_character: str, red: int , green: int, blue: int, traversable: bool):
+    def __init__(self, name: str, display_character: str, red: int, green: int, blue: int, traversable: bool):
         self.name = name
         self.display_character = display_character
         self.red = red

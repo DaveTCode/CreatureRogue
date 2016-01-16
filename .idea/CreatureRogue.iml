@@ -7,7 +7,7 @@
       <excludeFolder url="file://$MODULE_DIR$/cover" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.5.1 virtualenv at C:\home_projects\CreatureRogue\venv" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.5.1 virtualenv at C:\projects\CreatureRogue\venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

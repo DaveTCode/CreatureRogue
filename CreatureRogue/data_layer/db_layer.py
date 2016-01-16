@@ -37,7 +37,6 @@ class Loader:
             data into the application so that it can be quickly accessed as 
             required.
         """
-        conn = None
         try:
             with sqlite3.connect(self.db_file) as conn:
                 # XP

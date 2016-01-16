@@ -2,7 +2,6 @@ from CreatureRogue.data_layer.species import Species
 
 
 class Encounter:
-
     def __init__(self, species: Species, min_level: int, max_level: int, rarity):
         self.species = species
         self.min_level = min_level
