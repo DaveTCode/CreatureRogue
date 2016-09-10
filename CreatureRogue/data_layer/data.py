@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Dict
 
 from CreatureRogue.data_layer.location_area_rect import LocationAreaRect
 from CreatureRogue.data_layer.location_area_rect_collection import LocationAreaRectCollection
@@ -16,7 +16,7 @@ ACCURACY_STAT = 7
 EVASION_STAT = 8
 
 
-def load_location_area_rects(rects_file_name: str):
+def load_location_area_rects(rects_file_name: str) -> LocationAreaRectCollection:
     """
         TODO - Put somewhere sensible
     """
@@ -38,7 +38,7 @@ class StaticGameData:
     passing it around the game and each object should be accessed directly
     (static_data.*).
     """
-    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs, ailments, map_data_tile_types: Sequence[MapDataTileType]):
+    def __init__(self, species, types, type_chart, moves, stats, colors, growth_rates, move_targets, regions, locations, location_areas, xp_lookup, pokeballs, ailments, map_data_tile_types: Dict[int, MapDataTileType]):
         self.species = species
         self.types = types
         self.type_chart = type_chart
@@ -50,6 +50,7 @@ class StaticGameData:
         self.regions = regions
         self.locations = locations
         self.location_areas = location_areas
+        self.location_area_rects = None
         self.xp_lookup = xp_lookup
         self.pokeballs = pokeballs
         self.ailments = ailments

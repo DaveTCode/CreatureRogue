@@ -2,8 +2,10 @@
     The db layer module is used to load information from the static database
     data into a static data object. Acts as an ORM.
 """
+import logging
 import sqlite3
 import sys
+from typing import Dict
 
 import tcod as libtcod
 
@@ -72,13 +74,15 @@ class Loader:
                 # Map Data Tile Types
                 map_data_tile_types = self._load_map_data_tile_types(conn)
         except sqlite3.Error as err:
-            print("An error occurred: ", err.args[0])  # TODO - Convert to logger
+            logging.error("An error occurred attempting to pull data from the database", err)
             sys.exit(1)
 
         return StaticGameData(species, types, type_chart, moves, stats, colors, growth_rates, move_targets,
                               regions, locations, location_areas, xp_lookup, pokeballs, ailments, map_data_tile_types)
 
-    def _load_ailments(self, conn):
+    @staticmethod
+    def _load_ailments(conn) -> Dict[int, Ailment]:
+        logging.info("Loading ailments")
         ailments = {}
         cur = conn.cursor()
         cur.execute(
@@ -90,7 +94,9 @@ class Loader:
 
         return ailments
 
-    def _load_stats(self, conn):
+    @staticmethod
+    def _load_stats(conn) -> Dict[int, Stat]:
+        logging.info("Loading stats")
         stats = {}
         cur = conn.cursor()
         cur.execute(
@@ -102,7 +108,9 @@ class Loader:
 
         return stats
 
-    def _load_colors(self, conn):
+    @staticmethod
+    def _load_colors(conn) -> Dict[int, Color]:
+        logging.info("Loading colors")
         colors = {}
         cur = conn.cursor()
         cur.execute(
@@ -114,7 +122,9 @@ class Loader:
 
         return colors
 
-    def _load_growth_rates(self, conn):
+    @staticmethod
+    def _load_growth_rates(conn) -> Dict[int, GrowthRate]:
+        logging.info("Loading growth rates")
         growth_rates = {}
         cur = conn.cursor()
         cur.execute('SELECT id, identifier FROM growth_rates')
@@ -124,7 +134,9 @@ class Loader:
 
         return growth_rates
 
-    def _load_xp_lookup(self, conn, growth_rates):
+    @staticmethod
+    def _load_xp_lookup(conn, growth_rates: Dict[int, GrowthRate]) -> XpLookup:
+        logging.info("Loading xp lookup")
         xp_lookup = {growth_rates[growth_rate_id]: {} for growth_rate_id in growth_rates}
         cur = conn.cursor()
         cur.execute('SELECT growth_rate_id, level, experience FROM experience ORDER BY growth_rate_id, level')
@@ -134,7 +146,9 @@ class Loader:
 
         return XpLookup(xp_lookup)
 
-    def _load_pokeballs(self, conn):
+    @staticmethod
+    def _load_pokeballs(conn) -> Dict[int, Pokeball]:
+        logging.info("Loading pokeballs")
         pokeballs = {}
         cur = conn.cursor()
         cur.execute('SELECT id, name, catch_rate, top_color, bottom_color, display_char FROM pokeballs')
@@ -148,7 +162,9 @@ class Loader:
 
         return pokeballs
 
-    def _load_move_targets(self, conn):
+    @staticmethod
+    def _load_move_targets(conn) -> Dict[int, MoveTarget]:
+        logging.info("Loading move targets")
         targets = {}
         cur = conn.cursor()
         cur.execute(
@@ -160,7 +176,9 @@ class Loader:
 
         return targets
 
-    def _load_types(self, conn):
+    @staticmethod
+    def _load_types(conn) -> Dict[int, Type]:
+        logging.info("Loading types")
         types = {}
         cur = conn.cursor()
         cur.execute(
@@ -172,7 +190,9 @@ class Loader:
 
         return types
 
-    def _load_type_chart(self, conn, types) -> TypeChart:
+    @staticmethod
+    def _load_type_chart(conn, types: Dict[int, Type]) -> TypeChart:
+        logging.info("Loading type chart")
         chart = {}
         cur = conn.cursor()
         cur.execute('SELECT damage_type_id, target_type_id, damage_factor FROM type_efficacy')
@@ -188,7 +208,9 @@ class Loader:
 
         return TypeChart(chart)
 
-    def _load_moves(self, conn, types, stats, move_targets, ailments):
+    @staticmethod
+    def _load_moves(conn, types: Dict[int, Type], stats: Dict[int, Stat], move_targets: Dict[int, MoveTarget], ailments: Dict[int, Ailment]) -> Dict[int, MoveData]:
+        logging.info("Loading moves")
         moves = {}
         cur = conn.cursor()
         cur.execute('SELECT * FROM move_data')
@@ -220,7 +242,9 @@ class Loader:
 
         return moves
 
-    def _load_species(self, conn, types, colors, stats, growth_rates, moves):
+    @staticmethod
+    def _load_species(conn, types: Dict[int, Type], colors: Dict[int, Color], stats: Dict[int, Stat], growth_rates: Dict[int, GrowthRate], moves: Dict[int, MoveData]) -> Dict[int, Species]:
+        logging.info("Loading species")
         species = {}
         cur = conn.cursor()
         cur.execute(
@@ -254,7 +278,9 @@ class Loader:
 
         return species
 
-    def _load_regions(self, conn):
+    @staticmethod
+    def _load_regions(conn) -> Dict[int, Region]:
+        logging.info("Loading regions")
         regions = {}
         cur = conn.cursor()
         cur.execute(
@@ -262,11 +288,13 @@ class Loader:
                 settings.LOCAL_LANGUAGE_ID))
 
         for region_id, identifier, name in cur.fetchall():
-            regions[region_id] = Region(id=region_id, identifier=identifier, name=name)
+            regions[region_id] = Region(region_id=region_id, identifier=identifier, name=name)
 
         return regions
 
-    def _load_locations(self, conn, regions):
+    @staticmethod
+    def _load_locations(conn, regions: Dict[int, Region]) -> Dict[int, Location]:
+        logging.info("Loading locations")
         locations = {}
         cur = conn.cursor()
         cur.execute(
@@ -278,7 +306,9 @@ class Loader:
 
         return locations
 
-    def _load_location_areas(self, conn, locations, species):
+    @staticmethod
+    def _load_location_areas(conn, locations: Dict[int, Location], species: Dict[int, Species]) -> Dict[int, LocationArea]:
+        logging.info("Loading location areas")
         location_areas = {}
         cur = conn.cursor()
         cur.execute(
@@ -305,11 +335,13 @@ class Loader:
 
         return location_areas
 
-    def _load_map_data_tile_types(self, conn):
+    @staticmethod
+    def _load_map_data_tile_types(conn) -> Dict[int, MapDataTileType]:
+        logging.info("Loading tile types")
         tile_types = {}
         cur = conn.cursor()
         cur.execute("SELECT id, display_character, red, green, blue, traversable, name FROM region_map_data_cell_types")
-        for id, display_character, red, green, blue, traversable, name in cur.fetchall():
-            tile_types[id] = MapDataTileType(name=name, red=red, green=green, blue=blue, traversable=traversable, display_character=display_character)
+        for tile_type_id, display_character, red, green, blue, traversable, name in cur.fetchall():
+            tile_types[tile_type_id] = MapDataTileType(name=name, red=red, green=green, blue=blue, traversable=traversable, display_character=display_character)
 
         return tile_types

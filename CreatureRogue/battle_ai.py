@@ -1,7 +1,7 @@
 """
     AIs used to determine which move to pick in a battle.
 """
-from random import choice
+import random
 
 
 class RandomMoveAi:
@@ -22,4 +22,4 @@ class RandomMoveAi:
         if len(pp_moves) == 0:
             return None
 
-        return choice(pp_moves)
+        return random.choice(pp_moves)

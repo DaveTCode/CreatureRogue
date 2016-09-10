@@ -1,6 +1,6 @@
 class Region:
-    def __init__(self, id, identifier, name):
-        self.id = id
+    def __init__(self, region_id, identifier, name):
+        self.id = region_id
         self.identifier = identifier
         self.name = name
 

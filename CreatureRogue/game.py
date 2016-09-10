@@ -31,7 +31,7 @@ from CreatureRogue.renderer.map_renderer import MapRenderer
 
 class Game:
     
-    def __init__(self, screen_width, screen_height, title, font):
+    def __init__(self, screen_width: int, screen_height: int, title: str, font: str):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.title = title
