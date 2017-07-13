@@ -5,7 +5,7 @@
     It is only used for the human player and not for trainers.
 """
 import random
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from CreatureRogue.data_layer.data import StaticGameData
 from CreatureRogue.data_layer.location_area import LocationArea
@@ -52,7 +52,7 @@ class Player:
 
         return None
 
-    def _can_traverse(self, cell: MapDataTile):
+    def _can_traverse(self, cell: MapDataTile) -> bool:
         """
             Depending on the current player state they may or may not be able 
             to traverse any given cell. This check is made every time the 
@@ -64,7 +64,7 @@ class Player:
         # TODO - Only really check that the cell is always traversable at the moment
         return cell.tile_type.traversable
 
-    def _causes_encounter(self):
+    def _causes_encounter(self) -> bool:
         """
             Calculation used to determine whether a player causes an encounter 
             with movement.
@@ -88,7 +88,7 @@ class Player:
         else:
             return False
 
-    def move_to_cell(self, x: int, y: int):
+    def move_to_cell(self, x: int, y: int) -> Tuple[bool, bool]:
         """
             Move to the cell specified by x,y in the current map.
 
@@ -109,7 +109,7 @@ class Player:
         else:
             return False, False
 
-    def get_cell(self):
+    def get_cell(self) -> MapDataTile:
         """
             Returns the exact cell that the player is currently on.
         """
