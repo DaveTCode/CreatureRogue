@@ -5,8 +5,10 @@
     It is only used for the human player and not for trainers.
 """
 import random
+from typing import Dict, Optional, Tuple
 
 from CreatureRogue.data_layer.data import StaticGameData
+from CreatureRogue.data_layer.location_area import LocationArea
 from CreatureRogue.data_layer.map_loader import MapData, MapDataTile
 from CreatureRogue.data_layer.pokeball import Pokeball
 from CreatureRogue.models.creature import Creature
@@ -25,7 +27,7 @@ class Player:
         self.static_game_data = static_game_data
         self.pokeballs = {static_game_data.pokeballs[pokeball_id]: 0 for pokeball_id in static_game_data.pokeballs}
 
-    def available_pokeballs(self):
+    def available_pokeballs(self) -> Dict[Pokeball, int]:
         """
             Checks whether the player has any available pokeballs.
         """
@@ -37,21 +39,20 @@ class Player:
         """
         self.pokeballs[pokeball] = max(0, self.pokeballs[pokeball] - 1)
 
-    def get_location_area(self):
+    def get_location_area(self) -> Optional[LocationArea]:
         """
             The location area of a player is determined by the x, y coordinates 
             and the static game data.
         """
         x, y = self.coords
-        location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x,
-                                                                                                   y)  # TODO - No location_area_rects on static game data object.
+        location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(x, y)
 
         if location_area_id is not None:
             return self.static_game_data.location_areas[location_area_id]
 
         return None
 
-    def _can_traverse(self, cell: MapDataTile):
+    def _can_traverse(self, cell: MapDataTile) -> bool:
         """
             Depending on the current player state they may or may not be able 
             to traverse any given cell. This check is made every time the 
@@ -63,7 +64,7 @@ class Player:
         # TODO - Only really check that the cell is always traversable at the moment
         return cell.tile_type.traversable
 
-    def _causes_encounter(self):
+    def _causes_encounter(self) -> bool:
         """
             Calculation used to determine whether a player causes an encounter 
             with movement.
@@ -73,6 +74,9 @@ class Player:
             generated and false otherwise.
         """
         location_area = self.get_location_area()
+        if location_area is None:
+            return False
+
         encounter_rate = min(100, location_area.walk_encounter_rate)
 
         if 8 - encounter_rate // 10 < self.steps_in_long_grass_since_encounter:
@@ -84,7 +88,7 @@ class Player:
         else:
             return False
 
-    def move_to_cell(self, x: int, y: int):
+    def move_to_cell(self, x: int, y: int) -> Tuple[bool, bool]:
         """
             Move to the cell specified by x,y in the current map.
 
@@ -105,7 +109,7 @@ class Player:
         else:
             return False, False
 
-    def get_cell(self):
+    def get_cell(self) -> MapDataTile:
         """
             Returns the exact cell that the player is currently on.
         """

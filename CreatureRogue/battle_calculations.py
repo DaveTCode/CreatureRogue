@@ -3,9 +3,16 @@
     essentially all of the game logic for battles.
 """
 import random
+from typing import List, Tuple
+from CreatureRogue.models.battle_creature import BattleCreature
+from CreatureRogue.models.move import Move
+from CreatureRogue.data_layer.pokeball import Pokeball
+import CreatureRogue.data_layer.data as data
+from CreatureRogue.data_layer.data import StaticGameData
+from CreatureRogue.data_layer.stat import Stat
 
 
-def perform_move(move, attacking_creature, defending_creature, static_game_data):
+def perform_move(move: Move, attacking_creature: BattleCreature, defending_creature: BattleCreature, static_game_data: StaticGameData):
     """
         Performs the move by the attacking creature on the defending_creature.
 
@@ -48,19 +55,20 @@ def perform_move(move, attacking_creature, defending_creature, static_game_data)
                         messages.append(u"{0} fainted!".format(target.creature.in_battle_name()))
 
                 if move.move_data.stat_change_move():
-                    for stat in move.move_data.stat_changes:
-                        adjust_amount = target.adjust_stat_adjusts(stat, move.move_data.stat_changes[stat])
+                    for stat, value in move.move_data.stat_changes.items():
+                        if value != 0:
+                            adjust_amount = target.adjust_stat_adjusts(stat, value)
 
-                        messages.append(get_stat_change_message(move, target, adjust_amount))
+                            messages.append(get_stat_change_message(move, target, adjust_amount, stat))
 
     return messages
 
 
-def hit_calculation(move, attacking_creature, defending_creature):
+def hit_calculation(move: Move, attacking_creature: BattleCreature, defending_creature: BattleCreature) -> bool:
     """
-            Determines whether the move will hit the defending creature.
-            This is based on a random check.
-        """
+        Determines whether the move will hit the defending creature.
+        This is based on a random check.
+    """
     if move.move_data.base_accuracy:
         return random.random() < (move.move_data.base_accuracy / 100 *
                                   (attacking_creature.stat_value(move.move_data.accuracy_stat) /
@@ -69,7 +77,7 @@ def hit_calculation(move, attacking_creature, defending_creature):
     return False
 
 
-def damage_calculation(move, attacking_creature, defending_creature, type_chart):
+def damage_calculation(move: Move, attacking_creature: BattleCreature, defending_creature: BattleCreature, type_chart) -> Tuple[List[str], int]:
     """
         To calculate the damage that a move does we need to know which
         creature is performing the move and which is defending it.
@@ -80,8 +88,7 @@ def damage_calculation(move, attacking_creature, defending_creature, type_chart)
     defence_stat_value = defending_creature.stat_value(move.move_data.defence_stat)
 
     # Modifiers
-    critical_modifier = 2 if random.uniform(0,
-                                            100) < 6.25 else 1  # TODO: Incomplete - should use items and check whether this is a high critical move etc
+    critical_modifier = 2 if random.uniform(0, 100) < 6.25 else 1  # TODO: Incomplete - should use items and check whether this is a high critical move etc
     same_type_attack_bonus = 1.5 if move.move_data.type in attacking_creature.creature.species.types else 1
     type_modifier = 1
     for defending_type in defending_creature.creature.species.types:
@@ -102,7 +109,7 @@ def damage_calculation(move, attacking_creature, defending_creature, type_chart)
     return messages, int((((2 * attacking_creature.creature.level + 10) / 250) * (attack_stat_value / defence_stat_value) * move.move_data.base_attack + 2) * modifier)
 
 
-def num_catch_checks_passed(creature, pokeball, num_shakes):
+def num_catch_checks_passed(creature: BattleCreature, pokeball: Pokeball, num_shakes: int):
     """
         Catching a creature is based on a catch rate (modified from the 
         creatures base catch rate), the ball used and a set of random
@@ -120,7 +127,7 @@ def num_catch_checks_passed(creature, pokeball, num_shakes):
     return num_shakes
 
 
-def get_catch_message(percent_complete, creature):
+def get_catch_message(percent_complete, creature) -> str:
     """
         Used to generate the display message when we try to catch a creature.
     """
@@ -136,22 +143,22 @@ def get_catch_message(percent_complete, creature):
         return "Gotcha! {0} was caught".format(creature.creature.in_battle_name())
 
 
-def get_stat_change_message(move, target, stat_change):
+def get_stat_change_message(move: Move, target: BattleCreature, stat_change: int, stat: Stat) -> str:
     """
         Creates the message which is displayed when a creatures stats change.
     """
-    if adjust_amount == 0 and move.move_data.stat_changes[stat] != 0 and not move.move_data.damage_move():
+    if stat_change == 0 and move.move_data.stat_changes[stat] != 0 and not move.move_data.damage_move():
         direction = 'higher' if move.move_data.stat_changes[stat] > 0 else 'lower'
         return u"{0}'s {1} won't go any {2}!".format(target.creature.in_battle_name(), stat.name, direction)
-    elif adjust_amount == 1:
+    elif stat_change == 1:
         return u"{0}'s {1} rose!".format(target.creature.in_battle_name(), stat.name)
-    elif adjust_amount == 2:
+    elif stat_change == 2:
         return u"{0}'s {1} sharply rose!".format(target.creature.in_battle_name(), stat.name)
-    elif adjust_amount > 2:
+    elif stat_change > 2:
         return u"{0}'s {1} rose drastically!".format(target.creature.in_battle_name(), stat.name)
-    elif adjust_amount == -1:
+    elif stat_change == -1:
         return u"{0}'s {1} fell!".format(target.creature.in_battle_name(), stat.name)
-    elif adjust_amount == -2:
+    elif stat_change == -2:
         return u"{0}'s {1} harshly fell!".format(target.creature.in_battle_name(), stat.name)
-    elif adjust_amount < -2:
+    elif stat_change < -2:
         return u"{0}'s {1} severely fell!".format(target.creature.in_battle_name(), stat.name)

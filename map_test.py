@@ -4,7 +4,7 @@ import CreatureRogue.creature_creator as creature_creator
 import CreatureRogue.settings as settings
 from CreatureRogue.game import Game
 from CreatureRogue.models.creature import Creature
-from CreatureRogue.data_layer.map_loader import MapData, MapLoader
+from CreatureRogue.data_layer.map_loader import MapLoader
 from CreatureRogue.data_layer.region import Region
 from CreatureRogue.models.move import Move
 from CreatureRogue.models.player import Player
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     game.init()
 
     # TODO - Fix this now that the map data isn't loaded automatically
-    kanto_region = Region(id=1, identifier="kanto", name="kanto")
+    kanto_region = Region(region_id=1, identifier="kanto", name="kanto")
     map_data = MapLoader(db_file=settings.DB_FILE).load_map(region=kanto_region,
                                                             tile_types=game.static_game_data.map_data_tile_types,
                                                             default_tile_type=game.static_game_data.map_data_tile_types[11])

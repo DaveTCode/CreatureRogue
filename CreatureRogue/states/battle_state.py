@@ -57,7 +57,7 @@ class BattleState:
         if len(self.messages) == 0 and self.display_level_up is not None:
             sub_console = self.level_up_renderer.render(self.display_level_up[0].creature, self.display_level_up[1])
 
-            libtcod.console.blit(sub_console, 0, 0, 0, 0, console, 0, 0)
+            libtcod.console_blit(sub_console, 0, 0, 0, 0, console, 0, 0)
 
         # If we're in the process of catching a creature then there is an 
         # extra step which renders the catch graphics on top of the screen.
@@ -65,17 +65,16 @@ class BattleState:
             percent_to_display = self._percent_of_catch_to_display()
             message = None
             if percent_to_display == self.percent_of_creature_caught:
-                message = get_catch_message(self.percent_of_creature_caught,
-                                            self.game_data.battle_data.defending_creature())
+                message = battle_calculations.get_catch_message(self.percent_of_creature_caught,
+                                                                self.game_data.battle_data.defending_creature())
 
             sub_console = self.catch_graphic_renderer.render(self.catching_with_pokeball, percent_to_display, message)
 
-            libtcod.console.blit(sub_console,
+            libtcod.console_blit(sub_console,
                                  0, 0, 0, 0,
                                  console,
-                                 libtcod.console.get_width(console) // 2 - libtcod.console.get_width(sub_console) // 2,
-                                 libtcod.console.get_height(console) // 2 - libtcod.console.get_height(
-                                     sub_console) // 2)
+                                 libtcod.console_get_width(console) // 2 - libtcod.console_get_width(sub_console) // 2,
+                                 libtcod.console_get_height(console) // 2 - libtcod.console_get_height(sub_console) // 2)
 
         # The check to see whether to end the battle is done once in the 
         # render function so that we can guarantee that it will get called
@@ -132,10 +131,7 @@ class BattleState:
                     self.selecting_pokeball = False
                     self.catching_with_pokeball = pokeball
                     self.time_started_catching_ms = libtcod.sys_elapsed_milli()
-                    num_checks_passed = num_catch_checks_passed(self.game_data.battle_data.defending_creature(),
-                                                                # TODO - Function call to function that doesn't exist.
-                                                                pokeball,
-                                                                BattleState.number_catch_checks)
+                    num_checks_passed = battle_calculations.num_catch_checks_passed(self.game_data.battle_data.defending_creature(), pokeball, BattleState.number_catch_checks)
 
                     self.percent_of_creature_caught = (100 * num_checks_passed) // BattleState.number_catch_checks
                     self.game_data.player.use_pokeball(pokeball)
@@ -172,7 +168,7 @@ class BattleState:
             # The move can actually be None if there were no valid 
             # moves to select from.
             if move:
-                messages = battle_calculations.act(move, aggressor, defender, self.game.static_game_data)
+                messages = battle_calculations.perform_move(move, aggressor, defender, self.game.static_game_data)
 
                 for message in messages:
                     self.messages.append(message)

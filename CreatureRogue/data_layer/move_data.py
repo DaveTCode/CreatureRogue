@@ -8,13 +8,13 @@ from CreatureRogue.data_layer.type import Type
 
 class MoveData:
 
-    def __init__(self, name: str, max_pp: int, type: Type, base_attack: int, base_accuracy: int,
+    def __init__(self, name: str, max_pp: int, move_type: Type, base_attack: int, base_accuracy: int,
                  min_hits: int, max_hits: int, stat_changes: Mapping[Stat, int],
                  attack_stat: Optional[Stat], defence_stat: Optional[Stat], accuracy_stat: Optional[Stat], evasion_stat: Optional[Stat],
                  target: MoveTarget, ailment: Optional[Ailment]):
         self.name = name
         self.max_pp = max_pp
-        self.type = type
+        self.type = move_type
         self.base_attack = base_attack
         self.base_accuracy = base_accuracy
         self.attack_stat = attack_stat

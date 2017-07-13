@@ -2,13 +2,16 @@
     The creature object contains the information and immediately accessible
     values for any creature.
 """
-from __future__ import division
 import math
+from typing import Dict, List, Optional
+
+from CreatureRogue.models.move import Move
+from CreatureRogue.data_layer.species import Species
+from CreatureRogue.data_layer.stat import Stat
 
 
 class Creature:
-    def __init__(self, species, level, nickname, trainer, individual_values, effort_values, was_traded, moves,
-                 current_xp):
+    def __init__(self, species: Species, level: int, nickname: Optional[str], trainer, individual_values: Dict[Stat, int], effort_values: Dict[Stat, int], was_traded: bool, moves: List[Move], current_xp: int):
         self.species = species
         self.level = level
         self.nickname = nickname if nickname is not None else species.name
@@ -22,25 +25,25 @@ class Creature:
         self.fainted = False
         self.ailments = []
 
-    def adjust_stat(self, stat, delta):
+    def adjust_stat(self, stat: Stat, delta: int):
         """
             Adjust a stat by the given delta. Also caps at the min/max values 
             for that stat.
         """
-        self.stats[stat] = self.stats[stat] - delta
+        self.stats[stat] -= delta
 
         if self.stats[stat] < 0:
             self.stats[stat] = 0
         elif self.stats[stat] > self.max_stat(stat):
             self.stats[stat] = self.max_stat(stat)
 
-    def current_stat(self, stat):
+    def current_stat(self, stat: Stat) -> int:
         """
             Get the current value of the given stat.
         """
         return self.stats[stat]
 
-    def max_stat(self, stat, level=None):
+    def max_stat(self, stat: Stat, level: Optional[int]=None):
         """
             The stat value of a creature is a function of it's level, species,
             IVs and EVs and differs slightly for hitpoints and normal stats.
