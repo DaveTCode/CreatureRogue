@@ -55,10 +55,11 @@ def perform_move(move: Move, attacking_creature: BattleCreature, defending_creat
                         messages.append(u"{0} fainted!".format(target.creature.in_battle_name()))
 
                 if move.move_data.stat_change_move():
-                    for stat in move.move_data.stat_changes:
-                        adjust_amount = target.adjust_stat_adjusts(stat, move.move_data.stat_changes[stat])
+                    for stat, value in move.move_data.stat_changes.items():
+                        if value != 0:
+                            adjust_amount = target.adjust_stat_adjusts(stat, value)
 
-                        messages.append(get_stat_change_message(move, target, adjust_amount, stat))
+                            messages.append(get_stat_change_message(move, target, adjust_amount, stat))
 
     return messages
 
