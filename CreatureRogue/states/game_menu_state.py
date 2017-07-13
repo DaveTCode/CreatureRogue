@@ -45,6 +45,6 @@ class InGameMenuState:
 
         sub_console = self.menu_renderer.render(InGameMenuState.keys)
 
-        libtcod.console.blit(sub_console, 0, 0, 0, 0, console, libtcod.console.get_width(console) - libtcod.console.get_width(sub_console), 0)
+        libtcod.console_blit(sub_console, 0, 0, 0, 0, console, libtcod.console_get_width(console) - libtcod.console_get_width(sub_console), 0)
 
         return console

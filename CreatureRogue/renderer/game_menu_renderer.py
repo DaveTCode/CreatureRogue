@@ -12,15 +12,15 @@ class GameMenuRenderer:
 
     def __init__(self, game):
         self.game = game
-        self.console = libtcod.console.new(GameMenuRenderer.width, GameMenuRenderer.height)
+        self.console = libtcod.console_new(GameMenuRenderer.width, GameMenuRenderer.height)
         
     def render(self, keys):
         """
             Returns the completed menu console ready to be blitted onto another
             existing console.
         """
-        libtcod.console.clear(self.console)
-        libtcod.console.set_default_background(self.console, settings.MENU_BG_COLOR)
+        libtcod.console_clear(self.console)
+        libtcod.console_set_default_background(self.console, settings.MENU_BG_COLOR)
 
         self._render_lines()
         self._render_menu(keys)
@@ -28,7 +28,7 @@ class GameMenuRenderer:
         return self.console
 
     def _render_lines(self):
-        libtcod.console.print_frame(self.console, 0, 1, GameMenuRenderer.width - 1, GameMenuRenderer.height - 2)
+        libtcod.console_print_frame(self.console, 0, 1, GameMenuRenderer.width - 1, GameMenuRenderer.height - 2)
 
     def _render_menu(self, keys):
         """
@@ -43,4 +43,4 @@ class GameMenuRenderer:
         """
         for key in keys:
             row = key["row"] + 1 if key["row"] >= 0 else GameMenuRenderer.height + key["row"] - 2
-            libtcod.console.print(self.console, 2, row, "{0}. {1}".format(key["char"], key["str"]))
+            libtcod.console_print(self.console, 2, row, "{0}. {1}".format(key["char"], key["str"]))

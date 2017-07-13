@@ -82,16 +82,16 @@ class Game:
             The game loop runs until the user closes the window manually. All 
             game logic and rendering is done here.
         """
-        while not libtcod.console.is_window_closed():
-            libtcod.console.set_default_foreground(self.console, libtcod.white)
-            libtcod.console.print_frame(self.console, 0, 0, self.screen_width, self.screen_height)
+        while not libtcod.console_is_window_closed():
+            libtcod.console_set_default_foreground(self.console, libtcod.white)
+            libtcod.console_print_frame(self.console, 0, 0, self.screen_width, self.screen_height)
             
             output_console = self.state.render()
 
-            libtcod.console.blit(output_console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
-            libtcod.console.flush()
+            libtcod.console_blit(output_console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+            libtcod.console_flush()
 
-            key = libtcod.console.check_for_keypress()
+            key = libtcod.console_check_for_keypress()
             if key and key.vk != libtcod.KEY_NONE:
                 self.state.handle_input(key)
 
