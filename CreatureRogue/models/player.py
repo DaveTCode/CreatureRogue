@@ -27,7 +27,7 @@ class Player:
         self.static_game_data = static_game_data
         self.pokeballs = {static_game_data.pokeballs[pokeball_id]: 0 for pokeball_id in static_game_data.pokeballs}
 
-    def available_pokeballs(self) -> Dict[Pokeball: int]:
+    def available_pokeballs(self) -> Dict[Pokeball, int]:
         """
             Checks whether the player has any available pokeballs.
         """
