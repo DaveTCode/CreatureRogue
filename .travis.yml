@@ -11,6 +11,6 @@ install:
   - pip install coveralls
 # command to run tests
 script:
-  - nosetests -v --with-coverage --cover-package=CreatureRogue
+  - py.test --cov=CreatureRogue tests/
 after_success:
   - coveralls
