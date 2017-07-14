@@ -43,3 +43,4 @@ tiles/*
 venv
 cover
 .idea
+.cache
