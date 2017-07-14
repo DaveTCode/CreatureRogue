@@ -68,3 +68,6 @@ class BattleCreature:
         hp_stat = self.static_game_data.stats[HP_STAT]
         triple_max_hp = 3 * self.creature.max_stat(hp_stat)
         return (triple_max_hp - 2 * self.stat_value(hp_stat)) * self.creature.species.capture_rate * pokeball.catch_rate / triple_max_hp
+
+    def __str__(self):
+        return str(self.creature)

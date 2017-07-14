@@ -102,3 +102,6 @@ class Creature:
             return u"{0}'s {1}".format(self.trainer.name, self.nickname)
         else:
             return u"Wild {0}".format(self.nickname)
+
+    def __str__(self):
+        return self.in_battle_name()
