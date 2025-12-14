@@ -1,4 +1,5 @@
 import pytest
+
 from CreatureRogue.data_layer.color import Color
 from CreatureRogue.data_layer.growth_rate import GrowthRate
 from CreatureRogue.data_layer.species import Species
@@ -6,9 +7,22 @@ from tests.data_layer.move_data_test import create_default_move_data
 
 
 def create_blank_species(name: str) -> Species:
-    return Species(pokedex_number=1, name=name, height=0, weight=0, types=[], base_stats=[], base_xp_yield=0,
-                   growth_rate=GrowthRate("None"), display_character="A", display_color=Color("red", 255, 0, 0),
-                   level_moves={}, flavor_text="None", genus="None", capture_rate=0)
+    return Species(
+        pokedex_number=1,
+        name=name,
+        height=0,
+        weight=0,
+        types=[],
+        base_stats=[],
+        base_xp_yield=0,
+        growth_rate=GrowthRate("None"),
+        display_character="A",
+        display_color=Color("red", 255, 0, 0),
+        level_moves={},
+        flavor_text="None",
+        genus="None",
+        capture_rate=0,
+    )
 
 
 def test_imperial_weight_str_zero_weight():
@@ -17,7 +31,7 @@ def test_imperial_weight_str_zero_weight():
     :return:
     """
     s = create_blank_species("test")
-    assert "0.0 lbs." == s.imperial_weight_str()
+    assert s.imperial_weight_str() == "0.0 lbs."
 
 
 def test_imperial_weight_str_non_zero_weights():
@@ -26,11 +40,11 @@ def test_imperial_weight_str_non_zero_weights():
     """
     s = create_blank_species("test")
     s.weight = 1
-    assert "0.2 lbs." == s.imperial_weight_str()
+    assert s.imperial_weight_str() == "0.2 lbs."
     s.weight = 100
-    assert "22.0 lbs." == s.imperial_weight_str()
+    assert s.imperial_weight_str() == "22.0 lbs."
     s.weight = 200
-    assert "44.1 lbs." == s.imperial_weight_str()
+    assert s.imperial_weight_str() == "44.1 lbs."
 
 
 def test_imperial_height_str_zero_height():
@@ -38,7 +52,7 @@ def test_imperial_height_str_zero_height():
     Zero height still returns a valid string.
     """
     s = create_blank_species("test")
-    assert "0'00\"" == s.imperial_height_str()
+    assert s.imperial_height_str() == "0'00\""
 
 
 def test_imperial_height_str_non_zero_heights():
@@ -47,7 +61,7 @@ def test_imperial_height_str_non_zero_heights():
     """
     s = create_blank_species("test")
     s.height = 10
-    assert "3'03\"" == s.imperial_height_str()
+    assert s.imperial_height_str() == "3'03\""
 
 
 def test_zigzagoon_height_weight():
@@ -58,25 +72,25 @@ def test_zigzagoon_height_weight():
     s = create_blank_species("Zigzagoon")
     s.weight = 175
     s.height = 4
-    assert "38.6 lbs." == s.imperial_weight_str()
-    assert "1'04\"" == s.imperial_height_str()
+    assert s.imperial_weight_str() == "38.6 lbs."
+    assert s.imperial_height_str() == "1'04\""
 
 
 def test_string_blank_name():
     s = create_blank_species("")
-    assert "" == str(s)
+    assert str(s) == ""
 
 
 def test_string_non_blank_name():
     s = create_blank_species("Zigzagoon")
-    assert "Zigzagoon" == str(s)
+    assert str(s) == "Zigzagoon"
 
 
 def test_string_non_ascii_name():
     s = create_blank_species("Porygon-Z")
-    assert "Porygon-Z" == str(s)
+    assert str(s) == "Porygon-Z"
     s = create_blank_species("Farfetch'd")
-    assert "Farfetch'd" == str(s)
+    assert str(s) == "Farfetch'd"
 
 
 def test_move_data_assert_on_bad_level():
@@ -88,53 +102,63 @@ def test_move_data_assert_on_bad_level():
 def test_move_data_no_moves():
     s = create_blank_species("")
     moves = s.move_data_at_level(1)
-    assert 0 == len(moves)
+    assert len(moves) == 0
 
 
 def test_move_data_one_move():
     s = create_blank_species("")
     s.level_moves = {1: [create_default_move_data("")]}
     moves = s.move_data_at_level(1)
-    assert 1 == len(moves)
-    assert "" == moves[0].name
+    assert len(moves) == 1
+    assert moves[0].name == ""
 
 
 def test_move_data_four_moves_one_level():
     s = create_blank_species("")
-    s.level_moves = {1: [create_default_move_data("1"), create_default_move_data("2"),
-                         create_default_move_data("3"), create_default_move_data("4")]}
+    s.level_moves = {
+        1: [
+            create_default_move_data("1"),
+            create_default_move_data("2"),
+            create_default_move_data("3"),
+            create_default_move_data("4"),
+        ]
+    }
     moves = s.move_data_at_level(1)
-    assert 4 == len(moves)
-    assert "1" == moves[0].name
-    assert "2" == moves[1].name
-    assert "3" == moves[2].name
-    assert "4" == moves[3].name
+    assert len(moves) == 4
+    assert moves[0].name == "1"
+    assert moves[1].name == "2"
+    assert moves[2].name == "3"
+    assert moves[3].name == "4"
 
 
 def test_move_data_four_moves_four_levels():
     s = create_blank_species("")
-    s.level_moves = {1: [create_default_move_data("1")],
-                     2: [create_default_move_data("2")],
-                     3: [create_default_move_data("3")],
-                     4: [create_default_move_data("4")]}
+    s.level_moves = {
+        1: [create_default_move_data("1")],
+        2: [create_default_move_data("2")],
+        3: [create_default_move_data("3")],
+        4: [create_default_move_data("4")],
+    }
     moves = s.move_data_at_level(4)
-    assert 4 == len(moves)
-    assert "4" == moves[0].name
-    assert "3" == moves[1].name
-    assert "2" == moves[2].name
-    assert "1" == moves[3].name
+    assert len(moves) == 4
+    assert moves[0].name == "4"
+    assert moves[1].name == "3"
+    assert moves[2].name == "2"
+    assert moves[3].name == "1"
 
 
 def test_move_data_discard_move():
     s = create_blank_species("")
-    s.level_moves = {1: [create_default_move_data("1")],
-                     2: [create_default_move_data("2")],
-                     3: [create_default_move_data("3")],
-                     4: [create_default_move_data("4")],
-                     5: [create_default_move_data("5")]}
+    s.level_moves = {
+        1: [create_default_move_data("1")],
+        2: [create_default_move_data("2")],
+        3: [create_default_move_data("3")],
+        4: [create_default_move_data("4")],
+        5: [create_default_move_data("5")],
+    }
     moves = s.move_data_at_level(5)
-    assert 4 == len(moves)
-    assert "5" == moves[0].name
-    assert "4" == moves[1].name
-    assert "3" == moves[2].name
-    assert "2" == moves[3].name
+    assert len(moves) == 4
+    assert moves[0].name == "5"
+    assert moves[1].name == "4"
+    assert moves[2].name == "3"
+    assert moves[3].name == "2"

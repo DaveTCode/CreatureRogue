@@ -7,4 +7,4 @@ class LocationAreaRect:
         self.y2 = y2
 
     def __str__(self):
-        return "{0} - ({1},{2}),({3},{4})".format(self.location_area_id, self.x1, self.y1, self.x2, self.y2)
+        return f"{self.location_area_id} - ({self.x1},{self.y1}),({self.x2},{self.y2})"

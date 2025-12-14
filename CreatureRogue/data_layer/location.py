@@ -1,5 +1,5 @@
 class Location:
-    def __init__(self, identifier, name, region):
+    def __init__(self, identifier, name: str, region):
         self.region = region
         self.identifier = identifier
         self.name = name

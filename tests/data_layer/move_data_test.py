@@ -6,10 +6,22 @@ from CreatureRogue.data_layer.type import Type
 
 
 def create_default_move_data(name: str) -> MoveData:
-    return MoveData(name=name, max_pp=0, move_type=Type(name="None"), base_attack=0, base_accuracy=0,
-                    min_hits=0, max_hits=0, stat_changes={}, attack_stat=None, defence_stat=None,
-                    accuracy_stat=None, evasion_stat=None, target=MoveTarget("None", "None", "None"),
-                    ailment=Ailment(ailment_id=0, name="None"))
+    return MoveData(
+        name=name,
+        max_pp=0,
+        move_type=Type(name="None"),
+        base_attack=0,
+        base_accuracy=0,
+        min_hits=0,
+        max_hits=0,
+        stat_changes={},
+        attack_stat=None,
+        defence_stat=None,
+        accuracy_stat=None,
+        evasion_stat=None,
+        target=MoveTarget("None", "None", "None"),
+        ailment=Ailment(ailment_id=0, name="None"),
+    )
 
 
 def test_is_attack_move_true():
@@ -57,9 +69,9 @@ def test_is_stat_change_move_false_multiple_moves():
 
 def test_str():
     m = create_default_move_data("")
-    assert "" == str(m)
+    assert str(m) == ""
 
 
 def test_str_real_name():
     m = create_default_move_data("Pound")
-    assert "Pound" == str(m)
+    assert str(m) == "Pound"

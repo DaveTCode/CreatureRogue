@@ -26,7 +26,7 @@ classifiers = [
     "Topic :: Games/Entertainment",
 ]
 dependencies = [
-    "tcod>=16.0.0",
+    "tcod>=19.6.0",
 ]
 
 [project.optional-dependencies]

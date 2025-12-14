@@ -40,7 +40,10 @@ tiles/*
 *.sublime-project
 *.sublime-workspace
 
-venv
+.venv
 cover
 .idea
 .cache
+__pycache__
+.pytest_cache
+.ruff_cache

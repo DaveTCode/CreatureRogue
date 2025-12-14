@@ -9,4 +9,4 @@ class Encounter:
         self.rarity = rarity
 
     def __str__(self):
-        return "Encounter: {0} ({1},{2})".format(self.species, self.min_level, self.max_level)
+        return f"Encounter: {self.species} ({self.min_level},{self.max_level})"

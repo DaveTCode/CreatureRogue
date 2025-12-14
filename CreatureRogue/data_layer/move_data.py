@@ -1,4 +1,4 @@
-from typing import Optional, Mapping
+from collections.abc import Mapping
 
 from CreatureRogue.data_layer.ailment import Ailment
 from CreatureRogue.data_layer.move_target import MoveTarget
@@ -7,11 +7,23 @@ from CreatureRogue.data_layer.type import Type
 
 
 class MoveData:
-
-    def __init__(self, name: str, max_pp: int, move_type: Type, base_attack: int, base_accuracy: int,
-                 min_hits: int, max_hits: int, stat_changes: Mapping[Stat, int],
-                 attack_stat: Optional[Stat], defence_stat: Optional[Stat], accuracy_stat: Optional[Stat], evasion_stat: Optional[Stat],
-                 target: MoveTarget, ailment: Optional[Ailment]):
+    def __init__(
+        self,
+        name: str,
+        max_pp: int,
+        move_type: Type,
+        base_attack: int,
+        base_accuracy: int,
+        min_hits: int,
+        max_hits: int,
+        stat_changes: Mapping[Stat, int],
+        attack_stat: Stat | None,
+        defence_stat: Stat | None,
+        accuracy_stat: Stat | None,
+        evasion_stat: Stat | None,
+        target: MoveTarget,
+        ailment: Ailment | None,
+    ):
         self.name = name
         self.max_pp = max_pp
         self.type = move_type
@@ -29,20 +41,16 @@ class MoveData:
 
     def damage_move(self) -> bool:
         """
-            Determines whether a move affects the targets health.
+        Determines whether a move affects the targets health.
         """
         return self.attack_stat is not None
 
     def stat_change_move(self) -> bool:
         """
-            Determines whether a move affects the targets stats. This is
-            independent of whether it affects their health.
+        Determines whether a move affects the targets stats. This is
+        independent of whether it affects their health.
         """
-        for stat in self.stat_changes:
-            if self.stat_changes[stat] != 0:
-                return True
-
-        return False
+        return any(self.stat_changes[stat] != 0 for stat in self.stat_changes)
 
     def __str__(self):
         return self.name

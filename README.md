@@ -1,31 +1,48 @@
-# CreatureRogue [![Build Status](https://travis-ci.org/DaveTCode/CreatureRogue.svg?branch=develop)](https://travis-ci.org/DaveTCode/CreatureRogue) [![Coverage Status](https://coveralls.io/repos/DaveTCode/CreatureRogue/badge.svg?branch=develop&service=github)](https://coveralls.io/github/DaveTCode/CreatureRogue?branch=develop)
+# CreatureRogue
+
+[![Tests](https://github.com/DaveTCode/CreatureRogue/actions/workflows/tests.yml/badge.svg)](https://github.com/DaveTCode/CreatureRogue/actions/workflows/tests.yml)
 
 ## Requirements
 
 ### All system types
-- `Python 3.6`
+- Python 3.10+
 
 ### Unix OSs
-Developing on linux also requires the following packages for building libtcod-cffi from source:
-- `gcc`
+Developing on Linux also requires SDL2 for the tcod library:
 - `libsdl2-dev`
-- `libffi-dev`
-- `python-dev`
 
-Once those dependencies are installed then run the following command (system independent) to
-install the python dependencies.
-```
-pip install -r requirements.txt
+## Installation
+
+```bash
+pip install -e .[dev]
 ```
 
-which should be installed before attempting to run `pip install`.
+## Running the Game
+
+After installation, you can run the game using:
+```bash
+creaturerogue
+```
+
+Or run directly:
+```bash
+python main.py
+```
 
 ## Unit Testing
 
-All unit tests are run on all branches on push and the results are on [Travis CI](https://travis-ci.org/DaveTCode/CreatureRogue)
-, if you want to run the tests locally you can use
+Tests run automatically via GitHub Actions on push and pull requests. To run tests locally:
+```bash
+pytest
 ```
-py.test --cov=CreatureRogue tests/
+
+## Linting
+
+This project uses ruff for linting and formatting:
+```bash
+ruff check .        # Run linter
+ruff format .       # Format code
+ruff check --fix .  # Auto-fix issues
 ```
 
 ## Interactive Testing

@@ -8,8 +8,8 @@ def test_empty_type_chart():
     that accessing elements in it doesn't cause exceptions to be thrown.
     """
     type_chart = TypeChart({})
-    assert "" == str(type_chart)
-    assert 100 == type_chart.damage_modifier(Type("test"), Type("test2"))
+    assert str(type_chart) == ""
+    assert type_chart.damage_modifier(Type("test"), Type("test2")) == 100
 
 
 def test_single_entry_type_chart():
@@ -20,10 +20,10 @@ def test_single_entry_type_chart():
     t1 = Type("1")
     t2 = Type("2")
     type_chart = TypeChart({t1: {t2: 50}})
-    assert 50 == type_chart.damage_modifier(t1, t2)
-    assert 100 == type_chart.damage_modifier(Type("test"), t2)
-    assert 100 == type_chart.damage_modifier(t1, Type("test"))
-    assert "1 - (2:50), \n" == str(type_chart)
+    assert type_chart.damage_modifier(t1, t2) == 50
+    assert type_chart.damage_modifier(Type("test"), t2) == 100
+    assert type_chart.damage_modifier(t1, Type("test")) == 100
+    assert str(type_chart) == "1 - (2:50), \n"
 
 
 def test_type_chart_not_commutative():
@@ -35,4 +35,4 @@ def test_type_chart_not_commutative():
     t1 = Type("1")
     t2 = Type("2")
     type_chart = TypeChart({t1: {t2: 50}})
-    assert 100 == type_chart.damage_modifier(t2, t1)
+    assert type_chart.damage_modifier(t2, t1) == 100
