@@ -7,7 +7,6 @@ It is responsible for rendering and input processing.
 
 import collections
 import random
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -15,12 +14,12 @@ if TYPE_CHECKING:
     from CreatureRogue.models.game_data import GameData
     from CreatureRogue.renderer.battle_renderer import (
         BattleRenderer,
-        LevelUpRenderer,
         CatchGraphicRenderer,
+        LevelUpRenderer,
     )
 
-from tcod import libtcodpy
 import tcod
+from tcod import libtcodpy
 
 import CreatureRogue.battle_calculations as battle_calculations
 import CreatureRogue.data_layer.data as data
@@ -111,11 +110,7 @@ class BattleState:
         # The check to see whether to end the battle is done once in the
         # render function so that we can guarantee that it will get called
         # within a 30fps time frame.
-        if (
-            len(self.messages) == 0
-            and self.display_level_up is None
-            and self.end_battle
-        ):
+        if len(self.messages) == 0 and self.display_level_up is None and self.end_battle:
             self.game.end_wild_battle()
 
         return console
@@ -128,26 +123,16 @@ class BattleState:
         battle_data = self.game_data.battle_data
 
         if len(self.messages) > 0:
-            if (
-                event.sym == tcod.event.KeySym.SPACE
-                or event.sym == tcod.event.KeySym.RETURN
-            ):
+            if event.sym == tcod.event.KeySym.SPACE or event.sym == tcod.event.KeySym.RETURN:
                 self.messages.popleft()
         elif self.display_level_up:
-            if (
-                event.sym == tcod.event.KeySym.SPACE
-                or event.sym == tcod.event.KeySym.RETURN
-            ):
+            if event.sym == tcod.event.KeySym.SPACE or event.sym == tcod.event.KeySym.RETURN:
                 self.display_level_up = None
         elif self.selecting_pokeball:
             self._selecting_pokeball_input(event)
         elif self.catching_with_pokeball:
-            if (
-                self._percent_of_catch_to_display() == self.percent_of_creature_caught
-                and (
-                    event.sym == tcod.event.KeySym.SPACE
-                    or event.sym == tcod.event.KeySym.RETURN
-                )
+            if self._percent_of_catch_to_display() == self.percent_of_creature_caught and (
+                event.sym == tcod.event.KeySym.SPACE or event.sym == tcod.event.KeySym.RETURN
             ):
                 self._handle_catch_end()
         else:
@@ -296,9 +281,7 @@ class BattleState:
         xp_given = defender.creature.xp_given(1, False)
 
         old_level = aggressor.creature.level
-        messages = aggressor.creature.add_xp(
-            self.game.static_game_data.xp_lookup, xp_given
-        )
+        messages = aggressor.creature.add_xp(self.game.static_game_data.xp_lookup, xp_given)
 
         for message in messages:
             self.messages.append(message)
@@ -314,9 +297,7 @@ class BattleState:
         May switch out of the battle state.
         """
         if self.percent_of_creature_caught == 100:
-            self.game.catch_creature(
-                self.game_data.battle_data.defending_creature().creature
-            )
+            self.game.catch_creature(self.game_data.battle_data.defending_creature().creature)
         else:
             self.catching_with_pokeball = None
             self.percent_of_creature_caught = 0

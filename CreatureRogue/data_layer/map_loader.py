@@ -72,10 +72,7 @@ class MapLoader:
             )
             max_row, max_col = cur.fetchone()
             tiles = [
-                [
-                    MapDataTile(tile_type=default_tile_type, row=y, column=x)
-                    for x in range(max_col)
-                ]
+                [MapDataTile(tile_type=default_tile_type, row=y, column=x) for x in range(max_col)]
                 for y in range(max_row)
             ]
 

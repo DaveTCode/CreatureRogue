@@ -85,10 +85,10 @@ class Game:
         config = GameConfig(screen_width, screen_height, title, font)
 
         # Load static game data
-        location_area_rectangles = data.load_location_area_rects(
-            settings.LOCATION_AREA_RECTS_FILE
+        location_area_rectangles = data.load_location_area_rects(settings.LOCATION_AREA_RECTS_FILE)
+        static_game_data = db_layer.Loader(settings.DB_FILE).load_static_data(
+            location_area_rectangles
         )
-        static_game_data = db_layer.Loader(settings.DB_FILE).load_static_data(location_area_rectangles)
 
         # Create game data
         game_data = GameData()
@@ -156,9 +156,7 @@ class Game:
             columns=self.screen_width,
             rows=self.screen_height,
             title=self.title,
-            tileset=tcod.tileset.load_tilesheet(
-                self.font, 16, 16, tcod.tileset.CHARMAP_TCOD
-            ),
+            tileset=tcod.tileset.load_tilesheet(self.font, 16, 16, tcod.tileset.CHARMAP_TCOD),
         ) as context:
             while True:
                 console.draw_frame(
@@ -171,16 +169,12 @@ class Game:
 
                 if self.state is not None:
                     output_console = self.state.render()
-                    output_console.blit(
-                        console, 0, 0, self.screen_width, self.screen_height, 0, 0
-                    )
+                    output_console.blit(console, 0, 0, self.screen_width, self.screen_height, 0, 0)
 
                 context.present(console)
 
                 for event in tcod.event.wait():
-                    context.convert_event(
-                        event
-                    )  # Sets tile coordinates for mouse events.
+                    context.convert_event(event)  # Sets tile coordinates for mouse events.
 
                     match event:
                         case tcod.event.KeyDown():
@@ -202,16 +196,12 @@ class Game:
     def start_wild_battle(self):
         # Choose a pokemon to fight
         x, y = self.game_data.player.coords
-        location_area_id = (
-            self.static_game_data.location_area_rects.get_location_area_by_position(
-                x, y
-            )
+        location_area_id = self.static_game_data.location_area_rects.get_location_area_by_position(
+            x, y
         )
 
         if location_area_id is not None:
-            encounter = self.static_game_data.location_areas[
-                location_area_id
-            ].get_encounter()
+            encounter = self.static_game_data.location_areas[location_area_id].get_encounter()
 
             level = random.randint(encounter.min_level, encounter.max_level)
             wild_creature = creature_creator.create_wild_creature(
@@ -221,9 +211,7 @@ class Game:
 
             self.game_data.battle_data = BattleData(
                 self.game_data,
-                BattleCreature(
-                    self.game_data.player.creatures[0], self.static_game_data
-                ),
+                BattleCreature(self.game_data.player.creatures[0], self.static_game_data),
                 RandomMoveAi(BattleCreature(wild_creature, self.static_game_data)),
                 wild_creature=BattleCreature(wild_creature, self.static_game_data),
             )

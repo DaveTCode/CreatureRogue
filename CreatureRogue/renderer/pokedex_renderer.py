@@ -4,8 +4,8 @@ Handles rendering jobs when the game is in the "View pokedex" state.
 
 import tcod
 
-from CreatureRogue.data_layer.species import Species
 import CreatureRogue.settings as settings
+from CreatureRogue.data_layer.species import Species
 
 
 class PokedexRenderer:
@@ -16,16 +16,12 @@ class PokedexRenderer:
 
     def __init__(self, game):
         self.game = game
-        self.console = tcod.console.Console(
-            settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT
-        )
+        self.console = tcod.console.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
 
         self.max_rows = self.column_height - 1
         self.max_columns = len(self.game.static_game_data.species) // self.column_height
 
-    def render(
-        self, pokedex, viewing_species, selected_row, selected_column, left_most_column
-    ):
+    def render(self, pokedex, viewing_species, selected_row, selected_column, left_most_column):
         """
         Major external interface to this class.
 
@@ -134,9 +130,7 @@ class PokedexRenderer:
         )
 
         if status == 2:
-            self.console.print(
-                23, 17, f"  {species.genus} Pokemon", fg=settings.POKEDEX_LINE_COLOR
-            )
+            self.console.print(23, 17, f"  {species.genus} Pokemon", fg=settings.POKEDEX_LINE_COLOR)
             self.console.print(
                 23,
                 18,
@@ -158,25 +152,15 @@ class PokedexRenderer:
                 fg=settings.POKEDEX_LINE_COLOR,
             )
 
-            self.console.print(
-                20, 22, species.flavor_text, fg=settings.POKEDEX_LINE_COLOR
-            )
+            self.console.print(20, 22, species.flavor_text, fg=settings.POKEDEX_LINE_COLOR)
         elif status == 1:
-            self.console.print(
-                23, 17, "  ????? Pokemon", fg=settings.POKEDEX_LINE_COLOR
-            )
+            self.console.print(23, 17, "  ????? Pokemon", fg=settings.POKEDEX_LINE_COLOR)
             self.console.print(23, 18, "Type(s): ?????", fg=settings.POKEDEX_LINE_COLOR)
-            self.console.print(
-                23, 19, "Height: ??'??\"", fg=settings.POKEDEX_LINE_COLOR
-            )
-            self.console.print(
-                23, 20, "Weight: ????.? lbs.", fg=settings.POKEDEX_LINE_COLOR
-            )
+            self.console.print(23, 19, "Height: ??'??\"", fg=settings.POKEDEX_LINE_COLOR)
+            self.console.print(23, 20, "Weight: ????.? lbs.", fg=settings.POKEDEX_LINE_COLOR)
 
     @staticmethod
-    def calculate_position_of_pokedex_number(
-        pokedex_number: int, left_most_column: int
-    ):
+    def calculate_position_of_pokedex_number(pokedex_number: int, left_most_column: int):
         """
         Given a number in the pokedex this backtracks to find the x, y
         coordinates in the output.

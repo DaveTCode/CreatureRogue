@@ -6,10 +6,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from CreatureRogue.game import Game
-    from CreatureRogue.models.game_data import GameData
-    from CreatureRogue.renderer.map_renderer import MapRenderer
-    from CreatureRogue.renderer.game_menu_renderer import GameMenuRenderer
+    pass
 
 import tcod
 

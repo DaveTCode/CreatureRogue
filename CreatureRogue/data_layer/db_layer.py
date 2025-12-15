@@ -7,9 +7,6 @@ import logging
 import sqlite3
 import sys
 
-from CreatureRogue.data_layer.location_area_rect_collection import (
-    LocationAreaRectCollection,
-)
 import CreatureRogue.settings as settings
 from CreatureRogue.data_layer.ailment import Ailment
 from CreatureRogue.data_layer.color import Color
@@ -18,6 +15,9 @@ from CreatureRogue.data_layer.encounter import Encounter
 from CreatureRogue.data_layer.growth_rate import GrowthRate
 from CreatureRogue.data_layer.location import Location
 from CreatureRogue.data_layer.location_area import LocationArea
+from CreatureRogue.data_layer.location_area_rect_collection import (
+    LocationAreaRectCollection,
+)
 from CreatureRogue.data_layer.map_loader import MapDataTileType
 from CreatureRogue.data_layer.move_data import MoveData
 from CreatureRogue.data_layer.move_target import MoveTarget
@@ -67,9 +67,7 @@ class Loader:
 
                 # Species
                 colors = self._load_colors(conn)
-                species = self._load_species(
-                    conn, types, colors, stats, growth_rates, moves
-                )
+                species = self._load_species(conn, types, colors, stats, growth_rates, moves)
 
                 # Regions/Areas
                 regions = self._load_regions(conn)
@@ -79,9 +77,7 @@ class Loader:
                 # Map Data Tile Types
                 map_data_tile_types = self._load_map_data_tile_types(conn)
         except sqlite3.Error as err:
-            logging.error(
-                "An error occurred attempting to pull data from the database", err
-            )
+            logging.error("An error occurred attempting to pull data from the database", err)
             sys.exit(1)
 
         return StaticGameData(
@@ -161,9 +157,7 @@ class Loader:
     @staticmethod
     def _load_xp_lookup(conn, growth_rates: dict[int, GrowthRate]) -> XpLookup:
         logging.info("Loading xp lookup")
-        xp_lookup = {
-            growth_rates[growth_rate_id]: {} for growth_rate_id in growth_rates
-        }
+        xp_lookup = {growth_rates[growth_rate_id]: {} for growth_rate_id in growth_rates}
         cur = conn.cursor()
         cur.execute(
             "SELECT growth_rate_id, level, experience FROM experience ORDER BY growth_rate_id, level"
@@ -238,9 +232,7 @@ class Loader:
         logging.info("Loading type chart")
         chart = {}
         cur = conn.cursor()
-        cur.execute(
-            "SELECT damage_type_id, target_type_id, damage_factor FROM type_efficacy"
-        )
+        cur.execute("SELECT damage_type_id, target_type_id, damage_factor FROM type_efficacy")
 
         for damage_type_id, target_type_id, damage_factor in cur.fetchall():
             damage_type = types[damage_type_id]
@@ -351,9 +343,7 @@ class Loader:
             capture_rate,
         ) in cur.fetchall():
             types_cur = conn.cursor()
-            types_cur.execute(
-                f"SELECT type_id FROM pokemon_types WHERE pokemon_id = {creature_id}"
-            )
+            types_cur.execute(f"SELECT type_id FROM pokemon_types WHERE pokemon_id = {creature_id}")
             species_types = [types[row[0]] for row in types_cur]
 
             stats_cur = conn.cursor()
@@ -401,9 +391,7 @@ class Loader:
         )
 
         for region_id, identifier, name in cur.fetchall():
-            regions[region_id] = Region(
-                region_id=region_id, identifier=identifier, name=name
-            )
+            regions[region_id] = Region(region_id=region_id, identifier=identifier, name=name)
 
         return regions
 
@@ -452,9 +440,7 @@ class Loader:
                 method_id,
             ) in enc_cur.fetchall():
                 if method_id == 1:
-                    walk_encs.append(
-                        Encounter(species[species_id], min_level, max_level, rarity)
-                    )
+                    walk_encs.append(Encounter(species[species_id], min_level, max_level, rarity))
 
             location_areas[area_id] = LocationArea(
                 identifier, name, locations[location_id], walk_encs

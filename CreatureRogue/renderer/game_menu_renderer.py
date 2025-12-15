@@ -29,9 +29,7 @@ class GameMenuRenderer:
         return self.console
 
     def _render_lines(self):
-        self.console.draw_frame(
-            0, 1, GameMenuRenderer.width - 1, GameMenuRenderer.height - 2
-        )
+        self.console.draw_frame(0, 1, GameMenuRenderer.width - 1, GameMenuRenderer.height - 2)
 
     def _render_menu(self, keys):
         """

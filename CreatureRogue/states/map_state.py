@@ -5,14 +5,12 @@ world map.
 All states are responsible for rendering and input handling.
 """
 
-import tcod
-
 from typing import TYPE_CHECKING
 
+import tcod
+
 if TYPE_CHECKING:
-    from CreatureRogue.game import Game
-    from CreatureRogue.models.game_data import GameData
-    from CreatureRogue.renderer.map_renderer import MapRenderer
+    pass
 
 
 class MapState:
@@ -51,9 +49,7 @@ class MapState:
             )
 
             try:
-                _, caused_wild_encounter = self.game_data.player.move_to_cell(
-                    new_x, new_y
-                )
+                _, caused_wild_encounter = self.game_data.player.move_to_cell(new_x, new_y)
 
                 if caused_wild_encounter:
                     self.game.start_wild_battle()

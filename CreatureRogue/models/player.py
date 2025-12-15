@@ -116,12 +116,13 @@ class Player:
             self.coords = (x, y)
             causes_encounter = False
 
-            if self.get_cell().base_cell == map_renderer.LONG_GRASS:
-                self.steps_in_long_grass_since_encounter += 1
+            # TODO - What is this supposed to do? LONG_GRASS doesn't exist anywhere in the code
+            # if self.get_cell().base_cell == map_renderer.LONG_GRASS:
+            #     self.steps_in_long_grass_since_encounter += 1
 
-                causes_encounter = self._causes_encounter()
-            else:
-                self.steps_in_long_grass_since_encounter = 0
+            #     causes_encounter = self._causes_encounter()
+            # else:
+            #     self.steps_in_long_grass_since_encounter = 0
 
             return True, causes_encounter
         return False, False

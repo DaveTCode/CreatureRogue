@@ -1,4 +1,3 @@
-from CreatureRogue.data_layer.color import Color
 from CreatureRogue.data_layer.pokeball import Pokeball
 
 

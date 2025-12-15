@@ -1,8 +1,8 @@
 import CreatureRogue.creature_creator as creature_creator
-from CreatureRogue.data_layer.location_area_rect_collection import LocationAreaRectCollection
 import CreatureRogue.settings as settings
 from CreatureRogue.data_layer.data import ATTACK_STAT
 from CreatureRogue.data_layer.db_layer import Loader
+from CreatureRogue.data_layer.location_area_rect_collection import LocationAreaRectCollection
 from CreatureRogue.models.battle_creature import BattleCreature
 from CreatureRogue.models.creature import Creature
 

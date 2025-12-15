@@ -9,7 +9,6 @@ will not be set up at that point.
 import argparse
 
 import CreatureRogue.creature_creator as creature_creator
-import CreatureRogue.settings as settings
 from CreatureRogue.battle_ai import RandomMoveAi
 from CreatureRogue.game import Game
 from CreatureRogue.models.battle_creature import BattleCreature

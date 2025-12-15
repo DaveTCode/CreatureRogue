@@ -4,16 +4,14 @@ Responsible for rendering a map of tiles onto the screen in ascii.
 
 import tcod
 
-from CreatureRogue.models.player import Player
 import CreatureRogue.settings as settings
 from CreatureRogue.data_layer.map_loader import MapData
+from CreatureRogue.models.player import Player
 
 
 class MapRenderer:
     def __init__(self):
-        self.console = tcod.console.Console(
-            settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT
-        )
+        self.console = tcod.console.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
         self.start_x = self.start_y = 0
 
     def render(self, player: Player | None) -> tcod.console.Console:
@@ -33,9 +31,7 @@ class MapRenderer:
     def _render_player(self, player: Player):
         x, y = player.coords
 
-        self.console.print(
-            x - self.start_x, y - self.start_y, "@", fg=settings.PLAYER_COLOR
-        )
+        self.console.print(x - self.start_x, y - self.start_y, "@", fg=settings.PLAYER_COLOR)
 
     def _render_map(self, map_data: MapData):
         for y in range(self.start_y, self.start_y + settings.SCREEN_HEIGHT):

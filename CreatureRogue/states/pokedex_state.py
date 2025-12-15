@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from CreatureRogue.game import Game
     from CreatureRogue.models.game_data import GameData
     from CreatureRogue.renderer.pokedex_renderer import PokedexRenderer
-    
+
 import tcod
 
 

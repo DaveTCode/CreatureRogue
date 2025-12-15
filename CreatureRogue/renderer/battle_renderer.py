@@ -4,8 +4,8 @@ Module contains all renderers which are used in battle
 
 from types import MappingProxyType
 
-from tcod import libtcodpy
 import tcod
+from tcod import libtcodpy
 
 import CreatureRogue.data_layer.data as data
 import CreatureRogue.settings as settings
@@ -110,9 +110,7 @@ class CatchGraphicRenderer:
 
     def __init__(self, game):
         self.game = game
-        self.console = tcod.console.Console(
-            CatchGraphicRenderer.width, CatchGraphicRenderer.height
-        )
+        self.console = tcod.console.Console(CatchGraphicRenderer.width, CatchGraphicRenderer.height)
 
     def render(
         self, pokeball: Pokeball, percent_complete: float, message: str
@@ -120,16 +118,12 @@ class CatchGraphicRenderer:
         """
         Render the area and return the full console
         """
-        rows_complete = int(
-            len(CatchGraphicRenderer.graphic) * (percent_complete / 100)
-        )
+        rows_complete = int(len(CatchGraphicRenderer.graphic) * (percent_complete / 100))
 
         self.console.clear()
         self.console.default_bg = settings.CATCH_GRAPHIC_BG_COLOR
         self.console.default_fg = settings.LINE_COLOR
-        self.console.draw_frame(
-            0, 0, CatchGraphicRenderer.width, CatchGraphicRenderer.height
-        )
+        self.console.draw_frame(0, 0, CatchGraphicRenderer.width, CatchGraphicRenderer.height)
 
         for y, row in enumerate(CatchGraphicRenderer.graphic):
             for x, cell in enumerate(row):
@@ -174,9 +168,7 @@ class LevelUpRenderer:
 
     def __init__(self, game):
         self.game = game
-        self.console = tcod.console.Console(
-            LevelUpRenderer.width, LevelUpRenderer.height
-        )
+        self.console = tcod.console.Console(LevelUpRenderer.width, LevelUpRenderer.height)
 
     def render(self, creature: Creature, prev_level: int) -> tcod.console.Console:
         """
@@ -195,9 +187,7 @@ class LevelUpRenderer:
         """
         Renders the border.
         """
-        self.console.draw_frame(
-            0, 0, LevelUpRenderer.width - 2, LevelUpRenderer.height - 2
-        )
+        self.console.draw_frame(0, 0, LevelUpRenderer.width - 2, LevelUpRenderer.height - 2)
 
     def _render_summary(self, creature: Creature, prev_level: int):
         """
@@ -252,9 +242,7 @@ class BattleRenderer:
 
     def __init__(self, game):
         self.game = game
-        self.console = tcod.console.Console(
-            settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT
-        )
+        self.console = tcod.console.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
 
     def render(
         self, battle_data: BattleData, messages: list[str], selecting_pokeball: bool
@@ -339,9 +327,7 @@ class BattleRenderer:
             height,
             fg=settings.BATTLE_TEXT_COLOR,
         )
-        self.console.print(
-            x + 1, y + 1, creature.nickname[:10], fg=settings.BATTLE_TEXT_COLOR
-        )
+        self.console.print(x + 1, y + 1, creature.nickname[:10], fg=settings.BATTLE_TEXT_COLOR)
         self.console.print(
             x + BattleRenderer.creature_details_width - 6,
             y + 1,
@@ -349,9 +335,7 @@ class BattleRenderer:
             fg=settings.BATTLE_TEXT_COLOR,
         )
 
-        self._render_health_bar(
-            creature, BattleRenderer.creature_details_width - 2, x + 1, y + 3
-        )
+        self._render_health_bar(creature, BattleRenderer.creature_details_width - 2, x + 1, y + 3)
         if include_health_values:
             self._render_health_values(
                 creature, x + BattleRenderer.creature_details_width - 8, y + 5

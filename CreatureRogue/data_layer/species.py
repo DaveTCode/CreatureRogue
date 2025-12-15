@@ -71,7 +71,7 @@ class Species:
         """
         assert level > 0
 
-        moves = [] # type: list[MoveData]
+        moves = []  # type: list[MoveData]
         for i in [lvl for lvl in range(level, 0, -1) if lvl in self.level_moves]:
             moves.extend(self.level_moves[i])
 
