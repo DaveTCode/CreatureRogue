@@ -17,9 +17,7 @@ if __name__ == "__main__":
     # TODO - Allow for selection of other regions (when they're stored in the database
     args = parser.parse_args()
 
-    game = Game(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, settings.TITLE, settings.FONT)
-    game.load_static_data()
-    game.init()
+    game = Game.create()
 
     # TODO - Fix this now that the map data isn't loaded automatically
     kanto_region = Region(region_id=1, identifier="kanto", name="kanto")

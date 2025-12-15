@@ -54,6 +54,7 @@ class StaticGameData:
         regions,
         locations,
         location_areas,
+        location_area_rectangles: LocationAreaRectCollection,
         xp_lookup,
         pokeballs,
         ailments,
@@ -70,7 +71,7 @@ class StaticGameData:
         self.regions = regions
         self.locations = locations
         self.location_areas = location_areas
-        self.location_area_rects = None
+        self.location_area_rects = location_area_rectangles
         self.xp_lookup = xp_lookup
         self.pokeballs = pokeballs
         self.ailments = ailments

@@ -7,6 +7,9 @@ import logging
 import sqlite3
 import sys
 
+from CreatureRogue.data_layer.location_area_rect_collection import (
+    LocationAreaRectCollection,
+)
 import CreatureRogue.settings as settings
 from CreatureRogue.data_layer.ailment import Ailment
 from CreatureRogue.data_layer.color import Color
@@ -31,7 +34,9 @@ class Loader:
     def __init__(self, db_file: str):
         self.db_file = db_file
 
-    def load_static_data(self) -> StaticGameData:
+    def load_static_data(
+        self, location_area_rectangles: LocationAreaRectCollection
+    ) -> StaticGameData:
         """
         Given a database file we want to load the entire of the static
         data into the application so that it can be quickly accessed as
@@ -62,7 +67,9 @@ class Loader:
 
                 # Species
                 colors = self._load_colors(conn)
-                species = self._load_species(conn, types, colors, stats, growth_rates, moves)
+                species = self._load_species(
+                    conn, types, colors, stats, growth_rates, moves
+                )
 
                 # Regions/Areas
                 regions = self._load_regions(conn)
@@ -72,7 +79,9 @@ class Loader:
                 # Map Data Tile Types
                 map_data_tile_types = self._load_map_data_tile_types(conn)
         except sqlite3.Error as err:
-            logging.error("An error occurred attempting to pull data from the database", err)
+            logging.error(
+                "An error occurred attempting to pull data from the database", err
+            )
             sys.exit(1)
 
         return StaticGameData(
@@ -87,6 +96,7 @@ class Loader:
             regions,
             locations,
             location_areas,
+            location_area_rectangles,
             xp_lookup,
             pokeballs,
             ailments,
@@ -151,7 +161,9 @@ class Loader:
     @staticmethod
     def _load_xp_lookup(conn, growth_rates: dict[int, GrowthRate]) -> XpLookup:
         logging.info("Loading xp lookup")
-        xp_lookup = {growth_rates[growth_rate_id]: {} for growth_rate_id in growth_rates}
+        xp_lookup = {
+            growth_rates[growth_rate_id]: {} for growth_rate_id in growth_rates
+        }
         cur = conn.cursor()
         cur.execute(
             "SELECT growth_rate_id, level, experience FROM experience ORDER BY growth_rate_id, level"
@@ -171,7 +183,14 @@ class Loader:
             "SELECT id, name, catch_rate, top_color, bottom_color, display_char FROM pokeballs"
         )
 
-        for pokeball_id, name, catch_rate, top_color, bottom_color, display_char in cur.fetchall():
+        for (
+            pokeball_id,
+            name,
+            catch_rate,
+            top_color,
+            bottom_color,
+            display_char,
+        ) in cur.fetchall():
             r_top, g_top, b_top = [int(a) for a in top_color.split(",")]
             r_bottom, g_bottom, b_bottom = [int(a) for a in bottom_color.split(",")]
 
@@ -219,7 +238,9 @@ class Loader:
         logging.info("Loading type chart")
         chart = {}
         cur = conn.cursor()
-        cur.execute("SELECT damage_type_id, target_type_id, damage_factor FROM type_efficacy")
+        cur.execute(
+            "SELECT damage_type_id, target_type_id, damage_factor FROM type_efficacy"
+        )
 
         for damage_type_id, target_type_id, damage_factor in cur.fetchall():
             damage_type = types[damage_type_id]
@@ -330,7 +351,9 @@ class Loader:
             capture_rate,
         ) in cur.fetchall():
             types_cur = conn.cursor()
-            types_cur.execute(f"SELECT type_id FROM pokemon_types WHERE pokemon_id = {creature_id}")
+            types_cur.execute(
+                f"SELECT type_id FROM pokemon_types WHERE pokemon_id = {creature_id}"
+            )
             species_types = [types[row[0]] for row in types_cur]
 
             stats_cur = conn.cursor()
@@ -378,7 +401,9 @@ class Loader:
         )
 
         for region_id, identifier, name in cur.fetchall():
-            regions[region_id] = Region(region_id=region_id, identifier=identifier, name=name)
+            regions[region_id] = Region(
+                region_id=region_id, identifier=identifier, name=name
+            )
 
         return regions
 
@@ -419,9 +444,17 @@ class Loader:
             )
 
             walk_encs = []
-            for species_id, min_level, max_level, rarity, method_id in enc_cur.fetchall():
+            for (
+                species_id,
+                min_level,
+                max_level,
+                rarity,
+                method_id,
+            ) in enc_cur.fetchall():
                 if method_id == 1:
-                    walk_encs.append(Encounter(species[species_id], min_level, max_level, rarity))
+                    walk_encs.append(
+                        Encounter(species[species_id], min_level, max_level, rarity)
+                    )
 
             location_areas[area_id] = LocationArea(
                 identifier, name, locations[location_id], walk_encs
@@ -437,7 +470,15 @@ class Loader:
         cur.execute(
             "SELECT id, display_character, red, green, blue, traversable, name FROM region_map_data_cell_types"
         )
-        for tile_type_id, display_character, red, green, blue, traversable, name in cur.fetchall():
+        for (
+            tile_type_id,
+            display_character,
+            red,
+            green,
+            blue,
+            traversable,
+            name,
+        ) in cur.fetchall():
             tile_types[tile_type_id] = MapDataTileType(
                 name=name,
                 red=red,

@@ -2,11 +2,14 @@
 The game module contains the main game loop as well as any code which
 doesn't yet have a sensible home.
 
-Correct access is via calling init, load_static_data then game_loop
+Use Game.create() to instantiate a fully initialized game.
 """
+
+from __future__ import annotations
 
 import random
 import sys
+from dataclasses import dataclass
 
 import tcod
 
@@ -32,53 +35,116 @@ from CreatureRogue.states.map_state import MapState
 from CreatureRogue.states.pokedex_state import PokedexState
 
 
+@dataclass
+class GameConfig:
+    """Configuration for creating a Game instance."""
+
+    screen_width: int
+    screen_height: int
+    title: str
+    font: str
+
+
 class Game:
-    def __init__(self, screen_width: int, screen_height: int, title: str, font: str):
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.title = title
-        self.font = font
-        self.static_game_data = None
+    def __init__(
+        self,
+        config: GameConfig,
+        static_game_data: data.StaticGameData,
+        game_data: GameData,
+        battle_renderer: BattleRenderer,
+        map_renderer: MapRenderer,
+        pokedex_renderer: PokedexRenderer,
+        level_up_renderer: LevelUpRenderer,
+        game_menu_renderer: GameMenuRenderer,
+        catch_graphic_renderer: CatchGraphicRenderer,
+    ):
+        self.config = config
+        self.static_game_data = static_game_data
+        self.game_data = game_data
+        self.battle_renderer = battle_renderer
+        self.map_renderer = map_renderer
+        self.pokedex_renderer = pokedex_renderer
+        self.level_up_renderer = level_up_renderer
+        self.game_menu_renderer = game_menu_renderer
+        self.catch_graphic_renderer = catch_graphic_renderer
+        self.state = MapState(self, self.game_data, self.map_renderer)
 
-        self.state = None
-        self.game_data = None
-        self.battle_renderer = None
-        self.map_renderer = None
-        self.pokedex_renderer = None
-        self.level_up_renderer = None
-        self.game_menu_renderer = None
-        self.catch_graphic_renderer = None
+    @classmethod
+    def create(
+        cls,
+        screen_width: int = settings.SCREEN_WIDTH,
+        screen_height: int = settings.SCREEN_HEIGHT,
+        title: str = settings.TITLE,
+        font: str = settings.FONT,
+    ) -> Game:
+        """
+        Factory method to create a fully initialized Game instance.
 
-    def load_static_data(self):
+        This loads all static data from the database and creates all renderers.
         """
-        This is required all over and must be called before init is called
-        to create the renderers.
-        """
-        self.static_game_data = db_layer.Loader(settings.DB_FILE).load_static_data()
-        self.static_game_data.location_area_rects = data.load_location_area_rects(
+        config = GameConfig(screen_width, screen_height, title, font)
+
+        # Load static game data
+        location_area_rectangles = data.load_location_area_rects(
             settings.LOCATION_AREA_RECTS_FILE
         )
+        static_game_data = db_layer.Loader(settings.DB_FILE).load_static_data(location_area_rectangles)
 
-    def init(self):
-        """
-        Set up the libtcod window with the parameters given to the game.
-        This must be called before the game loop is run.
-        """
-        if self.static_game_data is None:
-            print("You must load the static game data before calling init")
-            sys.exit(1)
+        # Create game data
+        game_data = GameData()
 
-        self.game_data = GameData()
-        # TODO: Need to set up the player object here or it will be none in the game data.
+        # Create a temporary game reference for renderers that need it
+        # We'll create a partial game first, then set up state
+        temp_game = object.__new__(cls)
+        temp_game.config = config
+        temp_game.static_game_data = static_game_data
+        temp_game.game_data = game_data
 
-        self.battle_renderer = BattleRenderer(self)
-        self.map_renderer = MapRenderer()
-        self.pokedex_renderer = PokedexRenderer(self)
-        self.level_up_renderer = LevelUpRenderer(self)
-        self.game_menu_renderer = GameMenuRenderer(self)
-        self.catch_graphic_renderer = CatchGraphicRenderer(self)
+        # Create renderers
+        battle_renderer = BattleRenderer(temp_game)
+        map_renderer = MapRenderer()
+        pokedex_renderer = PokedexRenderer(temp_game)
+        level_up_renderer = LevelUpRenderer(temp_game)
+        game_menu_renderer = GameMenuRenderer(temp_game)
+        catch_graphic_renderer = CatchGraphicRenderer(temp_game)
 
-        self.state = MapState(self, self.game_data, self.map_renderer)
+        # Now create the full game with all dependencies
+        game = cls(
+            config=config,
+            static_game_data=static_game_data,
+            game_data=game_data,
+            battle_renderer=battle_renderer,
+            map_renderer=map_renderer,
+            pokedex_renderer=pokedex_renderer,
+            level_up_renderer=level_up_renderer,
+            game_menu_renderer=game_menu_renderer,
+            catch_graphic_renderer=catch_graphic_renderer,
+        )
+
+        # Update renderer references to point to the real game
+        battle_renderer.game = game
+        pokedex_renderer.game = game
+        level_up_renderer.game = game
+        game_menu_renderer.game = game
+        catch_graphic_renderer.game = game
+
+        return game
+
+    @property
+    def screen_width(self) -> int:
+        return self.config.screen_width
+
+    @property
+    def screen_height(self) -> int:
+        return self.config.screen_height
+
+    @property
+    def title(self) -> str:
+        return self.config.title
+
+    @property
+    def font(self) -> str:
+        return self.config.font
 
     def game_loop(self):
         """
@@ -201,9 +267,6 @@ class Game:
 
 
 def main():
-    game = Game(
-        settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, settings.TITLE, settings.FONT
-    )
-    game.load_static_data()
-    game.init()
+    """Entry point for the game when installed as a package."""
+    game = Game.create()
     game.game_loop()

@@ -28,9 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("defending_creature_level", type=int)
     args = parser.parse_args()
 
-    game = Game(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, settings.TITLE, settings.FONT)
-    game.load_static_data()
-    game.init()
+    game = Game.create()
 
     game_data = GameData()
 
